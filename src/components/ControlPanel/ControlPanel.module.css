@@ -1,0 +1,18 @@
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: var(--gap-3xl);
+}
+
+.controls>div>div>div>div:nth-child(1) {
+    background-color: transparent;
+    border: 0;
+    font-weight: bold;
+}
+
+.controllerContainer {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+}

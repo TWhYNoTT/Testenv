@@ -1,0 +1,501 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Avenir:wght@400;700&display=swap");*/
+@import url("https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;700&display=swap");
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../../public/assets/fonts/AvenirLTStd-Black.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../../public/assets/fonts/AvenirLTStd-Roman.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url('../../public/assets/fonts/AvenirLTStd-Book.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+
+
+@font-face {
+    font-family: 'Avenire';
+    src: url('../../public/assets/fonts/Avenir/Avenir-Roman.eot');
+    src: local('Avenir Roman'), local('Avenir-Roman'),
+        url('../../public/assets/fonts/Avenir/Avenir-Roman.eot?#iefix') format('embedded-opentype'),
+        url('../../public/assets/fonts/Avenir/Avenir-Roman.woff2') format('woff2'),
+        url('../../public/assets/fonts/Avenir/Avenir-Roman.woff') format('woff'),
+        url('../../public/assets/fonts/Avenir/Avenir-Roman.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Avenire';
+    src: url('../../public/assets/fonts/Avenir/Avenir-Light.eot');
+    src: local('Avenir Light'), local('Avenir-Light'),
+        url('../../public/assets/fonts/Avenir/Avenir-Light.eot?#iefix') format('embedded-opentype'),
+        url('../../public/assets/fonts/Avenir/Avenir-Light.woff2') format('woff2'),
+        url('../../public/assets/fonts/Avenir/Avenir-Light.woff') format('woff'),
+        url('../../public/assets/fonts/Avenir/Avenir-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Avenire';
+    src: url('../../public/assets/fonts/Avenir/Avenir-Heavy.eot');
+    src: local('Avenir Heavy'), local('Avenir-Heavy'),
+        url('../../public/assets/fonts/Avenir/Avenir-Heavy.eot?#iefix') format('embedded-opentype'),
+        url('../../public/assets/fonts/Avenir/Avenir-Heavy.woff2') format('woff2'),
+        url('../../public/assets/fonts/Avenir/Avenir-Heavy.woff') format('woff'),
+        url('../../public/assets/fonts/Avenir/Avenir-Heavy.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Avenire';
+    src: url('../../public/assets/fonts/Avenir/Avenir-Black.eot');
+    src: local('Avenir Black'), local('Avenir-Black'),
+        url('../../public/assets/fonts/Avenir/Avenir-Black.eot?#iefix') format('embedded-opentype'),
+        url('../../public/assets/fonts/Avenir/Avenir-Black.woff2') format('woff2'),
+        url('../../public/assets/fonts/Avenir/Avenir-Black.woff') format('woff'),
+        url('../../public/assets/fonts/Avenir/Avenir-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Avenire';
+    src: url('../../public/assets/fonts/Avenir/Avenir-Medium.eot');
+    src: local('Avenir Medium'), local('Avenir-Medium'),
+        url('../../public/assets/fonts/Avenir/Avenir-Medium.eot?#iefix') format('embedded-opentype'),
+        url('../../public/assets/fonts/Avenir/Avenir-Medium.woff2') format('woff2'),
+        url('../../public/assets/fonts/Avenir/Avenir-Medium.woff') format('woff'),
+        url('../../public/assets/fonts/Avenir/Avenir-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+
+
+
+
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font: inherit;
+    vertical-align: baseline;
+    caret-color: var(--color-primary)
+}
+
+html {
+    line-height: 1.15;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    background-color: var(--color-background);
+    font-family: var(--primary-font-family);
+    /* font-style: ; */
+}
+
+
+
+button,
+input {
+    outline: 0;
+}
+
+
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+
+}
+
+
+.scrollable-element {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+
+}
+
+:root {
+    --color-primary: var(--color-blueviolet);
+    --color-secondary: #333333;
+    --color-accent: #C8A2C8;
+    --color-neutral-light: #F3F3F3;
+    --color-neutral: #C4C4C4;
+    --color-neutral-dark: #000000;
+    --color-success: #4CAF50;
+    --color-error: #F44336;
+    --color-warning: #FFC107;
+    --color-info: #2196F3;
+    --color-white: #fff;
+    --color-darkgray: #999;
+    --color-darkgray-v1: #2f2f2f;
+    --color-darkgray-v2: #383450;
+    --color-dark: #171717;
+    --color-dark-v1: #333333;
+    --color-dark-v2: #414141;
+    --color-dark-v3: #172038;
+    --color-dimgray: #5a6872;
+    --color-slategray: #557286;
+    --color-blueviolet: #6138e0;
+    --color-mediumslateblue: #875eff;
+    --color-lightslategray-100: #8a93a8;
+    --color-lightslategray-200: #8191ab;
+    --color-darkslategray-100: #333;
+    --color-darkslategray-200: #252e4a;
+    --color-crimson: #e52d42;
+    --color-light-vilot: #B15EAA;
+    --color-gainsboro: #cfdce6;
+    --color-forestgreen: #00b252;
+    --color-gray: #fafafa;
+    --color-disabled: #909FBA;
+    --color-disabled-1: #999999;
+    --color-disabled-2: #D6E0EB;
+    --color-disabled-3: #DBD1F9;
+    --color-disabled-4: #E8ECEE;
+    --color-disabled-5: #F7FAFC;
+    --color-disabled-6: #D2DAE7;
+    --color-disabled-7: #E9ECF2;
+    --color-disabled-8: #B0B3B8;
+    --color-disabled-9: #ddd;
+    --color-disabled-10: #EEF0F3;
+    --color-disabled-11: #F5F9FF;
+    --color-disabled-12: #E9EFF3;
+    --color-disabled-13: #EDEDED;
+    --color-disabled-14: #E2E6F0;
+    --color-disabled-15: #828FA4;
+    --color-disabled-16: #ECF0F8;
+    --color-disabled-li: #B5BDCE;
+    --color-background: #F6F6FB;
+    --color-background-form: var(--color-white);
+    --color-background-main: var(--color-background);
+    --color-background-header: var(--color-background);
+    --color-background-sidebar: var(--color-background);
+    --color-background-profilemenu: var(--color-white);
+    --color-background-table: var(--color-white);
+    --color-background-inputs: var(--color-white);
+    --color-background-searchbar: var(--color-white);
+    --color-background-hint: var(--color-white);
+    --color-background-dropdown-bar: var(--color-white);
+    --color-background-dropdown-menu: var(--color-white);
+    --color-background-calendar-bar: var(--color-white);
+    --color-background-calendar: var(--color-white);
+    --color-background-component: var(--color-white);
+    --color-overlay: rgba(255, 255, 255, 0.8);
+    --color-paid: #F1FFF3;
+    --color-paid-label: #E2FFF1;
+    --color-paid-circle: #5DB182;
+    --color-unpaid: #D7F3FF;
+    --color-unpaid-label: #BBDDFF;
+    --color-unpaid-circle: #3394F4;
+    --color-upcoming: #EEF6FE;
+    --color-upcoming-label: #D8CCFE;
+    --color-upcoming-circle: #6138E0;
+    --color-late: #FFF1F1;
+    --color-late-label: #FCDEE2;
+    --color-late-circle: #DF0000;
+    --color-draft: #F4F4FB;
+    --color-draft-label: #1A2943;
+    --color-draft-circle: #333333;
+
+    --primary-hover: #4422AE;
+    --primary-hover-tran: #dedaeb86;
+    --secondary-hover: #262525;
+    --ghost-hover: var(--color-primary);
+
+    --color-text: var(--color-secondary);
+    --primary-font-family: 'Avenir', 'Avenire', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --secondary-font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    --font-size-h1: 32px;
+    --font-size-h2: 24px;
+    --font-size-h3: 20px;
+    --font-size-body: 16px;
+    --font-size-small: 12px;
+
+    --font-size-11xl: 38px;
+    --font-size-10xl: 38px;
+    --font-size-9xl: 36px;
+    --font-size-8xl: 34px;
+    --font-size-7xl: 32px;
+    --font-size-6xl: 30px;
+    --font-size-5xl: 28px;
+    --font-size-4xl: 26px;
+    --font-size-3xl: 24px;
+    --font-size-2xl: 22px;
+    --font-size-xl: 20px;
+    --font-size-lg: 18px;
+    --font-size-md: 16px;
+    --font-size-sm: 14px;
+    --font-size-xs: 12px;
+    --font-size-2xs: 10px;
+
+    --font-weight-xbold: 900;
+    --font-weight-bold: 900;
+    --font-weight-regular: 500;
+    --font-weight-normal: 400;
+    --font-weight-light: 300;
+
+    --spacing-xl: 32px;
+    --spacing-lg: 24px;
+    --spacing-md: 16px;
+    --spacing-sm: 8px;
+    --spacing-xs: 4px;
+
+    --paddin-7xl: 50px;
+    --paddin-4xl: 35px;
+    --paddin-3xl: 30px;
+    --paddin-2xl: 25px;
+    --paddin-lg: 20px;
+    --paddin-md: 15px;
+    --paddin-sm: 10px;
+    --paddin-xssm: 8px;
+    --paddin-xs: 5px;
+    --paddin-x-xs: 4px;
+    --paddin-xxs: 3px;
+
+    --margin-3xl: 30px;
+    --margin-2xl: 25px;
+    --margin-lg: 20px;
+    --margin-md: 15px;
+    --margin-sm: 10px;
+    --margin-xssm: 8px;
+    --margin-xs: 5px;
+
+    --gap-5xl: 40px;
+    --gap-4xl: 35px;
+    --gap-3xl: 30px;
+    --gap-2xl: 25px;
+    --gap-lg: 20px;
+    --gap-md: 15px;
+    --gap-sm: 10px;
+    --gap-xssm: 8px;
+    --gap-xs: 5px;
+
+    --border-width: 1px;
+    --border-style: solid;
+    --border-color: var(--color-primary);
+
+    --br-3xxl: 40px;
+    --br-4xl: 30px;
+    --br-3xl: 26px;
+    --br-2xl: 22px;
+    --br-lg: 18px;
+    --br-mdlg: 15px;
+    --br-md: 12px;
+    --br-sm: 8px;
+    --br-xs: 6px;
+    --br-xxs: 2px;
+    --border-radius-default: 8px;
+
+    --box-shadow-card: 0px 4px 8px rgba(0, 0, 0, 0.1);
+
+    --width-xl: 240px;
+    --width-lg: 180px;
+    --width-md: 130px;
+    --width-sm: 100px;
+
+    --Height-xh: 300px;
+    --Height-lg: 50px;
+    --Height-md: 40px;
+    --Height-sm: 30px;
+}
+
+
+
+
+[data-theme="dark"] {
+
+    /* --color-secondary: #444; */
+    --color-accent: #888;
+    --color-neutral-light: #333;
+    /* --color-neutral: #555; */
+    --color-neutral-dark: #fff;
+    --color-success: #4CAF50;
+    --color-error: #F44336;
+    --color-warning: #FFC107;
+    --color-info: #2196F3;
+    --color-white: #fff;
+    --color-darkgray: #999;
+    --color-dimgray: #5a6872;
+    --color-slategray: #557286;
+    --color-blueviolet: #6138e0;
+    --color-mediumslateblue: #875eff;
+    --color-lightslategray-100: #8a93a8;
+    --color-lightslategray-200: #8191ab;
+    --color-darkslategray-100: #333;
+    --color-darkslategray-200: #252e4a;
+    --color-crimson: #e52d42;
+    --color-gainsboro: #cfdce6;
+    --color-forestgreen: #00b252;
+    --color-gray: #fafafa;
+    --color-disabled: #909FBA;
+    --color-disabled-1: #999999;
+    --color-disabled-2: #D6E0EB;
+    --color-disabled-3: #DBD1F9;
+    --color-disabled-4: #E8ECEE;
+    --color-disabled-5: #3a3b3c;
+    --color-disabled-6: #D2DAE7;
+    --color-disabled-7: #E9ECF2;
+    --color-disabled-9: #3a3b3c;
+    --color-disabled-li: #B5BDCE;
+    --color-dark-text: #E4E6EB;
+    --color-background: #222;
+    --color-background-main: var(--color-background);
+    --color-background-header: var(--color-background);
+    --color-background-sidebar: var(--color-background);
+    --color-background-profilemenu: var(--color-darkgray-v1);
+    --color-background-table: var(--color-darkgray-v1);
+    --color-background-inputs: var(--color-darkgray-v1);
+    --color-background-searchbar: var(--color-darkgray-v1);
+    --color-background-hint: var(--color-darkgray-v1);
+    --color-background-dropdown-bar: var(--color-darkgray-v1);
+    --color-background-dropdown-menu: var(--color-darkgray-v1);
+    --color-background-calendar-bar: var(--color-darkgray-v1);
+    --color-background-calendar: var(--color-darkgray-v1);
+    --color-overlay: #3a3b3cab;
+
+    --primary-hover-tran: #44444486;
+    --secondary-hover: #666;
+    --ghost-hover: var(--color-primary);
+
+
+    --color-text: var(--color-dark-text);
+
+
+    --border-color: var(--color-primary);
+
+
+
+    /* --box-shadow-card: 0px 4px 8px rgba(255, 255, 255, 0.1); */
+    --box-shadow-card: 0 1px 3px rgba(255, 255, 255, 0.12), 0 1px 2px rgba(255, 255, 255, 0.24);
+
+}
+
+
+
+
+
+.tableSearch {
+    width: 70%;
+    height: 60px;
+    border-radius: var(--br-lg);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+
+
+
+.arrowUpDown:after {
+    /*position: absolute;
+    */
+    display: inline-block;
+    content: '';
+    width: 7px;
+    height: 7px;
+    border: solid var(--color-darkgray);
+    border-width: 0px 1px 1px 0px;
+    transform: translate(7px, -17px) rotate(45deg);
+    -webkit-transform: translate(7px, -17px) rotate(45deg);
+    -moz-transform: translate(7px, -17px) rotate(45deg);
+    -ms-transform: translate(7px, -17px) rotate(45deg);
+    -o-transform: translate(7px, -17px) rotate(45deg);
+    transition: transform 0.3s ease;
+    -webkit-transition: transform 0.3s ease;
+    -moz-transition: transform 0.3s ease;
+    -ms-transition: transform 0.3s ease;
+    -o-transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.arrowUpDown.isOpen:after {
+    transform: translate(7px, -17px) rotate(225deg);
+    -webkit-transform: translate(7px, -17px) rotate(225deg);
+    -moz-transform: translate(7px, -17px) rotate(225deg);
+    -ms-transform: translate(7px, -17px) rotate(225deg);
+    -o-transform: translate(7px, -17px) rotate(225deg);
+}
+
+.form-transition {
+    transition: opacity 300ms ease-in-out;
+}
+
+.fade-in {
+    opacity: 1;
+}
+
+.fade-out {
+    opacity: 0;
+}
+
+.headerText {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-bold);
+}
+
+.headerText>span {
+    font-size: var(--font-size-sm);
+}
+
+.xH1 {
+
+    font-size: var(--font-size-10xl);
+    color: var(--color-darkgray-v2);
+    font-weight: var(--font-weight-bold);
+
+}
+
+.descriptionText {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.container {
+    padding: 0px var(--paddin-sm);
+    width: 100%;
+}
+
+@media screen and (min-width:1400px) {
+    .container {
+        width: 95%;
+
+
+    }
+
+}

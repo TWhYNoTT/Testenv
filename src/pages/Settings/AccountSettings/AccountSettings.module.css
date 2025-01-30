@@ -1,0 +1,143 @@
+.accountSettings {
+    display: grid;
+    gap: var(--gap-lg);
+    padding: var(--paddin-lg);
+}
+
+.profileSection,
+.passwordSection,
+.businessHoursSection,
+.locationSection {
+    background-color: var(--color-background-component);
+    border-radius: var(--br-2xl);
+    display: grid;
+    gap: var(--gap-lg);
+    padding: var(--paddin-4xl);
+    padding-bottom: var(--paddin-4xl);
+    position: relative;
+    -webkit-border-radius: var(--br-2xl);
+    -moz-border-radius: var(--br-2xl);
+    -ms-border-radius: var(--br-2xl);
+    -o-border-radius: var(--br-2xl);
+}
+
+.headerBckBTN {
+    display: flex;
+    gap: var(--gap-lg);
+}
+
+.backButton {
+    cursor: pointer;
+}
+
+.profileSection {
+    grid-template-rows: 1fr 100px 1fr;
+    grid-template-areas: 'row1' 'row2' 'row3';
+}
+
+.coverImage {
+    position: absolute;
+    width: 100%;
+    height: 45%;
+
+}
+
+.logo {
+    position: absolute;
+    z-index: 1;
+    left: 6%;
+    top: 35%;
+
+}
+
+
+
+.passwordSection,
+.businessInfo {
+    display: grid;
+    grid-template-columns: 40%;
+}
+
+.businessInfo {
+    grid-area: row3;
+}
+
+
+
+
+.h2 {
+    color: var(--color-dark-v3);
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+
+}
+
+.weekDayRow {
+    display: grid;
+    gap: var(--gap-3xl);
+
+
+}
+
+
+@media screen and (min-width:505px) {
+    .weekDayRow {
+
+        grid-template-columns: 150px 1fr;
+
+    }
+
+}
+
+.weekDayRow label {
+    gap: var(--gap-md);
+}
+
+.dropdownContainer {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: var(--gap-md);
+
+}
+
+.dropdown>div {
+    width: 150px;
+}
+
+
+
+div.dropdownContainer div {
+    border-radius: 15px;
+
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -ms-border-radius: 15px;
+    -o-border-radius: 15px;
+}
+
+
+div.weekDayRow div.dropdownContainer div::after {
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+    right: 11%;
+}
+
+.locationSection {
+    display: grid;
+    justify-content: space-between;
+    grid-template-columns: 40% 50%;
+
+}
+
+
+.fieldsContainer {
+    display: grid;
+    gap: var(--gap-lg);
+}
+
+.cityZipRow {
+    display: grid;
+    grid-template-columns: 55% 40%;
+    justify-content: space-between;
+}

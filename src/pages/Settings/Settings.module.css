@@ -1,0 +1,62 @@
+.settingsPage {
+    display: grid;
+    gap: var(--gap-lg);
+    padding: var(--paddin-lg);
+}
+
+.settingSection {
+    background-color: var(--color-background-component);
+    border-radius: var(--br-lg);
+    display: grid;
+    gap: var(--gap-lg);
+    padding: var(--paddin-lg);
+    padding-bottom: var(--paddin-4xl);
+}
+
+.settingSection h3 {
+    color: var(--color-dark-v3);
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+
+}
+
+.settingCards {
+    display: grid;
+    grid-template-columns: 350px 350px;
+
+    gap: var(--gap-lg);
+}
+
+.settingCard {
+    background-color: var(--color-background-component);
+    gap: var(--gap-lg);
+    width: 320px;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr;
+
+
+}
+
+
+.cardContent {
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.cardContent h4 {
+    color: var(--color-dark-v3);
+    font-size: var(--font-size-md);
+    font-weight: bold;
+}
+
+.cardContent p {
+    color: var(--color-disabled-15);
+    font-size: var(--font-size-sm);
+}
+
+.horR {
+
+    height: 2px;
+    background-color: var(--color-disabled-16);
+}

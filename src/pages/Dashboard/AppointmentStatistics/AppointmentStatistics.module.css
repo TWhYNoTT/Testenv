@@ -1,0 +1,73 @@
+.appointmentStatistics {
+    background-color: var(--color-background-component);
+    padding: var(--paddin-3xl);
+    border-radius: var(--br-lg);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+    display: grid;
+    gap: var(--gap-3xl);
+    overflow: auto;
+    color: var(--color-text);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+}
+
+.chartContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-sm);
+    flex-wrap: wrap;
+    /* width: 300px; */
+
+}
+
+.chart {
+    width: 100%;
+}
+
+
+.chart canvas {
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+@media (min-width: 850px) {
+    .chart {
+        width: 50%;
+    }
+
+}
+
+.legends {
+    list-style: none;
+    display: grid;
+    gap: var(--gap-sm);
+}
+
+.legendContainer {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-sm);
+}
+
+.bullet {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.percentageValue {
+    font-weight: var(--font-weight-bold);
+}

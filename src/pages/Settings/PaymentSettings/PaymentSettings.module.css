@@ -1,0 +1,86 @@
+.paymentPage {
+    padding: 20px;
+
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.backButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-dark-v3);
+}
+
+.paymentMethod {
+    width: 450px;
+    background-color: var(--color-white);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -ms-border-radius: 15px;
+    -o-border-radius: 15px;
+}
+
+.paymentMethod.isEditing {
+    display: grid;
+    grid-template-areas: "header header header ." "body side side ." ". left left right ";
+    gap: var(--gap-lg);
+    width: auto;
+}
+
+.methodHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    grid-area: header;
+}
+
+.editForm {
+    display: grid;
+    /* gap: var(--gap-xs); */
+    grid-area: body;
+}
+
+.methodHeader h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-dark-v3);
+}
+
+
+
+.cardInfo {
+    margin-bottom: 45px;
+}
+
+.cardInfo p {
+    color: var(--color-dark-v2);
+}
+
+
+.formRow {
+    display: grid;
+    grid-template-columns: 45% 45%;
+    justify-content: space-between;
+}
+
+.formActions {
+    grid-area: right;
+    gap: var(--gap-lg);
+    display: flex;
+    justify-content: flex-end;
+}

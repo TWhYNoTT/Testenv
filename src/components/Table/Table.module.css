@@ -1,0 +1,146 @@
+.tableContainer {
+    position: relative;
+    border-radius: var(--br-lg);
+    overflow: auto;
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    font-size: var(--font-size-lg);
+    text-align: left;
+    border-radius: var(--br-lg);
+    box-shadow: var(--box-shadow-card);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+    background-color: var(--color-background-table);
+    color: var(--color-text);
+    white-space: nowrap;
+
+
+
+}
+
+
+.td {
+    padding: var(--paddin-lg);
+    align-content: center;
+}
+
+.th {
+    padding: var(--paddin-3xl);
+    color: var(--color-disabled);
+}
+
+.tr:nth-child(even) {
+    background-color: var(--color-disabled-5);
+}
+
+.actions {
+    display: flex;
+    gap: var(--gap-lg);
+}
+
+
+/* .actions button {
+    background: none;
+    border: none;
+    padding: 0;
+
+
+
+} */
+/* 
+.actions button:hover {
+    text-decoration: underline;
+} */
+
+/* .actions .delete {
+    color: red;
+} */
+
+.horR {
+    background-color: var(--color-disabled-6);
+    height: 1px;
+    margin-bottom: var(--margin-sm);
+}
+
+.tdHr {
+    padding: 0px var(--paddin-lg);
+}
+
+.loader {
+    border: 8px solid #f3f3f3;
+    /* Light grey */
+    border-top: 8px solid var(--color-primary);
+    /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-overlay);
+    border-radius: var(--br-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.fadein {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.noData {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-disabled);
+    font-size: 1.5rem;
+}
+
+.sortable {
+    cursor: pointer;
+}
+
+.sortable:hover {
+    text-decoration: underline;
+}

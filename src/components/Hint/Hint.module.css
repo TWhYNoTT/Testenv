@@ -1,0 +1,47 @@
+.hintCard {
+    display: flex;
+    gap: var(--gap-lg);
+    border: var(--border-width) solid var(--color-disabled-4);
+    background-color: var(--color-background-hint);
+    padding: var(--paddin-3xl);
+    border-radius: var(--br-3xxl);
+    -webkit-border-radius: var(--br-3xxl);
+    -moz-border-radius: var(--br-3xxl);
+    -ms-border-radius: var(--br-3xxl);
+    -o-border-radius: var(--br-3xxl);
+    min-height: 200px;
+}
+
+.iconColumn {
+    /* flex: 0 0 auto; */
+    /* padding-right: var(--spacing-md); */
+}
+
+.lampIcon {
+
+    font-size: var(--font-size-lg);
+    /* color: var(--color-warning); */
+}
+
+.lampIcon img {
+    width: 25px;
+}
+
+.textColumn {
+    /* flex: 1; */
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--paddin-xs);
+    gap: var(--gap-xssm);
+}
+
+.hintName {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-darkslategray-100);
+}
+
+.hintDescription {
+    font-size: var(--font-size-md);
+    color: var(--color-disabled-1);
+}

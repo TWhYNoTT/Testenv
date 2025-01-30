@@ -1,0 +1,31 @@
+.timeSlots {
+    display: grid;
+    grid-auto-rows: 50px;
+}
+
+.timeSlot {
+    font: menu;
+    font-size: var(--font-size-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-dark-v1);
+    transition: color, font-weight 0.2s ease;
+    -webkit-transition: color, font-weight 0.2s ease;
+    -moz-transition: color, font-weight 0.2s ease;
+    -ms-transition: color, font-weight 0.2s ease;
+    -o-transition: color, font-weight 0.2s ease;
+    transform: translateY(calc(-50% - 4px));
+    -webkit-transform: translateY(calc(-50% - 4px));
+    -moz-transform: translateY(calc(-50% - 4px));
+    -ms-transform: translateY(calc(-50% - 4px));
+    -o-transform: translateY(calc(-50% - 4px));
+
+}
+
+.timeSlot.active {
+    font-weight: var(--font-weight-bold);
+
+    color: var(--color-primary);
+}

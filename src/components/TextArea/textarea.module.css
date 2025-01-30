@@ -1,0 +1,118 @@
+.textAreaContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: var(--spacing-md) 0px;
+}
+
+.label {
+    font-size: var(--font-size-md);
+    color: var(--color-darkgray);
+    position: absolute;
+    top: 1px;
+    /* left: var(--paddin-sm); */
+    transform: translateY(50%);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    -webkit-transform: translateY(50%);
+    -moz-transform: translateY(50%);
+    -ms-transform: translateY(50%);
+    -o-transform: translateY(50%);
+}
+
+.textArea:focus+.label,
+.textArea:not(:placeholder-shown)+.label {
+    top: 0;
+    transform: translateY(-100%);
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+}
+
+.textArea::placeholder {
+    visibility: hidden;
+}
+
+.textArea:focus::placeholder {
+    visibility: visible;
+}
+
+.textAreaWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.textArea {
+    padding: var(--paddin-sm) 0px;
+    font-size: var(--font-size-body);
+    border-bottom: var(--border-width) var(--border-style) var(--color-neutral);
+    background-color: var(--color-background-inputs);
+    /* border-radius: var(--border-radius-default); */
+    transition: border-color 0.3s ease;
+    width: 100%;
+    outline: none;
+    resize: none;
+    color: var(--color-text);
+    /* -webkit-border-radius: var(--border-radius-default);
+    -moz-border-radius: var(--border-radius-default);
+    -ms-border-radius: var(--border-radius-default);
+    -o-border-radius: var(--border-radius-default); */
+}
+
+.border {
+    width: 100%;
+    height: 15px;
+    border-bottom: 2px var(--border-style) var(--color-primary);
+    /* border-radius: var(--border-radius-default); */
+    position: absolute;
+    bottom: 0;
+    transform: scale(0);
+    transform-origin: 50% 100%;
+    transition: transform 0.5s ease;
+    /* -webkit-border-radius: var(--border-radius-default);
+    -moz-border-radius: var(--border-radius-default);
+    -ms-border-radius: var(--border-radius-default);
+    -o-border-radius: var(--border-radius-default); */
+}
+
+.textArea:focus~.border {
+    transform: scale(1);
+}
+
+.feedbackMessage {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+}
+
+.success {
+    border-color: var(--color-success);
+}
+
+.error {
+    border-color: var(--color-error);
+}
+
+.warning {
+    border-color: var(--color-warning);
+}
+
+.required {
+    color: var(--color-error);
+    margin-left: var(--spacing-xs);
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+.resizeHandle {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    width: 15px;
+    height: 15px;
+
+    cursor: s-resize;
+}

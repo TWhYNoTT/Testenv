@@ -1,0 +1,62 @@
+.branchFilterContainer {
+    border-radius: var(--br-3xl);
+    background-color: var(--color-background-component);
+    padding: var(--paddin-lg);
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    align-items: center;
+    gap: var(--gap-sm);
+    color: var(--color-text);
+    -webkit-border-radius: var(--br-3xl);
+    -moz-border-radius: var(--br-3xl);
+    -ms-border-radius: var(--br-3xl);
+    -o-border-radius: var(--br-3xl);
+    border: 1px solid var(--color-disabled-12);
+    flex-wrap: wrap;
+}
+
+.branchFilterContainer label {
+    background-color: transparent;
+}
+
+.plusButton {
+    display: flex;
+    gap: var(--gap-lg);
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.plusSpan {
+    flex-shrink: 0;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.modalHeader {
+    text-align: center;
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.modalTitle {
+    font-size: var(--font-size-7xl);
+    font-weight: bold;
+}
+
+.modalTitleDesc {
+
+    color: var(--color-lightslategray-100);
+}
+
+.modalBody {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-sm);
+}
+
+.modalFooter {
+    display: flex;
+    gap: var(--gap-sm);
+}

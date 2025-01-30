@@ -1,0 +1,61 @@
+.step3Container {
+    display: grid;
+    gap: var(--gap-3xl);
+}
+
+.weekDaysContainer {
+    display: grid;
+    gap: var(--gap-3xl);
+
+}
+
+.weekDayRow {
+    display: grid;
+    gap: var(--gap-3xl);
+
+
+}
+
+
+@media screen and (min-width:505px) {
+    .weekDayRow {
+
+        grid-template-columns: 150px 1fr;
+
+    }
+
+}
+
+.weekDayRow label {
+    gap: var(--gap-md);
+}
+
+.dropdownContainer {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: var(--gap-md);
+
+}
+
+.dropdown>div {
+    width: 150px;
+}
+
+
+
+div.dropdownContainer div {
+    border-radius: 15px;
+
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -ms-border-radius: 15px;
+    -o-border-radius: 15px;
+}
+
+
+div.weekDayRow div.dropdownContainer div::after {
+    border-bottom-width: 3px;
+    border-right-width: 3px;
+    right: 11%;
+}

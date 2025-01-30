@@ -1,0 +1,60 @@
+.promotionForm {
+    padding: var(--paddin-4xl) 0;
+    width: 99%;
+    display: grid;
+    gap: var(--gap-2xl);
+}
+
+.frm {
+    display: grid;
+    grid-template-columns: 40% auto;
+    gap: var(--gap-lg);
+    background-color: var(--color-background-component);
+    border-radius: var(--br-lg);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+    padding: var(--paddin-4xl);
+    box-shadow: var(--box-shadow-card);
+
+}
+
+.generatedCode {
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    gap: var(--gap-sm);
+    height: 100%;
+
+}
+
+
+.generatedCode span,
+.generatedCode p:first-child {
+    color: var(--color-dark-v1);
+
+}
+
+.generatedCode p {
+    color: var(--color-disabled);
+
+}
+
+
+
+.filedContainer {
+    display: grid;
+
+    gap: var(--gap-2xl);
+}
+
+.bckBTNheader {
+    display: flex;
+    gap: 10px;
+}
+
+.backButton {
+    cursor: pointer;
+}

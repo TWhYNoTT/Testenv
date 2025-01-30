@@ -1,0 +1,132 @@
+.modalBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 10000;
+    pointer-events: auto;
+
+}
+
+
+
+
+.modalBackground.open {
+    animation: modalDisplay 0.3s ease-in-out;
+
+    -webkit-animation: modalDisplay 0.3s ease-in-out;
+}
+
+@keyframes modalDisplay {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.modalContainer {
+
+    background: var(--color-background-component);
+    border-radius: var(--br-lg) 0 0 var(--br-lg);
+    padding: var(--paddin-4xl);
+    box-shadow: var(--box-shadow-card);
+    overflow: auto;
+    width: 100%;
+    height: 100dvh;
+
+
+    position: relative;
+    -webkit-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -moz-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -ms-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -o-border-radius: var(--br-lg) 0 0 var(--br-lg);
+
+}
+
+
+@media (min-width:500px) {
+    .modalContainer {
+        width: 400px;
+    }
+
+}
+
+.modalContainer.open {
+    animation: modalContainerDisplay 0.3s ease-in-out;
+    -webkit-animation: modalContainerDisplay 0.3s ease-in-out;
+}
+
+@keyframes modalContainerDisplay {
+    0% {
+        transform: translateX(100%);
+        -webkit-transform: translateX(100%);
+        -moz-transform: translateX(100%);
+        -ms-transform: translateX(100%);
+        -o-transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.uploadphoto {
+    cursor: pointer;
+    display: grid;
+    gap: var(--gap-sm);
+    justify-self: start;
+}
+
+.uploadphoto .img {
+    height: 200px;
+}
+
+.uploadphoto .desc {
+    color: var(--color-darkslategray-100);
+    font-weight: bold;
+
+}
+
+
+
+.headerCloseInputsContainer {
+    display: grid;
+    gap: var(--gap-2xl);
+}
+
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+
+.closeButton {
+    position: absolute;
+    top: var(--paddin-md);
+    right: var(--paddin-4xl);
+    background: none;
+    border: none;
+    font-size: var(--font-size-4xl);
+    cursor: pointer;
+}
+
+
+.header {
+    color: var(--color-dark-v1);
+}
+
+.addBtn {
+    font-weight: bold;
+}

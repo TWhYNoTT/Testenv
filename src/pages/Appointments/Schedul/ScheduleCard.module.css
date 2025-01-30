@@ -1,0 +1,243 @@
+.scheduleCard {
+    display: grid;
+    padding: var(--paddin-lg);
+    height: 100%;
+    border-radius: var(--br-md);
+
+    position: relative;
+
+
+}
+
+.scheduleCard.isShrinked {
+
+    overflow: hidden;
+
+    padding: var(--paddin-sm);
+}
+
+.scheduleCard.isShrinked * {
+
+    font-size: var(--font-size-xs) !important;
+    flex-wrap: wrap;
+
+
+}
+
+
+
+.scheduleCard.isShrinked img,
+.scheduleCard.isShrinked .menu {
+
+    display: none;
+
+}
+
+.scheduleCard.isShrinked .status {
+    padding: var(--paddin-xs);
+
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    position: absolute;
+    top: var(--paddin-sm);
+    right: var(--paddin-sm);
+    cursor: pointer;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    transition: background-color 0.2s ease-in-out;
+    -webkit-transition: background-color 0.2s ease-in-out;
+    -moz-transition: background-color 0.2s ease-in-out;
+    -ms-transition: background-color 0.2s ease-in-out;
+    -o-transition: background-color 0.2s ease-in-out;
+}
+
+.menu:hover {
+    background-color: var(--primary-hover-tran);
+}
+
+.menuIcon {
+    height: 25px;
+}
+
+.scheduleDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+}
+
+.service {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-dark-v1);
+}
+
+.scheduleCard img.customerImage {
+    width: 45px;
+    height: 45px;
+    border-radius: var(--br-lg);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.customerDetails {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+}
+
+.customerNamePhone {
+    /* display: grid;
+
+    gap: var(--gap-xs); */
+}
+
+.contact {
+    font: caption;
+}
+
+.customerName {
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--margin-sm);
+}
+
+.durationPriceStatus {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.duration {
+    color: var(--color-disabled);
+    font-weight: var(--font-weight-light);
+    margin-bottom: var(--margin-xs);
+
+}
+
+.price {
+    color: var(--color-dark-v1);
+    font: caption;
+    font-size: var(--font-size-lg);
+}
+
+.status {
+    padding: var(--paddin-sm) var(--paddin-lg);
+    border-radius: var(--br-xs);
+    -webkit-border-radius: var(--br-xs);
+    -moz-border-radius: var(--br-xs);
+    -ms-border-radius: var(--br-xs);
+    -o-border-radius: var(--br-xs);
+}
+
+
+.scheduleCard.paid {
+    background-color: var(--color-paid);
+}
+
+.scheduleCard.unpaid {
+    background-color: var(--color-unpaid);
+}
+
+.scheduleCard.upcoming {
+    background-color: var(--color-upcoming);
+}
+
+.scheduleCard.late {
+    background-color: var(--color-late);
+}
+
+.scheduleCard.draft {
+    background-color: var(--color-draft);
+}
+
+.status.paid {
+    color: var(--color-paid-circle);
+    background-color: var(--color-paid-label);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+.status.unpaid {
+    color: var(--color-unpaid-circle);
+    background-color: var(--color-unpaid-label);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+.status.upcoming {
+    color: var(--color-upcoming-circle);
+    background-color: var(--color-upcoming-label);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+.status.late {
+    color: var(--color-late-circle);
+    background-color: var(--color-late-label);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+.status.draft {
+    color: var(--color-white);
+    background-color: var(--color-draft-label);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+}
+
+
+
+.dropdownMenu {
+    position: absolute;
+    top: 25px;
+    right: 40px;
+    display: grid;
+    gap: var(--gap-xs);
+    background-color: var(--color-background-component);
+    box-shadow: var(--box-shadow-card);
+    border-radius: var(--br-md);
+    overflow: hidden;
+    z-index: 1000;
+    padding: 10px 0px;
+}
+
+.dropdownItem {
+    font: menu;
+    font-size: var(--font-size-lg);
+    display: flex;
+
+    align-items: center;
+    width: 200px;
+    height: 30px;
+    padding: var(--paddin-lg);
+    cursor: pointer;
+    gap: var(--gap-md);
+    transition: background-color 0.2s;
+}
+
+.dropdownItem:nth-child(3) {
+    color: var(--color-late-circle);
+}
+
+.dropdownItem:hover {
+    background-color: var(--primary-hover-tran);
+}
+
+
+
+.separator {
+    height: 1px;
+    background-color: var(--color-disabled-13);
+    margin: 0 var(--margin-sm);
+}

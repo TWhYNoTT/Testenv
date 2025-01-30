@@ -1,0 +1,58 @@
+.employeePage {
+    display: grid;
+    gap: var(--gap-md);
+    padding: var(--paddin-lg);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+
+.searchSection {
+    width: 100%;
+    height: 50px;
+    border-radius: var(--br-lg);
+}
+
+
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    /* border-radius: var(--br-md); */
+    margin-right: 10px;
+
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+
+
+.headerText {
+    margin: 0;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 60% auto;
+    gap: var(--gap-md);
+}
+
+
+
+.nameCell {
+    display: flex;
+    align-items: center;
+}
+
+
+.tableButtonContainer {
+    display: flex;
+    gap: 10px;
+}

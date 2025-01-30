@@ -1,0 +1,106 @@
+.formWrapper {
+    display: grid;
+    padding: var(--paddin-lg);
+    background-color: var(--color-background-form);
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    margin-bottom: var(--margin-lg);
+}
+
+.formWrapper form {
+    width: 90vw;
+}
+
+
+.formImageContainer {
+    padding: var(--paddin-lg);
+
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-primary);
+    border-radius: var(--br-3xl) 0px 0px var(--br-3xl);
+    -webkit-border-radius: var(--br-3xl) 0px 0px var(--br-3xl);
+    -moz-border-radius: var(--br-3xl) 0px 0px var(--br-3xl);
+    -ms-border-radius: var(--br-3xl) 0px 0px var(--br-3xl);
+    -o-border-radius: var(--br-3xl) 0px 0px var(--br-3xl);
+    height: inherit;
+    width: 100%;
+    display: none;
+
+}
+
+@media screen and (min-width: 450px) {
+    .formWrapper {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: initial;
+    }
+
+    .formWrapper form {
+        width: 400px;
+    }
+
+
+}
+
+@media screen and (min-width: 700px) {
+    .formWrapper {
+        grid-template-columns: 40% 1fr;
+    }
+
+    .formImageContainer {
+        display: flex;
+    }
+
+    .formWrapper form {
+        width: 100%;
+    }
+}
+
+@media screen and (min-width: 950px) {
+
+
+    .formWrapper form {
+        width: 300px;
+    }
+}
+
+@media screen and (min-width: 1400px) {
+
+
+    .formWrapper form {
+        width: 400px;
+    }
+}
+
+
+
+
+.formImage svg {
+    height: 95vh;
+    width: 95%;
+}
+
+
+@keyframes draw {
+    0% {
+        stroke-dasharray: 0, 100;
+    }
+
+    100% {
+        stroke-dasharray: 100, 0;
+    }
+}
+
+
+.formImage svg path {
+    animation: draw 2s ease-in-out forwards;
+    stroke: white;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    -webkit-animation: draw 2s ease-in-out forwards;
+}

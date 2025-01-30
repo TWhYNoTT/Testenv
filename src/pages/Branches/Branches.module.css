@@ -1,0 +1,35 @@
+.branches {
+    display: grid;
+    padding: 20px;
+    gap: var(--gap-md);
+}
+
+.tableButtonContainer {
+    display: flex;
+    gap: var(--gap-md);
+}
+
+
+
+.naviHeaderAdd {
+    display: flex;
+    justify-content: space-between;
+
+    gap: var(--gap-md);
+    flex-wrap: wrap;
+}
+
+.naviHeader {
+    display: flex;
+    gap: var(--gap-md);
+}
+
+.backToDash {
+
+    cursor: pointer;
+}
+
+.header {
+    font-size: var(--font-size-11xl);
+    color: var(--color-darkgray-v2);
+}
