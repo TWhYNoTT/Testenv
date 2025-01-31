@@ -1,0 +1,222 @@
+.serviceCard {
+    padding: var(--paddin-lg);
+    background-color: var(--color-background-component);
+    border-radius: var(--br-md);
+    box-shadow: var(--box-shadow-card);
+    overflow: hidden;
+    position: relative;
+    transition: min-height, max-height 0.3s ease-in-out;
+    min-height: 100px;
+    max-height: 200px;
+    width: 100%;
+    -webkit-transition: min-height, max-height 0.3s ease-in-out;
+    -moz-transition: min-height, max-height 0.3s ease-in-out;
+    -ms-transition: min-height, max-height 0.3s ease-in-out;
+    -o-transition: min-height, max-height 0.3s ease-in-out;
+    -webkit-border-radius: var(--br-md);
+    -moz-border-radius: var(--br-md);
+    -ms-border-radius: var(--br-md);
+    -o-border-radius: var(--br-md);
+}
+
+.expanded {
+    min-height: 200px;
+    max-height: 500px;
+}
+
+.serviceDetailsImageContainer {
+    display: grid;
+    grid-template-columns: 20% 70%;
+    gap: var(--gap-md);
+}
+
+.image {
+    width: 70px;
+    height: 70px;
+}
+
+.serviceDetails {
+    display: grid;
+
+    gap: var(--gap-xs);
+
+
+}
+
+.category {
+    color: var(--color-light-vilot);
+}
+
+
+.title {
+    color: var(--color-darkslategray-100);
+    font-size: var(--font-size-4xl);
+    font-weight: bold;
+
+}
+
+.durationBranch {
+    margin-top: var(--margin-sm);
+    display: flex;
+    gap: var(--gap-xs);
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+}
+
+
+
+.pricingMenu {
+
+    display: grid;
+    gap: var(--gap-md);
+}
+
+
+.pricingItem {
+    display: flex;
+    justify-content: space-between;
+
+
+}
+
+.optionDuration {
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.option {
+    color: var(--color-darkslategray-100);
+    font-weight: bold;
+}
+
+.price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-xs);
+}
+
+.curnc {
+    font-size: var(--font-size-xs);
+}
+
+
+
+.duration,
+.branch {
+    color: var(--color-disabled);
+}
+
+
+.menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    position: absolute;
+    top: var(--paddin-sm);
+    right: var(--paddin-sm);
+    cursor: pointer;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    transition: background-color 0.2s ease-in-out;
+    -webkit-transition: background-color 0.2s ease-in-out;
+    -moz-transition: background-color 0.2s ease-in-out;
+    -ms-transition: background-color 0.2s ease-in-out;
+    -o-transition: background-color 0.2s ease-in-out;
+}
+
+.menu:hover {
+    background-color: var(--primary-hover-tran);
+}
+
+.menuIcon {
+    height: 25px;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 25px;
+    right: 40px;
+    display: grid;
+    gap: var(--gap-xs);
+    background-color: var(--color-background-component);
+    box-shadow: var(--box-shadow-card);
+    border-radius: var(--br-md);
+    overflow: hidden;
+    z-index: 1000;
+    padding: 10px 0px;
+}
+
+.dropdownItem {
+    font: menu;
+    font-size: var(--font-size-lg);
+    display: flex;
+
+    align-items: center;
+    width: 200px;
+    height: 30px;
+    padding: var(--paddin-lg);
+    cursor: pointer;
+    gap: var(--gap-md);
+    transition: background-color 0.2s;
+}
+
+.dropdownItem:nth-child(3) {
+    color: var(--color-late-circle);
+}
+
+.dropdownItem:hover {
+    background-color: var(--primary-hover-tran);
+}
+
+
+
+.separator {
+    height: 1px;
+    background-color: var(--color-disabled-13);
+    margin: 0 var(--margin-sm);
+}
+
+.pricingButton {
+    cursor: pointer;
+    color: var(--color-primary);
+    font-size: var(--font-size-md);
+    font-weight: bold;
+    display: flex;
+    margin-top: var(--margin-md);
+    margin-bottom: var(--margin-md);
+}
+
+
+
+.arrowUpDown:after {
+    display: inline-block;
+    content: '';
+    width: 7px;
+    height: 7px;
+    border: solid var(--color-primary);
+    border-width: 0px 2px 2px 0px;
+    transform: translate(10px, 6px) rotate(45deg);
+    -webkit-transform: translate(10px, 6px) rotate(45deg);
+    -moz-transform: translate(10px, 6px) rotate(45deg);
+    -ms-transform: translate(10px, 6px) rotate(45deg);
+    -o-transform: translate(10px, 6px) rotate(45deg);
+    transition: transform 0.3s ease;
+    -webkit-transition: transform 0.3s ease;
+    -moz-transition: transform 0.3s ease;
+    -ms-transition: transform 0.3s ease;
+    -o-transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.arrowUpDown.isOpen:after {
+    transform: translate(10px, 6px) rotate(225deg);
+    -webkit-transform: translate(10px, 6px) rotate(225deg);
+    -moz-transform: translate(10px, 6px) rotate(225deg);
+    -ms-transform: translate(10px, 6px) rotate(225deg);
+    -o-transform: translate(10px, 6px) rotate(225deg);
+}

@@ -1,0 +1,108 @@
+.menuContainer {
+    position: relative;
+    /* display: flex; */
+    /* display: inline-block; */
+    color: var(--color-text);
+}
+
+.menuTrigger img {
+    border-radius: var(--br-mdlg);
+    width: 40px;
+    height: 40px;
+    -webkit-border-radius: var(--br-mdlg);
+    -moz-border-radius: var(--br-mdlg);
+    -ms-border-radius: var(--br-mdlg);
+    -o-border-radius: var(--br-mdlg);
+    cursor: pointer
+}
+
+.menuContent {
+    position: absolute;
+    right: 0;
+    background-color: var(--color-background-profilemenu);
+    box-shadow: var(--box-shadow-card);
+    border-radius: var(--br-lg);
+    z-index: 10;
+    width: var(--width-xl);
+
+    padding: var(--paddin-2xl);
+    display: grid;
+    gap: var(--gap-md);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.menuProfile {
+    display: flex;
+
+    gap: var(--gap-sm);
+
+}
+
+.menuProfile img {
+    border-radius: var(--br-lg);
+    width: 50px;
+    height: 50px;
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.profileDetails {
+    display: grid;
+    font-weight: bold;
+}
+
+
+
+.profileSettings {
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    color: var(--color-primary);
+}
+
+.menuItem {
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.menuItem:hover {
+    color: var(--color-primary);
+}
+
+.menuLanguages {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.menuLanguages span {
+    transition: color 0.3s;
+}
+
+.menuLanguages span:hover {
+    color: var(--primary-hover);
+}
+
+.menuDivider {
+    border-top: var(--border-width) var(--border-style) var(--color-disabled-6);
+
+}
+
+.languagesTitle {
+    color: var(--color-disabled);
+
+}
+
+.activeLanguage {
+    color: #6c63ff;
+    cursor: pointer;
+}
+
+.inactiveLanguage {
+    color: #999;
+    cursor: pointer;
+}

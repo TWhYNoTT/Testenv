@@ -1,0 +1,46 @@
+.dateRangePicker {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    color: var(--color-disabled);
+}
+
+.dateRangePicker label {
+    background-color: transparent;
+}
+
+.checkboxGroup {
+    display: grid;
+    align-items: center;
+    /* justify-content: center; */
+    /* flex-wrap: wrap; */
+    grid-template-columns: 50% 50%;
+    gap: var(--gap-lg);
+}
+
+@media (min-width:420px) {
+
+    .checkboxGroup {
+        display: flex;
+        /* align-items: center; */
+        /* justify-content: center; */
+        /* flex-wrap: wrap; */
+        /* grid-template-columns: 50% 50%; */
+        gap: var(--gap-lg);
+    }
+
+}
+
+.datePicker {
+    display: flex;
+    align-items: center;
+}
+
+.datePicker>div>div>div {
+
+    background-color: transparent;
+    border: 0;
+    font-weight: bold;
+    font-size: var(--font-size-md);
+}

@@ -1,0 +1,92 @@
+.loginForm {
+    display: grid;
+    gap: var(--gap-lg);
+
+    border-radius: var(--border-radius-default);
+    -webkit-border-radius: var(--border-radius-default);
+    -moz-border-radius: var(--border-radius-default);
+    -ms-border-radius: var(--border-radius-default);
+    -o-border-radius: var(--border-radius-default);
+    color: var(--color-text);
+
+}
+
+.loginText {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-bold);
+
+}
+
+.loginFields * {
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    -ms-border-radius: 0;
+    -o-border-radius: 0;
+}
+
+.loginFields {
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.loginFields input {
+    padding-left: 0;
+}
+
+.loginFields input+label {
+    left: 0;
+}
+
+.loginFields input+label+div {
+    right: 2px;
+}
+
+.loginOptions {
+    display: flex;
+    gap: var(--gap-lg);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.loginOptions>div span {
+    font-weight: var(--font-weight-light);
+}
+
+.socialProfile {
+    display: flex;
+    gap: var(--gap-lg);
+    justify-content: center;
+}
+
+.socialText {
+    justify-self: center;
+    color: var(--color-lightslategray-200);
+    font-size: var(--font-size-sm);
+}
+
+.registerOption {
+    display: flex;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    gap: 2px;
+}
+
+.loginForm span.link button {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold)
+}
+
+.socialIcon {
+    cursor: pointer;
+}
+
+.buttonWrpr button {
+    border-radius: var(--br-mdlg);
+    -webkit-border-radius: var(--br-mdlg);
+    -moz-border-radius: var(--br-mdlg);
+    -ms-border-radius: var(--br-mdlg);
+    -o-border-radius: var(--br-mdlg);
+    font-size: var(--font-size-sm);
+    padding: var(--paddin-md) 0;
+}

@@ -1,0 +1,54 @@
+.promotionPage {
+    padding: var(--paddin-lg);
+    display: grid;
+    gap: var(--gap-lg);
+}
+
+
+
+.promotionTypes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-lg);
+
+}
+
+.promotionCard {
+    background-color: var(--color-background-component);
+    border-radius: var(--br-lg);
+    padding: var(--paddin-lg);
+
+    width: 320px;
+    aspect-ratio: 3/1;
+    display: flex;
+    gap: var(--gap-sm);
+    cursor: pointer;
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.details {
+    display: grid;
+    /* gap: var(--gap-xs); */
+}
+
+.details h3 {
+    color: var(--color-dark-v3);
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+}
+
+.details p {
+    color: var(--color-disabled-15);
+    font-size: var(--font-size-sm);
+}
+
+
+
+
+.tableButtonContainer {
+    display: flex;
+    gap: 10px;
+}

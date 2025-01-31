@@ -1,0 +1,83 @@
+.datePicker {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px;
+    /* padding: 0px 30px; */
+    padding-left: 30px;
+}
+
+.navButton {
+    box-shadow: var(--box-shadow-card);
+    cursor: pointer;
+    border-radius: var(--br-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.dates {
+    width: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    /* grid-auto-columns: minmax(10px, 50px); */
+    /* justify-content: space-between; */
+
+    justify-items: start;
+
+    /* gap: 5px; */
+
+    /* margin: 0 30px; */
+}
+
+.date {
+    transform: translateX(50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-sm);
+    cursor: pointer;
+    border-radius: var(--br-2xl);
+    transition: background-color 0.4s;
+    -webkit-transition: background-color 0.4s;
+    -moz-transition: background-color 0.4s;
+    -ms-transition: background-color 0.4s;
+    -o-transition: background-color 0.4s;
+    -webkit-border-radius: var(--br-2xl);
+    -moz-border-radius: var(--br-2xl);
+    -ms-border-radius: var(--br-2xl);
+    -o-border-radius: var(--br-2xl);
+    color: var(--color-dark-v1);
+    padding: var(--paddin-sm);
+    aspect-ratio: 1;
+    -webkit-transform: translateX(50%);
+    -moz-transform: translateX(50%);
+    -ms-transform: translateX(50%);
+    -o-transform: translateX(50%);
+}
+
+.date:hover {
+    background-color: var(--color-upcoming-label);
+}
+
+.selected {
+    background-color: var(--color-upcoming-label);
+    color: var(--color-primary);
+}
+
+.dayName {
+    /* font-size: 14px; */
+    /* color: #666666; */
+}
+
+.dayNumber {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+
+}

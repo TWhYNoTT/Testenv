@@ -1,0 +1,7 @@
+.stepContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    /* min-width: 600px; */
+}

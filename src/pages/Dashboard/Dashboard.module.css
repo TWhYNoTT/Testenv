@@ -1,0 +1,41 @@
+.dashboard {
+    display: grid;
+    padding: 20px;
+    gap: 30px;
+}
+
+.clientNameGreetingAndDateFilterContainer {
+    display: grid;
+
+    gap: 5px;
+}
+
+.clientName {
+    font-size: var(--font-size-10xl);
+    color: var(--color-darkgray-v2);
+    font-weight: var(--font-weight-bold);
+}
+
+.greetingAndDateFilter {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.greetingText {
+    font-size: var(--font-size-h3);
+    color: var(--color-disabled);
+}
+
+.charts {
+    display: grid;
+
+    gap: 30px;
+}
+
+@media (min-width: 850px) {
+    .charts {
+        grid-template-columns: calc(50% - 25px) calc(50% - 25px);
+    }
+}

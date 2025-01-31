@@ -1,0 +1,59 @@
+.chartContainer {
+    background-color: var(--color-background-component);
+    padding: var(--paddin-3xl);
+    border-radius: var(--br-lg);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+    display: grid;
+    gap: var(--gap-lg);
+    position: relative;
+    color: var(--color-text);
+    overflow: auto;
+}
+
+
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+
+
+
+
+.chartjsTooltip {
+    background-color: #10203bd2;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+}
+
+.tooltipTitle {
+    font-size: 12px;
+
+}
+
+.tooltipValue {
+
+    font-weight: bold;
+    color: #ffffff;
+}

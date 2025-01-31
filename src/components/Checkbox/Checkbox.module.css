@@ -1,0 +1,119 @@
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.checkboxContainer * {
+    font-weight: var(--font-weight-bold);
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    position: relative;
+}
+
+.label.additionalTextt {
+
+    display: grid;
+
+}
+
+.buttonLabel {
+    background-color: var(--color-disabled-5);
+    border-radius: var(--br-sm);
+    padding: var(--paddin-xssm) var(--paddin-md);
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: var(--border-radius-md);
+    -webkit-border-radius: var(--br-sm);
+    -moz-border-radius: var(--br-sm);
+    -ms-border-radius: var(--br-sm);
+    -o-border-radius: var(--br-sm);
+    -webkit-transition: background-color 0.3s, color 0.3s;
+    -moz-transition: background-color 0.3s, color 0.3s;
+    -ms-transition: background-color 0.3s, color 0.3s;
+    -o-transition: background-color 0.3s, color 0.3s;
+}
+
+.buttonLabel * {
+    font-weight: var(--font-weight-regular);
+}
+
+.additionalText {
+    color: var(--color-lightslategray-100);
+
+}
+
+label.buttonLabel.checked {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+label.buttonLabel.additionalTextt.checked * {
+
+    color: var(--color-white);
+}
+
+
+.disabledLabel {
+    cursor: not-allowed;
+}
+
+.required {
+    color: var(--color-error);
+    margin-left: var(--margin-xs);
+}
+
+.input {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    height: 25px;
+    width: 25px;
+    border: var(--border-width) solid var(--color-disabled-3);
+    border-radius: var(--br-xs);
+    transition: 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkedMark {
+    background-color: var(--color-disabled-3);
+}
+
+/* .checked {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+} */
+
+.checkmark::after {
+    content: "";
+    display: none;
+    width: 8px;
+    height: 15px;
+    border: solid var(--color-primary);
+    border-width: 0px 3px 3px 0px;
+    transform: translateY(-2px) rotate(45deg);
+    border-radius: 2px;
+}
+
+.input:checked~label span::after {
+    display: block;
+}
+
+.disabled {
+    background-color: var(--color-disabled);
+    cursor: not-allowed;
+}

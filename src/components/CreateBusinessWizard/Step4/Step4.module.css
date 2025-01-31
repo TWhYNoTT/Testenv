@@ -1,0 +1,15 @@
+.stepContainer {
+    display: grid;
+    gap: var(--gap-2xl);
+}
+
+.inputfiledsContainer {
+    display: grid;
+    gap: var(--gap-sm);
+}
+
+.cityZipCode {
+    display: grid;
+    grid-template-columns: 55% 40%;
+    justify-content: space-between;
+}

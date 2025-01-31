@@ -1,0 +1,19 @@
+.stepContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+}
+
+.checkboxGroup {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.categoriesGrid {
+    display: grid;
+    padding: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    background-color: var(--color-background-component);
+}
