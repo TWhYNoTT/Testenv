@@ -1,51 +1,78 @@
 import React from 'react';
-import Toggle from '../../Toggle/Toggle';
-import Checkbox from '../../Checkbox/Checkbox';
-import Dropdown from '../../Dropdown/Dropdown';
+import Toggle from '../../../components/Toggle/Toggle';
+import Checkbox from '../../../components/Checkbox/Checkbox';
+import Dropdown from '../../../components/Dropdown/Dropdown';
 import styles from './Step3.module.css';
 
-type Step3Props = {
-    alwaysOpen: boolean;
-    setAlwaysOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    weekDays: string[];
-    setWeekDays: React.Dispatch<React.SetStateAction<string[]>>;
-    businessHours: { [key: string]: { from: string, to: string } };
-    setBusinessHours: React.Dispatch<React.SetStateAction<{ [key: string]: { from: string, to: string } }>>;
-};
+interface BusinessHour {
+    dayOfWeek: number;
+    isOpen: boolean;
+    openTime?: string;
+    closeTime?: string;
+    is24Hours: boolean;
+}
 
-const Step3: React.FC<Step3Props> = ({ alwaysOpen, setAlwaysOpen, weekDays, setWeekDays, businessHours, setBusinessHours }) => {
+interface Step3Props {
+    alwaysOpen: boolean;
+    setAlwaysOpen: (value: boolean) => void;
+    businessHours: BusinessHour[];
+    setBusinessHours: React.Dispatch<React.SetStateAction<BusinessHour[]>>;
+    errors?: {
+        businessHours?: string;
+    };
+}
+
+const Step3: React.FC<Step3Props> = ({
+    alwaysOpen,
+    setAlwaysOpen,
+    businessHours,
+    setBusinessHours,
+    errors
+}) => {
     const toggleAlwaysOpen = () => {
         setAlwaysOpen(!alwaysOpen);
+        if (!alwaysOpen) {
+            // When turning ON always open
+            setBusinessHours(businessHours.map(hour => ({
+                ...hour,
+                isOpen: true,
+                is24Hours: true
+            })));
+        } else {
+            // When turning OFF always open
+            setBusinessHours(businessHours.map(hour => ({
+                ...hour,
+                isOpen: false,
+                is24Hours: false,
+                openTime: undefined,
+                closeTime: undefined
+            })));
+        }
     };
 
-    const handleWeekDayChange = (day: string) => {
-        setWeekDays(prevState => {
-            if (prevState.includes(day)) {
-                const newState = prevState.filter(d => d !== day);
-                const { [day]: removed, ...rest } = businessHours;
-                setBusinessHours(rest);
-                return newState;
-            } else {
-                return [...prevState, day];
-            }
-        });
+    const handleDayToggle = (dayIndex: number) => {
+        setBusinessHours(businessHours.map((hour, index) =>
+            index === dayIndex
+                ? { ...hour, isOpen: !hour.isOpen }
+                : hour
+        ));
     };
 
-    const handleBusinessHourChange = (day: string, time: 'from' | 'to', value: string | string[]) => {
-        setBusinessHours(prevState => ({
-            ...prevState,
-            [day]: {
-                ...prevState[day],
-                [time]: value,
-            },
-        }));
+    const handleTimeChange = (dayIndex: number, timeType: 'openTime' | 'closeTime', value: string) => {
+        setBusinessHours(businessHours.map((hour, index) =>
+            index === dayIndex
+                ? { ...hour, [timeType]: value }
+                : hour
+        ));
     };
+
+    const dayHoursList = [
+        '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00',
+        '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
+        '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+    ];
 
     const weekDaysList = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayHoursList = [
-        '12:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM', '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
-        '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM'
-    ];
 
     return (
         <div className={styles.step3Container}>
@@ -56,41 +83,46 @@ const Step3: React.FC<Step3Props> = ({ alwaysOpen, setAlwaysOpen, weekDays, setW
                 checked={alwaysOpen}
                 onChange={toggleAlwaysOpen}
             />
+
             {!alwaysOpen && (
                 <div className={styles.weekDaysContainer}>
-                    {weekDaysList.map(day => (
-                        <div key={day} className={styles.weekDayRow}>
+                    {businessHours.map((hour, index) => (
+                        <div key={weekDaysList[index]} className={styles.weekDayRow}>
                             <Checkbox
-                                label={day}
-                                checked={weekDays.includes(day)}
-                                onChange={() => handleWeekDayChange(day)}
+                                label={weekDaysList[index]}
+                                checked={hour.isOpen}
+                                onChange={() => handleDayToggle(index)}
                             />
 
                             <div className={styles.dropdownContainer}>
                                 <div className={styles.dropdown}>
                                     <Dropdown
                                         options={dayHoursList}
-                                        value={businessHours[day]?.from || ''}
-                                        onChange={(value) => handleBusinessHourChange(day, 'from', value)}
-                                        variant={weekDays.includes(day) ? 'primary' : 'secondary'}
-                                        disabled={!(weekDays.includes(day))}
-                                        defaultMessage='24 hours'
+                                        value={hour.openTime || ''}
+                                        onChange={(value) => handleTimeChange(index, 'openTime', value.toString())}
+                                        variant={hour.isOpen ? 'primary' : 'secondary'}
+                                        disabled={!hour.isOpen || hour.is24Hours}
+                                        defaultMessage='Opening time'
                                     />
                                 </div>
                                 <div className={styles.dropdown}>
                                     <Dropdown
                                         options={dayHoursList}
-                                        value={businessHours[day]?.to || ''}
-                                        onChange={(value) => handleBusinessHourChange(day, 'to', value)}
-                                        variant={weekDays.includes(day) ? 'primary' : 'secondary'}
-                                        disabled={!(weekDays.includes(day))}
-                                        defaultMessage='24 hours'
+                                        value={hour.closeTime || ''}
+                                        onChange={(value) => handleTimeChange(index, 'closeTime', value.toString())}
+                                        variant={hour.isOpen ? 'primary' : 'secondary'}
+                                        disabled={!hour.isOpen || hour.is24Hours}
+                                        defaultMessage='Closing time'
                                     />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
+            )}
+
+            {errors?.businessHours && (
+                <div className={styles.error}>{errors.businessHours}</div>
             )}
         </div>
     );
