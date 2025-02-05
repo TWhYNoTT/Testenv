@@ -14,6 +14,7 @@ import { useBizContext } from '../../contexts/BusinessContext';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Toast } from '../Toast/Toast';
+import { useLoading } from '../../contexts/LoadingContext';
 
 // Set default marker icon
 const defaultIcon = L.icon({
@@ -26,12 +27,9 @@ L.Marker.prototype.options.icon = defaultIcon;
 const Wizard: React.FC = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
-    const { businessData, updateBusinessData, submitBusiness, loading, checkAndNavigate } = useBizContext();
+    const { businessData, updateBusinessData, submitBusiness, loading } = useBizContext();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    useEffect(() => {
-        checkAndNavigate();
-    }, []);
+    const { showLoadingScreen } = useLoading();
 
     interface BusinessHour {
         dayOfWeek: number;
@@ -113,10 +111,11 @@ const Wizard: React.FC = () => {
 
         if (step === 4) {
             try {
-                await submitBusiness(); // Let the context handle the data transformation
-                navigate('/dashboard');
+                await submitBusiness();
+                showLoadingScreen(() => {
+                    navigate('/settings/accountsettings');
+                });
             } catch (error: any) {
-                // Add global error message if needed
                 if (error.errors?.Business) {
                     setErrorMessage(error.errors.Business[0]);
                 } else if (error.message) {
@@ -163,7 +162,7 @@ const Wizard: React.FC = () => {
                     onClose={() => setErrorMessage(null)}
                 />
             )}
-            {/* Show global error message if exists */}
+
 
             <div className={styles.wizardHeader}>
                 <div className="container">

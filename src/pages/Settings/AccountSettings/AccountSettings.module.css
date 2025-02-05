@@ -2,6 +2,7 @@
     display: grid;
     gap: var(--gap-lg);
     padding: var(--paddin-lg);
+    position: relative;
 }
 
 .profileSection,
@@ -39,7 +40,6 @@
     position: absolute;
     width: 100%;
     height: 45%;
-
 }
 
 .logo {
@@ -47,10 +47,7 @@
     z-index: 1;
     left: 6%;
     top: 35%;
-
 }
-
-
 
 .passwordSection,
 .businessInfo {
@@ -62,31 +59,21 @@
     grid-area: row3;
 }
 
-
-
-
 .h2 {
     color: var(--color-dark-v3);
     font-size: var(--font-size-xl);
     font-weight: bold;
-
 }
 
 .weekDayRow {
     display: grid;
     gap: var(--gap-3xl);
-
-
 }
-
 
 @media screen and (min-width:505px) {
     .weekDayRow {
-
         grid-template-columns: 150px 1fr;
-
     }
-
 }
 
 .weekDayRow label {
@@ -96,26 +83,20 @@
 .dropdownContainer {
     display: flex;
     flex-wrap: wrap;
-
     gap: var(--gap-md);
-
 }
 
 .dropdown>div {
     width: 150px;
 }
 
-
-
 div.dropdownContainer div {
     border-radius: 15px;
-
     -webkit-border-radius: 15px;
     -moz-border-radius: 15px;
     -ms-border-radius: 15px;
     -o-border-radius: 15px;
 }
-
 
 div.weekDayRow div.dropdownContainer div::after {
     border-bottom-width: 3px;
@@ -127,9 +108,7 @@ div.weekDayRow div.dropdownContainer div::after {
     display: grid;
     justify-content: space-between;
     grid-template-columns: 40% 50%;
-
 }
-
 
 .fieldsContainer {
     display: grid;
@@ -140,4 +119,68 @@ div.weekDayRow div.dropdownContainer div::after {
     display: grid;
     grid-template-columns: 55% 40%;
     justify-content: space-between;
+}
+
+.loadingOverlay {
+    position: absolute;
+    /* Changed from fixed to absolute */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    border-radius: var(--br-lg);
+}
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--color-primary);
+}
+
+.spinner svg {
+    width: 50px;
+    height: 50px;
+    animation: rotate 2s linear infinite;
+}
+
+.spinner circle {
+    stroke: currentColor;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+.spinner span {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
 }

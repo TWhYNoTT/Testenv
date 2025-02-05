@@ -177,3 +177,108 @@
 .addBtn {
     font-weight: bold;
 }
+
+.pricingOptionContainer {
+    display: grid;
+    gap: var(--gap-md);
+}
+
+.pricingOptionHeader {
+    display: grid;
+    /* justify-content: space-between; */
+    /* align-items: flex-start; */
+    width: 100%;
+    gap: var(--gap-md);
+}
+
+
+
+
+.deletebutton {
+    justify-self: end;
+}
+
+
+
+.uploadphotolbl {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-sm);
+}
+
+.previewImage {
+    width: 100%;
+    max-width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--br-sm);
+}
+
+
+
+
+/* Add to both CSS files */
+.loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--color-primary);
+}
+
+.spinner svg {
+    width: 50px;
+    height: 50px;
+    animation: rotate 2s linear infinite;
+}
+
+.spinner circle {
+    stroke: currentColor;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+.spinner span {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
+}

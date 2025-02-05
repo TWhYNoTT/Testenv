@@ -33,6 +33,13 @@
     align-items: start;
 }
 
+.servicesListContainer,
+.categoriesContainer {
+    position: relative;
+    min-height: 200px;
+    /* Ensure there's space for the spinner when no content */
+}
+
 .tapsContainer {
     position: relative;
 
@@ -105,6 +112,7 @@
 
 .cardsContainer {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--gap-md);
 }
 
@@ -121,4 +129,67 @@
 .categoryName {
     font-weight: bold;
     font-size: var(--font-size-body);
+}
+
+.loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    border-radius: var(--br-lg);
+}
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--color-primary);
+}
+
+.spinner svg {
+    width: 50px;
+    height: 50px;
+    animation: rotate 2s linear infinite;
+}
+
+.spinner circle {
+    stroke: currentColor;
+    stroke-linecap: round;
+    animation: dash 1.5s ease-in-out infinite;
+}
+
+.spinner span {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35;
+    }
+
+    100% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124;
+    }
 }

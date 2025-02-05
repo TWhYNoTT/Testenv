@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { apiService } from '../../services/api';
-import { useToast } from '../../contexts/ToastContext';
-import styles from './verifyAccount.module.css';
+import React, { useEffect } from 'react';
+import styles from './LoadingScreen.module.css';
 
 const Logo = () => (
     <svg className={styles.logo} viewBox="0 0 311 63" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,80 +20,24 @@ const Logo = () => (
     </svg>
 );
 
-const Spinner = () => <div className={styles.spinner} />;
-
-const VerifyAccount: React.FC = () => {
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-    const { showToast } = useToast();
-    const [verificationStatus, setVerificationStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-    const [errorMessage, setErrorMessage] = useState<string>('');
-
+const LoadingScreen: React.FC = () => {
     useEffect(() => {
-        const verifyAccount = async () => {
-            try {
-                const encodedToken = searchParams.get('token');
-                const userId = searchParams.get('userId');
+        const timer = setTimeout(() => {
+            // Dispatch event to trigger the stored action
+            window.dispatchEvent(new Event('loadingComplete'));
+            sessionStorage.removeItem('nextAction');
+        }, 500);
 
-                if (!encodedToken || !userId) {
-                    setErrorMessage('Invalid verification link');
-                    setVerificationStatus('error');
-                    setTimeout(() => navigate('/form/login'), 3000);
-                    return;
-                }
-
-                // Decode the token properly
-                const decodedToken = decodeURIComponent(encodedToken);
-
-                await apiService.verifyAccount({
-                    userId: parseInt(userId),
-                    userType: 2,
-                    verificationToken: decodedToken
-                });
-
-                setVerificationStatus('success');
-                showToast('Account verified successfully!', 'success');
-                setTimeout(() => navigate('/form/login'), 3000);
-            } catch (error: any) {
-                setErrorMessage(error.response?.data?.message || 'Verification failed');
-                setVerificationStatus('error');
-                setTimeout(() => navigate('/form/login'), 3000);
-            }
-        };
-
-        verifyAccount();
-    }, [navigate, searchParams, showToast]);
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <div className={styles.container}>
-            <div className={styles.card}>
-                <Logo />
-                {verificationStatus === 'verifying' && (
-                    <>
-                        <h2 className={styles.title}>Verifying your account...</h2>
-                        <Spinner />
-                    </>
-                )}
-                {verificationStatus === 'success' && (
-                    <div>
-                        <h2 className={`${styles.title} ${styles.success}`}>
-                            Account verified successfully!
-                        </h2>
-                        <p className={styles.message}>Redirecting to login page...</p>
-                    </div>
-                )}
-                {verificationStatus === 'error' && (
-                    <div>
-                        <h2 className={`${styles.title} ${styles.error}`}>
-                            Verification failed
-                        </h2>
-                        <p className={styles.message}>{errorMessage}</p>
-                        <p className={styles.message}>Redirecting to login page...</p>
-                    </div>
-                )}
-            </div>
+
+            <Logo />
+
         </div>
     );
 };
 
-export default VerifyAccount;
+export default LoadingScreen;

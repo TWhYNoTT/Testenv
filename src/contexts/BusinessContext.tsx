@@ -121,7 +121,7 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const response = await createBusiness(requestData);
 
         if (response) {
-            navigate('/');
+            navigate('/settings/accountsettings');
             return response;
         }
     };
@@ -137,7 +137,7 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
             const business = await checkBusinessExists();
             if (business) {
-                navigate('/');
+                navigate('/settings/accountsettings');
             } else {
                 navigate('/wizard');
             }

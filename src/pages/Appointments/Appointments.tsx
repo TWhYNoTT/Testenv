@@ -5,6 +5,8 @@ import Button from '../../components/Button/Button';
 import { DndContext } from '@dnd-kit/core';
 import styles from './Appointments.module.css';
 import ScheduleList from './Schedul/ScheduleList';
+import AddEditAppointment from './AddEditAppointment/AddEditAppointment';
+import { useToast } from '../../contexts/ToastContext';  // Add this import if not present
 
 interface ScheduleData {
     id: string;
@@ -42,11 +44,13 @@ const initialScheduleData: ScheduleData[] = [
 
 const Appointments: React.FC = () => {
     const [scheduleData, setScheduleData] = useState(initialScheduleData);
+    const [isAddEditOpen, setIsAddEditOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string>(() => {
         const today = new Date();
         today.setDate(today.getDate() - today.getDay());
         return today.toLocaleDateString('en-GB');
     });
+    const { showToast } = useToast();  // Add this line
 
     const handleDateChange = useCallback((date: string) => {
         setSelectedDate(date);
@@ -73,6 +77,12 @@ const Appointments: React.FC = () => {
 
     const currentMonthYear = useMemo(() => getCurrentMonthYear(), []);
 
+    const handleAddAppointmentSuccess = useCallback(() => {
+        showToast('Appointment created successfully', 'success');
+        // You might want to refresh your schedule data here
+        // setScheduleData([...updatedData]); // Update with new data
+    }, [showToast]);
+
     return (
         <div className={styles.appointmentsMainContainer}>
             <div className={styles.controlsHeaderContainer}>
@@ -83,6 +93,7 @@ const Appointments: React.FC = () => {
                         label="New appointment +"
                         variant="primary"
                         size="medium"
+                        onClick={() => setIsAddEditOpen(true)}
                     />
                 </div>
             </div>
@@ -94,6 +105,11 @@ const Appointments: React.FC = () => {
                     onDragEnd={handleDragEnd}
                 />
             </DndContext>
+            <AddEditAppointment
+                isOpen={isAddEditOpen}
+                onClose={() => setIsAddEditOpen(false)}
+                onSuccess={handleAddAppointmentSuccess}
+            />
         </div>
     );
 };

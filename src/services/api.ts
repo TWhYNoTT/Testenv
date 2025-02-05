@@ -1,6 +1,10 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse } from '../types/api-responses';
+import { User } from '../types/user.interface';
+import { LogoutRequest } from './auth.service';
+import { AppointmentStatus } from '../types/enums';
 
 const API_BASE_URL = 'https://localhost:7063/api';
 
@@ -76,22 +80,65 @@ export interface CategoryRequest {
     image?: File;
 }
 
+export interface ServicePricingOptionDto {
+    name: string;
+    price: number;
+    currency: string;
+    duration: string;
+}
+
 export interface ServiceRequest {
     categoryId: number;
     name: string;
     image?: File;
     minDuration: string;
     maxDuration: string;
-    serviceType: 'MenOnly' | 'WomenOnly' | 'Everyone';
+    serviceType: number;
     hasHomeService: boolean;
     description?: string;
-    pricingOptionsJson: string;
+    pricingOptions: ServicePricingOptionDto[];
 }
 
 export interface VerifyAccountRequest {
     userId: number;
     userType: number;
     verificationToken: string;
+}
+
+export interface Service {
+    id: number;
+    name: string;
+    imageUrl: string;
+    minDuration: string;
+    maxDuration: string;
+    serviceType: number;
+    hasHomeService: boolean;
+    description: string;
+    categoryName: string;
+    isActive: boolean;
+    pricingOptions: Array<{
+        name: string;
+        price: number;
+        currency: string;
+        duration: string;
+    }>;
+}
+
+export interface ServiceListResponse {
+    services: Service[];
+    totalCount: number;
+}
+
+export interface AppointmentRequest {
+    clientName: string;
+    mobileNumber: string;
+    email: string;
+    serviceId: number;
+    amount: number;
+    appointmentDate: string;  // YYYY-MM-DD format
+    appointmentTime: string;  // HH:mm format
+    isDraft: boolean;
+    status: AppointmentStatus;  // Using enum directly
 }
 
 class ApiService {
@@ -243,6 +290,11 @@ class ApiService {
         return response.data;
     }
 
+    async logout(data: LogoutRequest): Promise<LogoutResponse> {
+        const response = await this.axiosInstance.post('/Auth/logout', data);
+        return response.data;
+    }
+
     // Business APIs
     async createBusiness(data: BusinessRequest) {
         const response = await this.axiosInstance.post('/business', data);
@@ -259,13 +311,18 @@ class ApiService {
         return response.data;
     }
 
-    async getBusinessCategories(businessId: number) {
+    async getBusinessCategories(): Promise<CategoryListResponse> {
         const response = await this.axiosInstance.get('/category/business');
         return response.data;
     }
 
+    async getMyRequestedCategories(): Promise<CategoryListResponse> {
+        const response = await this.axiosInstance.get('/category/my-requests');
+        return response.data;
+    }
+
     // Category APIs
-    async requestCategory(data: CategoryRequest) {
+    async requestCategory(data: CategoryRequest): Promise<RequestCategoryResponse> {
         const formData = new FormData();
         formData.append('name', data.name);
         if (data.image) {
@@ -285,15 +342,29 @@ class ApiService {
     }
 
     // Service APIs
-    async createService(data: ServiceRequest) {
+    async createService(data: ServiceRequest): Promise<CreateServiceResponse> {
         const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-            if (key === 'image' && value) {
-                formData.append('image', value);
-            } else {
-                formData.append(key, value.toString());
-            }
-        });
+
+        // Add PricingOptionsJson as stringified array
+        formData.append('PricingOptionsJson', JSON.stringify(data.pricingOptions));
+
+        // Add other fields in exact order and format
+        formData.append('MinDuration', data.minDuration);
+        formData.append('Name', data.name);
+        formData.append('ServiceType', data.serviceType.toString());
+        formData.append('MaxDuration', data.maxDuration);
+        formData.append('CategoryId', data.categoryId.toString());
+
+        // Add image if exists
+        if (data.image) {
+            formData.append('Image', data.image);
+        }
+
+        formData.append('HasHomeService', data.hasHomeService.toString());
+
+        if (data.description) {
+            formData.append('Description', data.description);
+        }
 
         const response = await this.axiosInstance.post(
             '/service',
@@ -301,9 +372,29 @@ class ApiService {
             {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'accept': 'text/plain',
+
                 },
+                withCredentials: true // Changed from credentials: 'include'
             }
         );
+        return response.data;
+    }
+
+    async getServices(): Promise<ServiceListResponse> {
+        const response = await this.axiosInstance.get('/service');
+        return response.data;
+    }
+
+    // User APIs
+    async getCurrentUser(): Promise<User> {
+        const response = await this.axiosInstance.get('/Auth/me');
+        return response.data;
+    }
+
+    // Appointment APIs
+    async createAppointment(data: AppointmentRequest): Promise<AppointmentResponse> {
+        const response = await this.axiosInstance.post('/appointment', data);
         return response.data;
     }
 }

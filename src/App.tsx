@@ -18,6 +18,7 @@ import UserRoles from './pages/Settings/UserRoles/UserRoles';
 import PaymentSettings from './pages/Settings/PaymentSettings/PaymentSettings';
 import Help from './pages/Help/Help';
 import VerifyAccount from './pages/VerifyAccount/VerifyAccount';
+import LoadingScreen from './pages/LoadingScreen/LoadingScreen';
 
 // Form Components
 import LoginForm from './forms/LoginForm/LoginForm';
@@ -32,6 +33,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ErrorProvider } from './contexts/ErrorContext';
 import { AppProvider } from './contexts/AppProvider';
+import { LoadingProvider } from './contexts/LoadingContext';
+import { UserProvider } from './contexts/UserContext';
 
 // Styles
 import './styles/global.css';
@@ -44,116 +47,123 @@ const App: React.FC = () => {
         <ToastProvider>
             <ErrorProvider>
                 <AuthProvider>
-                    <BusinessProviderWithRouter>
+                    <UserProvider>
+                        <BusinessProviderWithRouter>
+                            <LoadingProvider>
 
-                        <Routes>
-                            {/* Add this new route before existing routes */}
-                            <Route path="/verify-account" element={<VerifyAccount />} />
+                                <Routes>
+                                    {/* Add LoadingScreen route */}
+                                    <Route path="/dashboard" element={<LoadingScreen />} />
 
-                            {/* Dashboard Route */}
-                            <Route
-                                path="/"
-                                element={
-                                    <MainLayout>
-                                        <Dashboard />
-                                    </MainLayout>
-                                }
-                            />
+                                    {/* Add this new route before existing routes */}
+                                    <Route path="/verify-account" element={<VerifyAccount />} />
 
-                            {/* Main Feature Routes */}
-                            <Route
-                                path="/appointments"
-                                element={
-                                    <MainLayout>
-                                        <AppointmentsPage />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/services"
-                                element={
-                                    <MainLayout>
-                                        <Services />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/employee"
-                                element={
-                                    <MainLayout>
-                                        <Employee />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/promotion"
-                                element={
-                                    <MainLayout>
-                                        <Promotion />
-                                    </MainLayout>
-                                }
-                            />
+                                    {/* Dashboard Route */}
+                                    <Route
+                                        path="/"
+                                        element={
+                                            <MainLayout>
+                                                <Dashboard />
+                                            </MainLayout>
+                                        }
+                                    />
 
-                            {/* Settings Routes */}
-                            <Route
-                                path="/settings"
-                                element={
-                                    <MainLayout>
-                                        <Settings />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/settings/accountsettings"
-                                element={
-                                    <MainLayout>
-                                        <AccountSettings />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/settings/branches"
-                                element={
-                                    <MainLayout>
-                                        <Branches />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/settings/userroles"
-                                element={
-                                    <MainLayout>
-                                        <UserRoles />
-                                    </MainLayout>
-                                }
-                            />
-                            <Route
-                                path="/settings/paymentsettings"
-                                element={
-                                    <MainLayout>
-                                        <PaymentSettings />
-                                    </MainLayout>
-                                }
-                            />
+                                    {/* Main Feature Routes */}
+                                    <Route
+                                        path="/appointments"
+                                        element={
+                                            <MainLayout>
+                                                <AppointmentsPage />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/services"
+                                        element={
+                                            <MainLayout>
+                                                <Services />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/employee"
+                                        element={
+                                            <MainLayout>
+                                                <Employee />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/promotion"
+                                        element={
+                                            <MainLayout>
+                                                <Promotion />
+                                            </MainLayout>
+                                        }
+                                    />
 
-                            {/* Help Route */}
-                            <Route
-                                path="/help"
-                                element={
-                                    <MainLayout>
-                                        <Help />
-                                    </MainLayout>
-                                }
-                            />
+                                    {/* Settings Routes */}
+                                    <Route
+                                        path="/settings"
+                                        element={
+                                            <MainLayout>
+                                                <Settings />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/settings/accountsettings"
+                                        element={
+                                            <MainLayout>
+                                                <AccountSettings />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/settings/branches"
+                                        element={
+                                            <MainLayout>
+                                                <Branches />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/settings/userroles"
+                                        element={
+                                            <MainLayout>
+                                                <UserRoles />
+                                            </MainLayout>
+                                        }
+                                    />
+                                    <Route
+                                        path="/settings/paymentsettings"
+                                        element={
+                                            <MainLayout>
+                                                <PaymentSettings />
+                                            </MainLayout>
+                                        }
+                                    />
 
-                            {/* Authentication Routes */}
-                            <Route path="/form/*" element={<FormWrapper />} />
+                                    {/* Help Route */}
+                                    <Route
+                                        path="/help"
+                                        element={
+                                            <MainLayout>
+                                                <Help />
+                                            </MainLayout>
+                                        }
+                                    />
 
-                            {/* Business Setup Route */}
-                            <Route path="/wizard" element={<Wizard />} />
-                        </Routes>
+                                    {/* Authentication Routes */}
+                                    <Route path="/form/*" element={<FormWrapper />} />
 
-                    </BusinessProviderWithRouter>
+                                    {/* Business Setup Route */}
+                                    <Route path="/wizard" element={<Wizard />} />
+                                </Routes>
+
+                            </LoadingProvider>
+                        </BusinessProviderWithRouter>
+                    </UserProvider>
                 </AuthProvider>
             </ErrorProvider>
         </ToastProvider>

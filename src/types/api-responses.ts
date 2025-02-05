@@ -29,3 +29,52 @@ export interface BusinessDetailsResponse {
         isActive: boolean;
     }>;
 }
+
+export interface Category {
+    id: number;
+    name: string;
+    imageUrl: string;
+    isActive: boolean;
+    approvalStatus: number;
+}
+
+export interface CategoryListResponse {
+    categories: Category[];
+    totalCount: number;
+}
+
+export interface RequestCategoryResponse {
+    categoryId: number;
+    name: string;
+    approvalStatus: number;
+}
+
+export interface ServicePricingOption {
+    name: string;
+    price: number;
+    currency: string;
+    duration: string;
+}
+
+export interface CreateServiceResponse {
+    serviceId: number;
+    name: string;
+    pricingOptions: ServicePricingOption[];
+}
+
+export interface LogoutResponse {
+    success: boolean;
+}
+
+export interface AppointmentResponse {
+    id: number;
+    clientName: string;
+    mobileNumber: string;
+    email: string;
+    serviceId: number;
+    amount: number;
+    appointmentDate: string;
+    appointmentTime: string;
+    isDraft: boolean;
+    status: string;
+}

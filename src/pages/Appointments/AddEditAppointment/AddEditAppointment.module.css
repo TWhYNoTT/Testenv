@@ -11,16 +11,16 @@
     align-items: center;
     z-index: 10000;
     pointer-events: auto;
-    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
-
-
-
 
 .modalBackground.open {
     animation: modalDisplay 0.3s ease-in-out;
-
     -webkit-animation: modalDisplay 0.3s ease-in-out;
+    opacity: 1;
+    visibility: visible;
 }
 
 @keyframes modalDisplay {
@@ -34,30 +34,24 @@
 }
 
 .modalContainer {
-
     background: var(--color-background-component);
     border-radius: var(--br-lg) 0 0 var(--br-lg);
     padding: var(--paddin-4xl);
     box-shadow: var(--box-shadow-card);
     overflow: auto;
-    width: 500px;
+    width: 100%;
     height: 100dvh;
-
-
     position: relative;
     -webkit-border-radius: var(--br-lg) 0 0 var(--br-lg);
     -moz-border-radius: var(--br-lg) 0 0 var(--br-lg);
     -ms-border-radius: var(--br-lg) 0 0 var(--br-lg);
     -o-border-radius: var(--br-lg) 0 0 var(--br-lg);
-
 }
 
-
-@media (min-width:500px) {
+@media (min-width: 500px) {
     .modalContainer {
         width: 400px;
     }
-
 }
 
 .modalContainer.open {
@@ -79,42 +73,26 @@
     }
 }
 
-.uploadphoto {
-    cursor: pointer;
-    display: grid;
-    gap: var(--gap-sm);
-    justify-self: start;
+.headerCloseContainer {
+    margin-bottom: var(--margin-lg);
+    position: relative;
 }
 
-.uploadphoto .img {
-    height: 200px;
-}
-
-.uploadphoto .desc {
-    color: var(--color-darkslategray-100);
-    font-weight: bold;
-
-}
-
-
-
-.headerCloseInputsContainer {
+.appointmentForm {
     display: grid;
     gap: var(--gap-2xl);
 }
-
 
 .buttonContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-top: var(--margin-2xl);
 }
-
-
 
 .closeButton {
     position: absolute;
-    top: var(--paddin-md);
+    /* top: var(--paddin-md); */
     right: var(--paddin-4xl);
     background: none;
     border: none;
@@ -122,53 +100,18 @@
     cursor: pointer;
 }
 
-
 .header {
     color: var(--color-dark-v1);
-}
-
-.addBtn {
+    font-size: var(--font-size-2xl);
     font-weight: bold;
 }
 
-.categoryHeader {
-    display: flex;
-    gap: 5px;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-direction: column;
-    width: 100%;
-}
-
-.categoryEntry {
-    display: grid;
-    gap: var(--gap-md);
-    opacity: 1;
-    transition: opacity 0.3s ease;
-}
-
-.categoryEntry.submitting {
-    opacity: 0.7;
-}
-
-.uploadphotolbl {
-    display: flex;
-    flex-direction: column;
-    justify-content: center
-}
-
-
-
-
-/* Add to both CSS files */
 .loadingOverlay {
-    position: sticky;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
-    height: 100vh;
     background: rgba(255, 255, 255, 0.8);
     display: flex;
     justify-content: center;
@@ -223,20 +166,4 @@
         stroke-dasharray: 90, 150;
         stroke-dashoffset: -124;
     }
-}
-
-.errorMessage {
-    color: var(--color-error);
-    font-size: var(--font-size-sm);
-    margin-top: -8px;
-}
-
-.submittingIndicator {
-    color: var(--color-primary);
-    font-size: var(--font-size-sm);
-    margin-top: -8px;
-}
-
-.deleteButtonContainer {
-    align-self: flex-end;
 }

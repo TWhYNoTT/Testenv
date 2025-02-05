@@ -6,7 +6,9 @@ import Checkbox from '../../components/Checkbox/Checkbox';
 import styles from './loginForm.module.css';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
-
+import { useBizContext } from '../../contexts/BusinessContext';
+import { useLoading } from '../../contexts/LoadingContext';
+import { useUser } from '../../contexts/UserContext'; // Add this import
 
 interface LoginFormProps {
     toggleForm: (form: 'login' | 'register' | 'forgetPassword' | 'partner') => void;
@@ -16,6 +18,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
     const navigate = useNavigate();
     const { login, loading } = useAuth();
     const { showToast } = useToast();
+    const { checkAndNavigate } = useBizContext();
+    const { showLoadingScreen } = useLoading();
+    const { refreshUser } = useUser(); // Add this line
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -35,21 +40,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         try {
-            const response = await login({
+            await login({
                 identifier: email,
                 password: password,
                 userType: 2
             });
 
-            showToast('Successfully logged in', 'success');
-            navigate('/wizard');
+
+            await refreshUser();
+
+
+            showLoadingScreen(() => {
+                checkAndNavigate();
+            });
 
         } catch (err) {
-
+            // ...error handling
         }
     };
 
@@ -110,7 +119,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
 
             <h3 className={styles.socialText}>Or continue with your social profile</h3>
 
-            <div className={styles.socialProfile}>
+            {/* <div className={styles.socialProfile}>
                 <div className={styles.socialIcon}>
                     <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="24.5" cy="24.5" r="24" stroke="#8191AB" />
@@ -125,7 +134,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
                         <circle cx="24.5" cy="24.5" r="24" stroke="#8191AB" />
                     </svg>
                 </div>
-            </div>
+            </div> */}
 
             <div className={styles.registerOption}>
                 <span>Don't have an account?</span>

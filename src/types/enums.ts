@@ -21,3 +21,11 @@ export enum Gender {
     Male = 1,
     Female = 2
 }
+
+export enum AppointmentStatus {
+    Upcoming = 0,
+    Paid = 1,
+    Late = 2,
+    Unpaid = 3,
+    Draft = 6
+}

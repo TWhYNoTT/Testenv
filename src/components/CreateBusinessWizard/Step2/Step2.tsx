@@ -36,7 +36,13 @@ const Step2: React.FC<Step2Props> = ({
         const fetchCategories = async () => {
             try {
                 const response = await getCategories();
-                setCategories(response.categories);
+                // Transform the API response categories to match our local interface
+                const transformedCategories = response.categories.map(cat => ({
+                    id: String(cat.id),
+                    name: cat.name,
+                    imageUrl: cat.imageUrl
+                }));
+                setCategories(transformedCategories);
             } catch (err) {
                 console.error('Failed to fetch categories:', err);
             }
