@@ -73,7 +73,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         }>
     });
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         setIsLoadingCategories(true);
         try {
             const response = await getBusinessCategories();
@@ -83,13 +83,13 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         } finally {
             setIsLoadingCategories(false);
         }
-    };
+    }, [getBusinessCategories]);
 
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
         }
-    }, [isOpen]);
+    }, [isOpen, fetchCategories]);
 
     useEffect(() => {
         if (isOpen) {

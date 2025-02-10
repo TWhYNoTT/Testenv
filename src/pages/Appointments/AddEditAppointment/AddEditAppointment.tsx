@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useServices } from '../../../hooks/useServices';
 import { useAppointments } from '../../../hooks/useAppointments';  // Add this import
 import InputField from '../../../components/InputField/InputField';
@@ -50,33 +50,33 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         { label: 'Draft', value: AppointmentStatus.Draft }
     ];
 
+    const fetchServices = useCallback(async () => {
+        if (services.length === 0) {
+            try {
+                await getServices();
+            } catch (error) {
+                console.error('Failed to fetch services:', error);
+            }
+        }
+    }, [getServices, services.length]);
+
     useEffect(() => {
-        let mounted = true;
+
 
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            // Only fetch if we haven't already
-            if (services.length === 0) {
-                getServices().catch(error => {
-                    if (mounted) {
-                        console.error('Failed to fetch services:', error);
-                    }
-                });
-            }
+            fetchServices();
         } else {
             document.body.style.overflow = 'auto';
         }
 
         return () => {
-            mounted = false;
+
             document.body.style.overflow = 'auto';
         };
-    }, [isOpen]); // Remove getServices from dependencies
+    }, [isOpen, fetchServices]);
 
-    const serviceOptions = services.map(service => ({
-        label: service.name,
-        value: service.id.toString()
-    }));
+
 
     const handleInputChange = (name: string, value: string | number | boolean) => {
         setAppointmentData(prev => ({

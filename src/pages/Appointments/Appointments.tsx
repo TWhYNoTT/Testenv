@@ -8,7 +8,7 @@ import ScheduleList from './Schedul/ScheduleList';
 import AddEditAppointment from './AddEditAppointment/AddEditAppointment';
 import { useToast } from '../../contexts/ToastContext';
 import { useAppointments } from '../../hooks/useAppointments';
-import { AppointmentDetails } from '../../types/api-responses';
+
 
 export interface ScheduleAppointment {
     id: string;
@@ -33,20 +33,20 @@ const getCurrentMonthYear = () => {
     return `${monthNames[date.getMonth()]}, ${date.getFullYear()}`;
 };
 
-const initialScheduleData: ScheduleAppointment[] = [
-    { id: '1', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '12:30 PM', date: '18/08/2024' },
-    { id: '2', service: 'Permanent Hair Colour', customer: 'Salama Khaled', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Unpaid', image: './assets/icons/avatar.png', time: '7:15 AM', date: '19/08/2024' },
-    { id: '3', service: 'Permanent Hair Colour', customer: 'Alaa Omar', contact: '0123 456 789', duration: '1h 30min', price: '200 AED', status: 'Late', image: './assets/icons/avatar.png', time: '8:00 AM', date: '20/08/2024' },
-    { id: '4', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '8:15 AM', date: '21/08/2024' },
-    { id: '5', service: 'Permanent Hair Colour', customer: 'Soha Ali', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Upcoming', image: './assets/icons/avatar.png', time: '9:15 AM', date: '22/08/2024' },
-    { id: '6', service: 'Permanent Hair Colour', customer: 'Aya Mohammed', contact: '0123 456 789', duration: '2h 0min', price: '120 AED', status: 'Draft', image: './assets/icons/avatar.png', time: '10:00 AM', date: '23/08/2024' },
-    { id: '7', service: 'Permanent Hair Colour', customer: 'Yasmin Aliaaaa', contact: '0123 456 789', duration: '1h 15min', price: '300 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '10:30 AM', date: '24/08/2024' },
+// const initialScheduleData: ScheduleAppointment[] = [
+//     { id: '1', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '12:30 PM', date: '18/08/2024' },
+//     { id: '2', service: 'Permanent Hair Colour', customer: 'Salama Khaled', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Unpaid', image: './assets/icons/avatar.png', time: '7:15 AM', date: '19/08/2024' },
+//     { id: '3', service: 'Permanent Hair Colour', customer: 'Alaa Omar', contact: '0123 456 789', duration: '1h 30min', price: '200 AED', status: 'Late', image: './assets/icons/avatar.png', time: '8:00 AM', date: '20/08/2024' },
+//     { id: '4', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '8:15 AM', date: '21/08/2024' },
+//     { id: '5', service: 'Permanent Hair Colour', customer: 'Soha Ali', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Upcoming', image: './assets/icons/avatar.png', time: '9:15 AM', date: '22/08/2024' },
+//     { id: '6', service: 'Permanent Hair Colour', customer: 'Aya Mohammed', contact: '0123 456 789', duration: '2h 0min', price: '120 AED', status: 'Draft', image: './assets/icons/avatar.png', time: '10:00 AM', date: '23/08/2024' },
+//     { id: '7', service: 'Permanent Hair Colour', customer: 'Yasmin Aliaaaa', contact: '0123 456 789', duration: '1h 15min', price: '300 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '10:30 AM', date: '24/08/2024' },
 
-];
+// ];
 
 const Appointments: React.FC = () => {
     const [scheduleData, setScheduleData] = useState<ScheduleAppointment[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+
     const [isAddEditOpen, setIsAddEditOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string>(() => {
         const today = new Date();
@@ -110,8 +110,7 @@ const Appointments: React.FC = () => {
 
     const currentMonthYear = useMemo(() => getCurrentMonthYear(), []);
 
-    // Add this helper function
-    const getStatusText = (status: number): string => {
+    const getStatusText = useCallback((status: number): string => {
         switch (status) {
             case 0: return 'Upcoming';
             case 1: return 'Paid';
@@ -120,20 +119,18 @@ const Appointments: React.FC = () => {
             case 4: return 'Draft';
             default: return 'Unknown';
         }
-    };
+    }, []);
 
-    const formatTime = (timeString: string) => {
+    const formatTime = useCallback((timeString: string) => {
         const [hours, minutes] = timeString.split(':');
         const hour = parseInt(hours);
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const formattedHour = hour % 12 || 12;
         return `${formattedHour}:${minutes} ${ampm}`;
-    };
+    }, []);
 
-    // Add a refresh function
     const refreshAppointments = useCallback(async () => {
         try {
-            setIsLoading(true);
             const fromDate = selectedDate.split('/').reverse().join('-');
             const toDateObj = new Date(fromDate);
             toDateObj.setDate(toDateObj.getDate() + 6);
@@ -163,15 +160,12 @@ const Appointments: React.FC = () => {
             setScheduleData(transformedData);
         } catch (error) {
             showToast('Failed to fetch appointments', 'error');
-        } finally {
-            setIsLoading(false);
         }
-    }, [selectedDate, getAppointments, showToast]);
+    }, [selectedDate, getAppointments, showToast, getStatusText, formatTime]);
 
-    // Update useEffect to use refreshAppointments
     useEffect(() => {
         refreshAppointments();
-    }, [selectedDate]);
+    }, [refreshAppointments]);
 
     // Update handleAddAppointmentSuccess to use refreshAppointments
     const handleAddAppointmentSuccess = useCallback(() => {

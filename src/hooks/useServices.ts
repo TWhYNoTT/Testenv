@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { apiService, ServiceRequest } from "../services/api";
 import type { CreateServiceResponse } from "../types/api-responses";
-import type { Service, ServiceListResponse } from "../services/api";
+import type { Service } from "../services/api";
 
 export const useServices = () => {
     const [loading, setLoading] = useState(false);

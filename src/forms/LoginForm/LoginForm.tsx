@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import InputField from '../../components/InputField/InputField';
 import Button from '../../components/Button/Button';
 import Checkbox from '../../components/Checkbox/Checkbox';
@@ -15,7 +15,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
-    const navigate = useNavigate();
+
     const { login, loading } = useAuth();
     const { showToast } = useToast();
     const { checkAndNavigate } = useBizContext();

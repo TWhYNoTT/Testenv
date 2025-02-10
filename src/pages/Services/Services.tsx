@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { useServices } from '../../hooks/useServices';
 import { Category } from '../../types/api-responses';
@@ -19,7 +19,7 @@ const Services: React.FC = () => {
     const { getServices, services } = useServices();
     const [isLoading, setIsLoading] = useState(false);
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
             const [businessCats, requestedCats] = await Promise.all([
                 getBusinessCategories(),
@@ -30,9 +30,9 @@ const Services: React.FC = () => {
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
-    };
+    }, [getBusinessCategories, getMyRequestedCategories]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             await Promise.all([
@@ -44,11 +44,11 @@ const Services: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [fetchCategories, getServices]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     const handleTapClick = (tap: 'services' | 'categories') => {
         setActiveTap(tap);
