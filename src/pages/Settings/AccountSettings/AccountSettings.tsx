@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { useBusiness } from '../../../hooks/useBusiness';
 import InputField from '../../../components/InputField/InputField';
 import TextArea from '../../../components/TextArea/TextArea';
 import Toggle from '../../../components/Toggle/Toggle';
@@ -11,28 +12,91 @@ import 'leaflet/dist/leaflet.css';
 import styles from './AccountSettings.module.css';
 
 const AccountSettings: React.FC = () => {
+    const navigate = useNavigate();
+    const { checkBusinessExists } = useBusiness();
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Add handleClick function
+    const handleClick = () => {
+        navigate('/settings');
+    };
+
     const [formData, setFormData] = useState({
-        businessName: 'Pastels Salon Ritz Carlton',
-        about: 'With dedicated areas for hair, nails and beauty and a team who are extremely knowledgeable on the latest styles and techniques you can be assured that you will feel relaxed and enjoy each treatment every time you visit.',
-        category: 'Beauty salon',
-        password: '••••••••',
+        businessName: '',
+        about: '',
+        category: '',
+
         alwaysOpen: false,
         location: {
-            country: 'Dubai',
+            country: '',
             state: '',
             streetAddress: '',
             city: '',
             zipCode: '',
-            homeServicesAvailable: true,
+            homeServicesAvailable: false,
             latitude: 25.276987,
             longitude: 55.296249
         }
     });
 
-    const navigate = useNavigate();
+    useEffect(() => {
+        const loadBusinessData = async () => {
+            setIsLoading(true);
+            try {
+                const business = await checkBusinessExists();
+                if (business) {
+                    setFormData({
+                        businessName: business.name,
+                        about: business.about,
+                        category: business.categories[0]?.name || '',
+                        alwaysOpen: business.isAlwaysOpen,
+                        location: {
+                            country: business.location.country,
+                            state: business.location.state,
+                            streetAddress: business.location.streetAddress,
+                            city: business.location.city,
+                            zipCode: business.location.zipCode,
+                            homeServicesAvailable: business.location.hasHomeService,
+                            latitude: business.location.latitude,
+                            longitude: business.location.longitude
+                        }
+                    });
 
-    const handleClick = () => {
-        navigate('/settings');
+                    // Fix business hours parsing
+                    const formattedHours: { [key: string]: { from: string, to: string } } = {};
+                    business.businessHours.forEach(hour => {
+                        // Convert string to number if needed
+                        const dayIndex = typeof hour.dayOfWeek === 'string' ? parseInt(hour.dayOfWeek, 10) : hour.dayOfWeek;
+                        const day = getDayName(dayIndex);
+                        formattedHours[day] = {
+                            from: hour.is24Hours ? '24 hours' : hour.openTime || 'Closed',
+                            to: hour.is24Hours ? '24 hours' : hour.closeTime || 'Closed'
+                        };
+                    });
+                    setBusinessHours(formattedHours);
+
+                    // Fix weekdays parsing
+                    setWeekDays(business.businessHours
+                        .filter(hour => hour.isOpen)
+                        .map(hour => {
+                            const dayIndex = typeof hour.dayOfWeek === 'string' ? parseInt(hour.dayOfWeek, 10) : hour.dayOfWeek;
+                            return getDayName(dayIndex);
+                        })
+                    );
+                }
+            } catch (error) {
+                console.error('Error loading business data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadBusinessData();
+    }, []);
+
+    const getDayName = (dayNumber: number): string => {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return days[dayNumber] || days[0]; // Return Sunday as fallback if invalid index
     };
 
     const [weekDays, setWeekDays] = useState<string[]>(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']);
@@ -92,6 +156,16 @@ const AccountSettings: React.FC = () => {
 
     return (
         <div className={styles.accountSettings}>
+            {isLoading && (
+                <div className={styles.loadingOverlay}>
+                    <div className={styles.spinner}>
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                        </svg>
+                        <span>Loading data...</span>
+                    </div>
+                </div>
+            )}
             <div className={styles.headerBckBTN}>
 
                 <svg onClick={handleClick} width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.backButton}>
@@ -130,10 +204,8 @@ const AccountSettings: React.FC = () => {
                 <h2 className={styles.h2}>Password</h2>
                 <InputField
                     type="password"
-                    value={formData.password}
-                    onChange={(value) => handleInputChange('password', value)}
+                    value="••••••••"
                 />
-
             </div>
 
             <div className={styles.businessHoursSection}>

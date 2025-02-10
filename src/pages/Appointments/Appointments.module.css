@@ -21,3 +21,12 @@
 .controlsContainer {
     gap: var(--gap-lg);
 }
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+}

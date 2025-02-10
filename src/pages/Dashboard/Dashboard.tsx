@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useUser } from '../../contexts/UserContext';
 
 import StatisticsSummary from './StatisticsSummary/StatisticsSummary';
 import BookingsRevenueChart from './BookingsRevenueChart/BookingsRevenueChart';
@@ -10,22 +10,17 @@ import RevenueChart from './RevenueChart/RevenueChart';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
 import BranchFilter from '../../components/BranchFilter/BranchFilter';
 
-
-
 const Dashboard: React.FC = () => {
+    const { user } = useUser();
     const data = [10000, 15000, 35000, 30000, 30000, 15000, 40500, 37000];
     const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-
-
-
-
 
     return (
         <div className={styles.dashboard} >
 
             <div className={styles.clientNameGreetingAndDateFilterContainer}>
                 <h1 className={styles.clientName}>
-                    Hi, AbdElrahman Mostafa
+                    Hi, {user?.fullName || 'User'}
                 </h1>
                 <div className={styles.greetingAndDateFilter}>
                     <h3 className={styles.greetingText}>Here’s what’s happening this week</h3>

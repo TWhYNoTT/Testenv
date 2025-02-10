@@ -1,17 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './Step2.module.css';
-import CategoryCard from '../../CategoryCard/CategoryCard';
-import Checkbox from '../../Checkbox/Checkbox';
+import CategoryCard from '../../../components/CategoryCard/CategoryCard';
+import Checkbox from '../../../components/Checkbox/Checkbox';
 import { ServiceType } from '../../../types/enums';
-import { CategoryResponse } from '../../../types/business';
+import { useCategories } from '../../../hooks/useCategories';
 
-interface Step2Props {
-    selectedCategories: number[];
-    setSelectedCategories: React.Dispatch<React.SetStateAction<number[]>>;
+type Step2Props = {
+    selectedCategories: string[];
+    setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
     selectedServiceType: ServiceType;
     setSelectedServiceType: React.Dispatch<React.SetStateAction<ServiceType>>;
-    categories: CategoryResponse[];
-    isLoading: boolean;
+    errors?: {
+        categories?: string;
+        serviceType?: string;
+    };
+};
+
+interface Category {
+    id: string;  // Change this to string to ensure consistency
+    name: string;
+    imageUrl: string;
 }
 
 const Step2: React.FC<Step2Props> = ({
@@ -19,23 +27,49 @@ const Step2: React.FC<Step2Props> = ({
     setSelectedCategories,
     selectedServiceType,
     setSelectedServiceType,
-    categories,
-    isLoading
+    errors
 }) => {
-    const handleCardClick = (categoryId: number) => {
-        setSelectedCategories((prevSelected) =>
-            prevSelected.includes(categoryId)
-                ? prevSelected.filter((id) => id !== categoryId)
-                : [...prevSelected, categoryId]
-        );
+    const { getCategories, loading, error } = useCategories();
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await getCategories();
+                // Transform the API response categories to match our local interface
+                const transformedCategories = response.categories.map(cat => ({
+                    id: String(cat.id),
+                    name: cat.name,
+                    imageUrl: cat.imageUrl
+                }));
+                setCategories(transformedCategories);
+            } catch (err) {
+                console.error('Failed to fetch categories:', err);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    const handleCardClick = (categoryId: string) => {
+        console.log('Clicked category:', categoryId);
+        const newCategories = selectedCategories.includes(categoryId)
+            ? selectedCategories.filter(id => id !== categoryId)
+            : [...selectedCategories, categoryId];
+
+        setSelectedCategories(newCategories);
     };
 
-    const handleServiceTypeChange = (serviceType: ServiceType) => {
-        setSelectedServiceType(serviceType);
+    const handleServiceTypeChange = (type: ServiceType) => {
+        setSelectedServiceType(type);
     };
 
-    if (isLoading) {
+    if (loading) {
         return <div className={styles.loading}>Loading categories...</div>;
+    }
+
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
     }
 
     return (
@@ -64,18 +98,26 @@ const Step2: React.FC<Step2Props> = ({
                 />
             </div>
 
+            {errors?.serviceType && (
+                <div className={styles.error}>{errors.serviceType}</div>
+            )}
+
             <p className='descriptionText'>Categories</p>
             <div className={styles.categoriesGrid}>
                 {categories.map((category) => (
                     <CategoryCard
                         key={category.id}
                         title={category.name}
-                        image={category.imageUrl || '/placeholder-image.png'}
-                        selected={selectedCategories.includes(category.id)}
-                        onClick={() => handleCardClick(category.id)}
+                        image={category.imageUrl}
+                        selected={selectedCategories.includes(String(category.id))}
+                        onClick={() => handleCardClick(String(category.id))}
                     />
                 ))}
             </div>
+
+            {errors?.categories && (
+                <div className={styles.error}>{errors.categories}</div>
+            )}
         </div>
     );
 };

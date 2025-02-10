@@ -11,9 +11,10 @@ const formatDate = (date: Date) => ({
 interface DatePickerProps {
     onDateChange: (date: string) => void;
     selectedDate: string;
+    onDateClick?: (date: string) => void; // Add this prop
 }
 
-const DatePicker: React.FC<DatePickerProps> = ({ onDateChange, selectedDate }) => {
+const DatePicker: React.FC<DatePickerProps> = ({ onDateChange, selectedDate, onDateClick }) => {
 
 
     const [rangeStartDate, setRangeStartDate] = useState(() => {
@@ -53,6 +54,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChange, selectedDate }) =
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
         setSelectedDatef(formattedDate);
 
+        onDateClick?.(formattedDate); // Add this line to notify parent
     };
 
 

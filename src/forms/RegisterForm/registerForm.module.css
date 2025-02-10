@@ -90,33 +90,3 @@
     font-size: var(--font-size-sm);
     padding: var(--paddin-md) 0;
 }
-
-
-
-/* Add these to your registerForm.module.css */
-.successMessage {
-    text-align: center;
-    padding: 2rem;
-    animation: fadeIn 0.3s ease-in;
-}
-
-.successMessage h2 {
-    color: #4CAF50;
-    margin-bottom: 1rem;
-}
-
-.successMessage p {
-    color: #666;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import styles from './InputField.module.css';
 
+
 type InputFieldProps = {
-    label?: string;
+    label?: string,
     value?: string;
     onChange?: (value: string) => void;
-    onBlur?: () => void;  // Added onBlur handler
     placeholder?: string;
     type?: 'text' | 'password' | 'email' | 'number';
     disabled?: boolean;
@@ -15,13 +15,13 @@ type InputFieldProps = {
     unit?: string;
     name?: string;
     showSpinner?: boolean;
+
 };
 
 const InputField: React.FC<InputFieldProps> = ({
     label = '',
     value = '',
     onChange = () => { },
-    onBlur,  // New prop
     placeholder = '',
     type = 'text',
     disabled = false,
@@ -41,17 +41,14 @@ const InputField: React.FC<InputFieldProps> = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e.target.value);
     };
-
     return (
         <div className={styles.inputFieldContainer}>
             <div className={styles.inputWrapper}>
                 <input
                     type={type === 'password' && showPassword ? 'text' : type}
-                    className={`${styles.input} ${disabled ? styles.disabled : ''} 
-                              ${feedback ? styles[feedback] : ''}`}
+                    className={`${styles.input} ${disabled ? styles.disabled : ''} ${feedback ? styles[feedback] : ''}`}
                     value={value}
                     onChange={handleChange}
-                    onBlur={onBlur}  // Added onBlur handler
                     placeholder={placeholder}
                     disabled={disabled}
                     required={required}
@@ -68,21 +65,32 @@ const InputField: React.FC<InputFieldProps> = ({
                             onClick={togglePasswordVisibility}
                             disabled={disabled}
                         >
-                            {showPassword ? (
+                            {showPassword ?
                                 <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 12C4 12 5.6 7 12 7M12 7C18.4 7 20 12 20 12M12 7V4M18 5L16 7.5M6 5L8 7.5M15 13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13C9 11.3431 10.3431 10 12 10C13.6569 10 15 11.3431 15 13Z" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M4 12C4 12 5.6 7 12 7M12 7C18.4 7 20 12 20 12M12 7V4M18 5L16 7.5M6 5L8 7.5M15 13C15 14.6569 13.6569 16 12 16C10.3431 16 9 14.6569 9 13C9 11.3431 10.3431 10 12 10C13.6569 10 15 11.3431 15 13Z" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                            ) : (
+                                :
                                 <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 10C4 10 5.6 15 12 15M12 15C18.4 15 20 10 20 10M12 15V18M18 17L16 14.5M6 17L8 14.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M4 10C4 10 5.6 15 12 15M12 15C18.4 15 20 10 20 10M12 15V18M18 17L16 14.5M6 17L8 14.5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
-                            )}
+                            }
                         </button>
                     )}
 
+                    {type === 'number' && !disabled && (
+                        <>
+                            {showSpinner && (
+                                <div className={styles.spinner}>
+                                    <div className={`${styles.button} ${styles.upArrow}`} onClick={() => onChange(String(Number(value) + 1))}></div>
+                                    <div className={`${styles.button} ${styles.downArrow}`} onClick={() => onChange(String(Number(value) - 1))}></div>
+                                </div>
+                            )}
+                            {unit && <span className={styles.unit}>{unit}</span>}
+                        </>
+                    )}
                     {feedback && (
                         <span className={`${styles.feedbackIcon} ${styles[feedback]}`}>
-                            {feedback === 'success' && '✓'}
+                            {feedback === 'success' && <span></span>}
                             {feedback === 'error' && '⚠'}
                             {feedback === 'warning' && '⚠'}
                         </span>

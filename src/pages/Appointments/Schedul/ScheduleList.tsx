@@ -31,9 +31,15 @@ interface ScheduleListProps {
     scheduleData: ScheduleData[];
     dateRange: string[];
     onDragEnd: (data: ScheduleData[]) => void;
+    onTimeSlotSelect?: (time: string) => void; // Add this prop
 }
 
-const ScheduleList: React.FC<ScheduleListProps> = React.memo(({ scheduleData, dateRange, onDragEnd }) => {
+const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
+    scheduleData,
+    dateRange,
+    onDragEnd,
+    onTimeSlotSelect  // Add this prop
+}) => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -50,7 +56,8 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({ scheduleData, da
     ], []);
     const handleTimeSlotClick = useCallback((time: string) => {
         setSelectedTime(time);
-    }, []);
+        onTimeSlotSelect?.(time); // Call the prop if provided
+    }, [onTimeSlotSelect]);
 
     const getTimeIndex = useCallback((time: string) => times.indexOf(time), [times]);
     const getDateIndex = useCallback((date: string) => dateRange.indexOf(date), [dateRange]);

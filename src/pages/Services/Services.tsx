@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useCategories } from '../../hooks/useCategories';
+import { useServices } from '../../hooks/useServices';
+import { Category } from '../../types/api-responses';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import Button from '../../components/Button/Button';
 import ServiceCard from './ServiceCard/ServiceCard';
@@ -10,6 +13,42 @@ import AddEditCategory from './AddEditCategory/AddEditCategory';
 const Services: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTap, setActiveTap] = useState<'services' | 'categories'>('services');
+    const [businessCategories, setBusinessCategories] = useState<Category[]>([]);
+    const [requestedCategories, setRequestedCategories] = useState<Category[]>([]);
+    const { getBusinessCategories, getMyRequestedCategories } = useCategories();
+    const { getServices, services } = useServices();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const fetchCategories = async () => {
+        try {
+            const [businessCats, requestedCats] = await Promise.all([
+                getBusinessCategories(),
+                getMyRequestedCategories()
+            ]);
+            setBusinessCategories(businessCats.categories);
+            setRequestedCategories(requestedCats.categories);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            await Promise.all([
+                fetchCategories(),
+                getServices()
+            ]);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const handleTapClick = (tap: 'services' | 'categories') => {
         setActiveTap(tap);
@@ -22,34 +61,13 @@ const Services: React.FC = () => {
         setIsModalOpen(true);
     };
 
+    const handleClose = () => {
+        setIsModalOpen(false);
+    };
 
-    const servicesData = [
-        {
-            title: 'Permanent Hair Colour',
-            category: 'Hairstyling',
-            duration: '1h 15min - 1h 35min',
-            branch: 'Marina branch',
-            image: './assets/images/services/hair.png',
-            pricingOptions: [
-                { option: 'Black', price: 120, duration: '35min' },
-                { option: 'Pink', price: 90, duration: '35min' },
-                { option: 'Red', price: 80, duration: '35min' },
-            ],
-        },
-        {
-            title: 'Nail treatments',
-            category: 'Manicure pedicure',
-            duration: '1h 15min - 1h 35min',
-            branch: 'Marina branch',
-            image: './assets/images/services/nails.png',
-            pricingOptions: [
-                { option: 'Standard', price: 100, duration: '30min' },
-                { option: 'Deluxe', price: 150, duration: '45min' },
-            ],
-        },
-    ];
-
-
+    const handleSuccess = async () => {
+        await fetchData(); // Only refetch when operation was successful
+    };
 
     return (
         <div className={styles.servicesPage}>
@@ -97,59 +115,98 @@ const Services: React.FC = () => {
                 />
             </div>
 
-            {activeTap === "services" && <>
-                <div className={styles.servicesList}>
-                    {servicesData.map((service, index) => (
-                        <ServiceCard key={index} {...service} />
-                    ))}
+            {activeTap === "services" && (
+                <div className={styles.servicesListContainer}>
+                    {isLoading && (
+                        <div className={styles.loadingOverlay}>
+                            <div className={styles.spinner}>
+                                <svg viewBox="0 0 50 50">
+                                    <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                                </svg>
+                                <span>Loading data...</span>
+                            </div>
+                        </div>
+                    )}
+                    <div className={styles.servicesList}>
+                        {services.map((service) => (
+                            <ServiceCard
+                                key={service.id}
+                                title={service.name}
+                                category={service.categoryName || ''}
+                                duration={`${service.minDuration} - ${service.maxDuration}`}
+                                branch="Marina branch"
+                                image={service.imageUrl}
+                                pricingOptions={service.pricingOptions.map(option => ({
+                                    option: option.name,
+                                    price: option.price,
+                                    duration: option.duration
+                                }))}
+                            />
+                        ))}
+                    </div>
                 </div>
-                {isModalOpen && (
-                    <AddEditService
+            )}
 
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                    />
-                )}
-            </>
-            }
-            {activeTap === "categories" && <>
-
+            {activeTap === "categories" && (
                 <div className={styles.categoriesContainer}>
+                    {isLoading && (
+                        <div className={styles.loadingOverlay}>
+                            <div className={styles.spinner}>
+                                <svg viewBox="0 0 50 50">
+                                    <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                                </svg>
+                                <span>Loading data...</span>
+                            </div>
+                        </div>
+                    )}
                     <div className={styles.addedCategories}>
                         <h3 className={styles.h3}>Added categories</h3>
-
                         <div className={styles.cardsContainer}>
-                            <div className={styles.card}>
-                                <img className={styles.img} src="./assets/images/categories/facials.png" alt="facials" />
-                                <span className={styles.categoryName}>Facials</span>
-                            </div>
-
-                            <div className={styles.card}>
-                                <img className={styles.img} src="./assets/images/categories/manicure-pedicure.png" alt="facials" />
-                                <span className={styles.categoryName}>Manicure pedicure</span>
-                            </div>
+                            {businessCategories.map((category) => (
+                                <div key={Math.random()} className={styles.card}>
+                                    <img
+                                        className={styles.img}
+                                        src={category.imageUrl}
+                                        alt={category.name}
+                                    />
+                                    <span className={styles.categoryName}>{category.name}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <div className={styles.pendingCategories}>
                         <h3 className={styles.h3}>Pending for approval</h3>
                         <div className={styles.cardsContainer}>
-                            <div className={styles.card}>
-                                <img className={styles.img} src="./assets/images/categories/hairtranspaplants.png" alt="hair transpaplants" />
-                                <span className={styles.categoryName}>Hair transpaplants</span>
-                            </div>
+                            {requestedCategories.map((category) => (
+                                <div key={category.id} className={styles.card}>
+                                    <img
+                                        className={styles.img}
+                                        src={category.imageUrl}
+                                        alt={category.name}
+                                    />
+                                    <span className={styles.categoryName}>{category.name}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
-                {isModalOpen && (
+            )}
 
-                    <AddEditCategory
-
+            {isModalOpen && (
+                activeTap === "services" ? (
+                    <AddEditService
                         isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
+                        onClose={handleClose}
+                        onSuccess={handleSuccess}
                     />
-                )}
-            </>
-            }
+                ) : (
+                    <AddEditCategory
+                        isOpen={isModalOpen}
+                        onClose={handleClose}
+                        onSuccess={handleSuccess}
+                    />
+                )
+            )}
         </div>
     );
 };
