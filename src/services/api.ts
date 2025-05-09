@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://devanza.runasp.net/api';
+const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
