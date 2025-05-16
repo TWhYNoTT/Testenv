@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";  // Add useCallback import
 import { apiService, ServiceRequest } from "../services/api";
 import type { CreateServiceResponse } from "../types/api-responses";
 import type { Service } from "../services/api";
@@ -8,7 +8,8 @@ export const useServices = () => {
     const [error, setError] = useState<string | null>(null);
     const [services, setServices] = useState<Service[]>([]);
 
-    const getServices = async (): Promise<Service[]> => {
+    // Memoize with useCallback
+    const getServices = useCallback(async (): Promise<Service[]> => {
         setLoading(true);
         setError(null);
         try {
@@ -22,9 +23,10 @@ export const useServices = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);  // Empty dependency array
 
-    const createService = async (data: ServiceRequest): Promise<CreateServiceResponse> => {
+    // Memoize with useCallback
+    const createService = useCallback(async (data: ServiceRequest): Promise<CreateServiceResponse> => {
         setLoading(true);
         setError(null);
         try {
@@ -37,7 +39,7 @@ export const useServices = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);  // Empty dependency array
 
     return {
         services,

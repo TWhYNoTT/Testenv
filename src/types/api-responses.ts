@@ -89,19 +89,56 @@ export interface AppointmentService {
 
 export interface AppointmentDetails {
     id: number;
-    clientName: string;
-    mobileNumber: string;
+    serviceName: string;
+    customerName: string;
+    phoneNumber: string;
     email: string;
     appointmentDate: string;
-    startTime: string;
-    endTime: string;
+    duration: string;
+    servicePrice: number;
+    paymentStatus: number;
+    paymentStatusString: string;
     status: number;
+    statusString: string;
     isDraft: boolean;
-    amount: number;
-    service: AppointmentService;
+    staffId?: number;
+    staffName?: string;
+    isRegisteredCustomer: boolean;
 }
 
 export interface AppointmentListResponse {
     appointments: AppointmentDetails[];
     totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+
+// Add to api-responses.ts
+export interface BusinessStaffDto {
+    id: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    position?: string;
+    isActive: boolean;
+    rating: number;
+    totalRatings: number;
+    schedules: StaffScheduleDto[];
+}
+
+export interface StaffScheduleDto {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+}
+
+export interface BusinessStaffListResponse {
+    staff: BusinessStaffDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
 }

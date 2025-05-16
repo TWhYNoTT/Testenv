@@ -1,7 +1,7 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
-import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse } from '../types/api-responses';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
@@ -130,25 +130,49 @@ export interface ServiceListResponse {
 }
 
 export interface AppointmentRequest {
+    businessId: number;
     clientName: string;
     mobileNumber: string;
     email: string;
+    categoryId: number;
     serviceId: number;
+    pricingOptionId: number;
     amount: number;
-    appointmentDate: string;  // YYYY-MM-DD format
-    appointmentTime: string;  // HH:mm format
+    staffId?: number | null;  // Optional to match backend
+    paymentStatus: number;
+    appointmentDate: string;  // Ensure format is correct (YYYY-MM-DDTHH:MM:SS)
     isDraft: boolean;
-    status: AppointmentStatus;  // Using enum directly
+    notes?: string;
 }
 
 export interface AppointmentListParams {
-    fromDate: string;
-    toDate: string;
-    status?: number;
-    includeDrafts?: boolean;
-    pageNumber?: number;
+    startDate?: string;         // Changed from fromDate
+    endDate?: string;           // Changed from toDate
+    paymentStatus?: number;     // Changed from status
+    categoryId?: number;        // Added to match backend
+    page?: number;              // Changed from pageNumber
     pageSize?: number;
 }
+
+
+
+
+export interface RegisterStaffRequest {
+    businessId: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    position?: string;
+    isActive: boolean;
+}
+
+export interface StaffListParams {
+    businessId: number;
+    page?: number;
+    pageSize?: number;
+}
+
 
 class ApiService {
     private axiosInstance: AxiosInstance;
@@ -276,7 +300,7 @@ class ApiService {
         delete this.axiosInstance.defaults.headers.common['Authorization'];
     }
 
-    private async refreshAccessToken(refreshToken: string) {
+    public async refreshAccessToken(refreshToken: string) {
         return await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
     }
 
@@ -380,11 +404,10 @@ class ApiService {
             formData,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'accept': 'text/plain',
 
-                },
-                withCredentials: true // Changed from credentials: 'include'
+                    'accept': 'text/plain'
+
+                }
             }
         );
         return response.data;
@@ -403,30 +426,68 @@ class ApiService {
 
     // Appointment APIs
     async createAppointment(data: AppointmentRequest): Promise<AppointmentResponse> {
-        const response = await this.axiosInstance.post('/appointment', data);
+        const response = await this.axiosInstance.post('/salon-owner/appointments', data);
         return response.data;
     }
 
     async getAppointments(params: AppointmentListParams): Promise<AppointmentListResponse> {
         const queryParams = new URLSearchParams();
-        queryParams.append('fromDate', params.fromDate);
-        queryParams.append('toDate', params.toDate);
 
-        if (params.status !== undefined) {
-            queryParams.append('status', params.status.toString());
+        // Use the correct parameter names expected by your backend
+        if (params.startDate) {
+            queryParams.append('startDate', params.startDate);
         }
-        if (params.includeDrafts !== undefined) {
-            queryParams.append('includeDrafts', params.includeDrafts.toString());
+
+        if (params.endDate) {
+            queryParams.append('endDate', params.endDate);
         }
-        if (params.pageNumber) {
-            queryParams.append('pageNumber', params.pageNumber.toString());
+
+        if (params.paymentStatus !== undefined) {
+            queryParams.append('paymentStatus', params.paymentStatus.toString());
         }
+
+        if (params.categoryId !== undefined) {
+            queryParams.append('categoryId', params.categoryId.toString());
+        }
+
+        if (params.page) {
+            queryParams.append('page', params.page.toString());
+        }
+
         if (params.pageSize) {
             queryParams.append('pageSize', params.pageSize.toString());
         }
 
-        const response = await this.axiosInstance.get(`/appointment?${queryParams.toString()}`);
+        const response = await this.axiosInstance.get(`/salon-owner/appointments?${queryParams.toString()}`);
         return response.data;
+    }
+
+
+    async registerStaff(data: RegisterStaffRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-staff/register', data);
+        return response.data;
+    }
+
+    async getBusinessStaff(params: StaffListParams): Promise<BusinessStaffListResponse> {
+        const queryParams = new URLSearchParams();
+
+        queryParams.append('businessId', params.businessId.toString());
+
+        if (params.page) {
+            queryParams.append('page', params.page.toString());
+        }
+
+        if (params.pageSize) {
+            queryParams.append('pageSize', params.pageSize.toString());
+        }
+
+        const response = await this.axiosInstance.get(`/salon-staff?${queryParams.toString()}`);
+        return response.data;
+    }
+
+    async deleteStaff(staffId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-staff/${staffId}`);
+        return response.data.success;
     }
 }
 

@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";  // Add useCallback import
 import { apiService, AppointmentRequest, AppointmentListParams } from "../services/api";
 import type { AppointmentResponse, AppointmentListResponse } from "../types/api-responses";
+
 
 export const useAppointments = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const createAppointment = async (data: AppointmentRequest): Promise<AppointmentResponse> => {
+    const createAppointment = useCallback(async (data: AppointmentRequest) => {
         setLoading(true);
         setError(null);
         try {
@@ -19,13 +20,24 @@ export const useAppointments = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const getAppointments = async (params: AppointmentListParams): Promise<AppointmentListResponse> => {
+    const getAppointments = useCallback(async (params: AppointmentListParams) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await apiService.getAppointments(params);
+            // Rename parameters to match backend
+            const apiParams = {
+
+                startDate: params.startDate,
+                endDate: params.endDate,
+                paymentStatus: params.paymentStatus,
+                categoryId: params.categoryId,
+                page: params.page || 1,
+                pageSize: params.pageSize || 10
+            };
+
+            const response = await apiService.getAppointments(apiParams);
             return response;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to fetch appointments';
@@ -34,7 +46,7 @@ export const useAppointments = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     return {
         createAppointment,

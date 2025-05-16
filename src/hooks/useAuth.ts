@@ -25,7 +25,7 @@ interface RegisterRequest {
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { setTokens } = useAuthContext();
+    const { setTokens, refreshToken, clearTokens } = useAuthContext();
     const { showToast } = useToast();
 
     const login = async (data: LoginRequest) => {
@@ -63,10 +63,38 @@ export const useAuth = () => {
             setLoading(false);
         }
     };
+    
+    const refreshAccessToken = async (): Promise<boolean> => {
+        if (!refreshToken) {
+            clearTokens();
+            return false;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await apiService.refreshAccessToken(refreshToken);
+            
+            if (response.data.accessToken && response.data.refreshToken) {
+                setTokens(response.data.accessToken, response.data.refreshToken);
+                return true;
+            } else {
+                throw new Error('Invalid token response');
+            }
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'An error occurred');
+            clearTokens();
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return {
         login,
         register,
+        refreshAccessToken,
         loading,
         error
     };

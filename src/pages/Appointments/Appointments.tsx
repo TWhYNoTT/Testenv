@@ -23,6 +23,28 @@ export interface ScheduleAppointment {
     date: string;
 }
 
+export interface ApiAppointment {
+    id: number;
+    serviceName: string;
+    customerName: string;  // For registered users
+    clientName?: string;   // For direct clients
+    phoneNumber: string;
+    clientPhone?: string;  // For direct clients
+    email: string;
+    clientEmail?: string;  // For direct clients
+    appointmentDate: string;
+    duration: string;
+    servicePrice: number;
+    paymentStatus: number;
+    status: number;
+    statusString: string;
+    paymentStatusString: string;
+    isDraft: boolean;
+    staffId?: number;
+    staffName?: string;
+    isRegisteredCustomer: boolean;
+}
+
 const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -131,37 +153,83 @@ const Appointments: React.FC = () => {
 
     const refreshAppointments = useCallback(async () => {
         try {
-            const fromDate = selectedDate.split('/').reverse().join('-');
-            const toDateObj = new Date(fromDate);
+            // Convert DD/MM/YYYY to YYYY-MM-DD
+            const fromDateParts = selectedDate.split('/');
+            const startDate = `${fromDateParts[2]}-${fromDateParts[1]}-${fromDateParts[0]}`;
+
+            // Calculate end date (7 days later)
+            const toDateObj = new Date(startDate);
             toDateObj.setDate(toDateObj.getDate() + 6);
-            const toDate = toDateObj.toISOString().split('T')[0];
+            const endDate = toDateObj.toISOString().split('T')[0];
 
             const response = await getAppointments({
-                fromDate,
-                toDate,
-                includeDrafts: true,
-                pageNumber: 1,
-                pageSize: 100
+                startDate, // Changed from fromDate
+                endDate,   // Changed from toDate
+                // Add businessId from your auth context or wherever it's stored
+
+                page: 1,   // Changed from pageNumber
+                pageSize: 50
             });
 
-            const transformedData: ScheduleAppointment[] = response.appointments.map(appointment => ({
-                id: appointment.id.toString(),
-                service: appointment.service.serviceName,
-                customer: appointment.clientName,
-                contact: appointment.mobileNumber,
-                duration: "1h 30min",
-                price: `${appointment.amount} AED`,
-                status: getStatusText(appointment.status),
-                image: './assets/icons/avatar.png',
-                time: formatTime(appointment.startTime),
-                date: appointment.appointmentDate.split('T')[0].split('-').reverse().join('/')
-            }));
+            const transformedData: ScheduleAppointment[] = response.appointments.map(appointment => {
+                // Parse duration HH:MM:SS to hours and minutes
+                const [durationHours, durationMinutes] = appointment.duration.split(':').map(Number);
+                const formattedDuration = `${durationHours}h ${durationMinutes}min`;
 
+                return {
+                    id: appointment.id.toString(),
+                    service: appointment.serviceName,
+                    customer: appointment.customerName,
+                    contact: appointment.phoneNumber,
+                    duration: formattedDuration,
+                    price: `${appointment.servicePrice} AED`,
+                    status: appointment.paymentStatusString,
+                    image: './assets/icons/avatar.png',
+                    time: formatAppointmentTime(appointment.appointmentDate),
+                    date: formatAppointmentDate(appointment.appointmentDate)
+                };
+            });
+            console.log(transformedData);
             setScheduleData(transformedData);
         } catch (error) {
             showToast('Failed to fetch appointments', 'error');
+            console.error(error);
         }
-    }, [selectedDate, getAppointments, showToast, getStatusText, formatTime]);
+    }, [selectedDate, getAppointments, showToast]);
+
+    const formatAppointmentDate = (dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+        return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+    };
+
+    const formatAppointmentTime = (dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+
+        // Round to nearest 15 minutes
+        const minutes = date.getMinutes();
+        const roundedMinutes = Math.round(minutes / 15) * 15;
+        date.setMinutes(roundedMinutes);
+
+        // Handle case where rounding pushes to next hour
+        if (roundedMinutes === 60) {
+            date.setMinutes(0);
+            date.setHours(date.getHours() + 1);
+        }
+
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        }); // Format: 1:30 PM
+    };
+
+    const formatDuration = (durationString: string) => {
+        const [hours, minutes, _] = durationString.split(':').map(Number);
+        return `${hours}h ${minutes}min`;
+    };
+
+
+
 
     useEffect(() => {
         refreshAppointments();

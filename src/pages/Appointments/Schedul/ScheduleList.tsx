@@ -43,17 +43,23 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
-    const times = useMemo(() => [
-        '7:00 AM', '7:15 AM', '7:30 AM', '7:45 AM',
-        '8:00 AM', '8:15 AM', '8:30 AM', '8:45 AM',
-        '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM',
-        '10:00 AM', '10:15 AM', '10:30 AM', '10:45 AM',
-        '11:00 AM', '11:15 AM', '11:30 AM', '11:45 AM',
-        '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM',
-        '1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM',
-        '2:00 PM', '2:15 PM', '2:30 PM', '2:45 PM',
-        '3:00 PM'
-    ], []);
+    const times = useMemo(() => {
+        const timeSlots = [];
+
+        // Generate all 24 hours with 15-minute intervals
+        for (let hour = 0; hour < 24; hour++) {
+            for (let minute = 0; minute < 60; minute += 15) {
+                const amPm = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+                const displayMinute = minute.toString().padStart(2, '0');
+                timeSlots.push(`${displayHour}:${displayMinute} ${amPm}`);
+            }
+        }
+
+        // Start the day at 7 AM (reorder array)
+        const morningStart = 7 * 4; // 7 AM (4 slots per hour)
+        return [...timeSlots.slice(morningStart), ...timeSlots.slice(0, morningStart)];
+    }, []);
     const handleTimeSlotClick = useCallback((time: string) => {
         setSelectedTime(time);
         onTimeSlotSelect?.(time); // Call the prop if provided
@@ -63,8 +69,19 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     const getDateIndex = useCallback((date: string) => dateRange.indexOf(date), [dateRange]);
 
     const calculateRowSpan = useCallback((duration: string) => {
-        const [hours, minutes] = duration.split(' ').map(part => parseInt(part));
-        return (hours * 60 + minutes) / 15;
+        // Check if format is "Xh Ymin"
+        if (duration.includes('h') && duration.includes('min')) {
+            const hoursMatch = duration.match(/(\d+)h/);
+            const minutesMatch = duration.match(/(\d+)min/);
+
+            const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+
+            return (hours * 60 + minutes) / 15;
+        }
+
+        // Fallback for other formats
+        return 4; // Default to 1 hour
     }, []);
 
     const layoutPlaceholders = useMemo(() =>
@@ -113,6 +130,7 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     }, [scheduleData, positions, onDragEnd]);
 
     const isOverlapping = useCallback((card1: ScheduleData, card2: ScheduleData) => {
+        console.log(card1, card2, 'overlapping');
         const card1StartIndex = getTimeIndex(card1.time);
         const card1EndIndex = card1StartIndex + calculateRowSpan(card1.duration);
 
@@ -158,7 +176,7 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
 
     const calculateCardWidthAndPosition = useCallback((card: ScheduleData, columnIndex: number, startIndex: number, rowSpan: number) => {
         const groups = calculateOverlapGroups(columnIndex, startIndex, rowSpan);
-
+        console.log(groups, startIndex, 'groups');
         for (const group of groups) {
             if (group.some((groupCard) => groupCard.id === card.id)) {
                 const cardIndexInGroup = group.findIndex((c) => c.id === card.id);

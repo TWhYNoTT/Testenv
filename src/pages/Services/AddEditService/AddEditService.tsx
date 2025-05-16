@@ -61,7 +61,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         name: '',
         image: null as File | null,
         minDuration: '00:30:00',
-        maxDuration: '00:30:00',
+        maxDuration: '01:00:00',
         serviceType: 1,
         hasHomeService: false,
         description: '',
@@ -149,7 +149,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
             name: "",
             price: 0,
             currency: "AED",
-            duration: "00:60:00"
+            duration: "00:30:00"
         };
         setServiceData(prev => ({
             ...prev,
