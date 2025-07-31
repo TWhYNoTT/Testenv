@@ -10,11 +10,9 @@ type DeleteModalProps = {
 };
 
 const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onDelete, branchName }) => {
-
-
     return (
-        <div className={`${styles.modalOverlay}  ${isOpen ? styles.open : ''}`}>
-            <div className={`${styles.modalContent}  ${isOpen ? styles.open : ''}`}>
+        <div className={`${styles.modalOverlay} ${isOpen ? styles.open : ''}`}>
+            <div className={`${styles.modalContent} ${isOpen ? styles.open : ''}`}>
                 <button className={styles.closeButton} onClick={onClose}>&times;</button>
                 <div className={styles.textContainer}>
                     <h2 className={styles.header}>Delete {branchName}</h2>
@@ -23,7 +21,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ isOpen, onClose, onDelete, br
                 <div className={styles.buttonsContainer}>
                     <Button label="Cancel" onClick={onClose} noAppearance={true} size='small' />
                     <div>
-                        <Button label="Delete Branche" onClick={onDelete} size='medium' backgroundColor='#E52D42' />
+                        <Button label="Delete" onClick={onDelete} size='medium' backgroundColor='#E52D42' />
                     </div>
                 </div>
             </div>

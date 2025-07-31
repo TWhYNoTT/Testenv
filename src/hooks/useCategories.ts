@@ -72,11 +72,27 @@ export const useCategories = () => {
         }
     }, []);
 
+    const removeCategoryFromBusiness = useCallback(async (categoryId: number): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.removeCategoryFromBusiness(categoryId);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to remove category';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         getCategories,
         getMyRequestedCategories,
         getBusinessCategories,
         requestCategory,
+        removeCategoryFromBusiness,
         loading,
         error
     };

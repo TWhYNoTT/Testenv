@@ -114,7 +114,6 @@ export interface AppointmentListResponse {
     totalPages: number;
 }
 
-
 // Add to api-responses.ts
 export interface BusinessStaffDto {
     id: number;
@@ -141,4 +140,20 @@ export interface BusinessStaffListResponse {
     page: number;
     pageSize: number;
     totalPages: number;
+}
+
+// Branch types
+export interface BranchDto {
+    id: number;
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
+    createdAt: string;
+}
+
+export interface BusinessBranchListResponse {
+    branches: BranchDto[];
+    totalCount: number;
 }

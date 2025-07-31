@@ -1,7 +1,7 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
-import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse } from '../types/api-responses';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
@@ -99,6 +99,19 @@ export interface ServiceRequest {
     pricingOptions: ServicePricingOptionDto[];
 }
 
+export interface UpdateServiceRequest {
+    name: string;
+    image?: File;
+    removeExistingImage: boolean;
+    minDuration: string;
+    maxDuration: string;
+    serviceType: number;
+    hasHomeService: boolean;
+    description?: string;
+    isActive: boolean;
+    pricingOptions: ServicePricingOptionDto[];
+}
+
 export interface VerifyAccountRequest {
     userId: number;
     userType: number;
@@ -154,9 +167,6 @@ export interface AppointmentListParams {
     pageSize?: number;
 }
 
-
-
-
 export interface RegisterStaffRequest {
     businessId: number;
     fullName: string;
@@ -173,6 +183,22 @@ export interface StaffListParams {
     pageSize?: number;
 }
 
+export interface CreateBranchRequest {
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
+}
+
+export interface UpdateBranchRequest {
+    id: number;
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
+}
 
 class ApiService {
     private axiosInstance: AxiosInstance;
@@ -374,6 +400,11 @@ class ApiService {
         return response.data;
     }
 
+    async removeCategoryFromBusiness(categoryId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/category/business/${categoryId}`);
+        return response.status === 200;
+    }
+
     // Service APIs
     async createService(data: ServiceRequest): Promise<CreateServiceResponse> {
         const formData = new FormData();
@@ -416,6 +447,41 @@ class ApiService {
     async getServices(): Promise<ServiceListResponse> {
         const response = await this.axiosInstance.get('/service');
         return response.data;
+    }
+
+    async getService(serviceId: number): Promise<Service> {
+        const response = await this.axiosInstance.get(`/service/${serviceId}`);
+        return response.data;
+    }
+
+    async updateService(serviceId: number, data: UpdateServiceRequest): Promise<boolean> {
+        const formData = new FormData();
+
+        formData.append('Name', data.name);
+        formData.append('MinDuration', data.minDuration);
+        formData.append('MaxDuration', data.maxDuration);
+        formData.append('ServiceType', data.serviceType.toString());
+        formData.append('HasHomeService', data.hasHomeService.toString());
+        formData.append('IsActive', data.isActive.toString());
+        formData.append('RemoveExistingImage', data.removeExistingImage.toString());
+        formData.append('PricingOptionsJson', JSON.stringify(data.pricingOptions));
+
+        if (data.image) {
+            formData.append('Image', data.image);
+        }
+        if (data.description) {
+            formData.append('Description', data.description);
+        }
+
+        const response = await this.axiosInstance.put(`/service/${serviceId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.status === 200;
+    }
+
+    async deleteService(serviceId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/service/${serviceId}`);
+        return response.status === 200;
     }
 
     // User APIs
@@ -462,7 +528,6 @@ class ApiService {
         return response.data;
     }
 
-
     async registerStaff(data: RegisterStaffRequest): Promise<number> {
         const response = await this.axiosInstance.post('/salon-staff/register', data);
         return response.data;
@@ -488,6 +553,32 @@ class ApiService {
     async deleteStaff(staffId: number): Promise<boolean> {
         const response = await this.axiosInstance.delete(`/salon-staff/${staffId}`);
         return response.data.success;
+    }
+
+    // Branch APIs
+    async getBranches(): Promise<BusinessBranchListResponse> {
+        const response = await this.axiosInstance.get('/salon-owner/branches');
+        return response.data;
+    }
+
+    async getBranchById(id: number): Promise<BranchDto> {
+        const response = await this.axiosInstance.get(`/salon-owner/branches/${id}`);
+        return response.data;
+    }
+
+    async createBranch(data: CreateBranchRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-owner/branches', data);
+        return response.data;
+    }
+
+    async updateBranch(id: number, data: UpdateBranchRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/branches/${id}`, data);
+        return response.data;
+    }
+
+    async deleteBranch(id: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-owner/branches/${id}`);
+        return response.data;
     }
 }
 

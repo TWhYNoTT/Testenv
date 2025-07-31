@@ -13,9 +13,18 @@ interface AddEditModalProps {
     onSave: (branch: any) => void;
     isAdd?: boolean;
     onDeleteClicked: () => void;
+    loading?: boolean;
 }
 
-const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, initialData, onSave, onDeleteClicked, isAdd }) => {
+const AddEditModal: React.FC<AddEditModalProps> = ({
+    isOpen,
+    onClose,
+    initialData,
+    onSave,
+    onDeleteClicked,
+    isAdd,
+    loading = false
+}) => {
     const [data, setData] = useState<any>(initialData || {
         Branch: '',
         Location: '',
@@ -71,15 +80,33 @@ const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, initialDat
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>
             <div className={`${styles.modalContainer} ${isOpen ? styles.open : ''}`}>
+                {loading && (
+                    <div className={styles.loadingOverlay}>
+                        <div className={styles.loadingContent}>
+                            <div className={styles.spinner}></div>
+                            <span>Saving branch...</span>
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.headerCloseInputsContainer}>
-                    <button className={styles.closeButton} onClick={onClose}>&times;</button>
-                    <h2 className={`${styles.header} headerText`}>{isAdd ? 'Add Branch' : 'Edit Branch'}</h2>
+                    <button
+                        className={styles.closeButton}
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        &times;
+                    </button>
+                    <h2 className={`${styles.header} headerText`}>
+                        {isAdd ? 'Add Branch' : 'Edit Branch'}
+                    </h2>
                     <InputField
                         label="Branch Name"
                         name="Branch"
                         value={data.Branch}
                         onChange={handleInputChange}
                         placeholder="Branch Name"
+                        disabled={loading}
                     />
                     <InputField
                         label="Branch Location"
@@ -87,36 +114,34 @@ const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, initialDat
                         value={data.Location}
                         onChange={handleLocationChange}
                         placeholder="Branch Location"
+                        disabled={loading}
                     />
                     <div className={styles.toggleContainer}>
-
                         <Toggle
                             messageIfChecked='Active'
                             messageIfNotChecked='Inactive'
                             checked={data.Status}
                             onChange={handleToggleChange}
+                            disabled={loading}
                         />
                     </div>
                     <div className={styles.checkboxMainContainer}>
                         <label>This is your primary Headquarters?</label>
                         <div className={styles.checkboxContainer}>
-
-
                             <Checkbox
                                 variant='button'
                                 label='Yes'
                                 checked={data.Headquarters}
                                 onChange={handleCheckboxChangeYes}
+                                disabled={loading}
                             />
-
-
                             <Checkbox
                                 variant='button'
                                 label='No'
                                 checked={!data.Headquarters}
                                 onChange={handleCheckboxChangeNo}
+                                disabled={loading}
                             />
-
                         </div>
                     </div>
 
@@ -126,22 +151,26 @@ const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, initialDat
                         value={data.Description}
                         onChange={handleTextareaChange}
                         placeholder="Set your location and find beauty parlors that offer various personal care treatments"
+                        disabled={loading}
                     />
                 </div>
                 <div className={styles.buttonContainer}>
                     <div className={styles.deleteButton}>
                         {
                             !isAdd &&
-                            <Button label="Delete branch" onClick={handleDelete} size='small'
+                            <Button
+                                label="Delete branch"
+                                onClick={handleDelete}
+                                size='small'
+                                disabled={loading}
                                 icon={
                                     <svg width="17" height="20" viewBox="0 0 17 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M13.7637 4.67346L12.938 17.6342C12.938 18.3814 12.3523 18.9926 11.638 18.9926H4.55157C3.838 18.9926 3.25443 18.3814 3.25443 17.6342L2.42871 4.67346" stroke="#E52D42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M4.57129 4.21502L4.642 2.11233C4.642 1.50106 5.03986 1 5.52486 1H10.3406C10.8263 1 11.2227 1.50106 11.2227 2.11233L11.2927 4.21502" stroke="#E52D42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M1 4.30613H15.8671" stroke="#E52D42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M5.38863 7.61224L5.89792 16.5167" stroke="#E52D42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M7.64371 10.551L7.928 16.4851" stroke="#E52D42" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M13.7637 4.67346L12.938 17.6342C12.938 18.3814 12.3523 18.9926 11.638 18.9926H4.55157C3.838 18.9926 3.25443 18.3814 3.25443 17.6342L2.42871 4.67346" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M4.57129 4.21502L4.642 2.11233C4.642 1.50106 5.03986 1 5.52486 1H10.3406C10.8263 1 11.2227 1.50106 11.2227 2.11233L11.2927 4.21502" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M1 4.30613H15.8671" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M5.38863 7.61224L5.89792 16.5167" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M7.64371 10.551L7.928 16.4851" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
-
                                 }
                                 iconPosition='left'
                                 noAppearance={true}
@@ -151,8 +180,19 @@ const AddEditModal: React.FC<AddEditModalProps> = ({ isOpen, onClose, initialDat
                         }
                     </div>
                     <div className={styles.cancelAddSave}>
-                        <Button label="Cancel" onClick={onClose} noAppearance={true} size='small' />
-                        <Button label={`${isAdd ? 'Add' : 'Save'}`} onClick={handleSave} size='small' />
+                        <Button
+                            label="Cancel"
+                            onClick={onClose}
+                            noAppearance={true}
+                            size='small'
+                            disabled={loading}
+                        />
+                        <Button
+                            label={`${isAdd ? 'Add' : 'Save'}`}
+                            onClick={handleSave}
+                            size='small'
+                            disabled={loading}
+                        />
                     </div>
                 </div>
             </div>

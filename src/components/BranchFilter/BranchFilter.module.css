@@ -60,3 +60,100 @@
     display: flex;
     gap: var(--gap-sm);
 }
+
+.branchFilterContainer {
+    border-radius: var(--br-3xl);
+    background-color: var(--color-background-component);
+    padding: var(--paddin-lg);
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    align-items: center;
+    gap: var(--gap-sm);
+    color: var(--color-text);
+    -webkit-border-radius: var(--br-3xl);
+    -moz-border-radius: var(--br-3xl);
+    -ms-border-radius: var(--br-3xl);
+    -o-border-radius: var(--br-3xl);
+    border: 1px solid var(--color-disabled-12);
+    flex-wrap: wrap;
+}
+
+.branchFilterContainer label {
+    background-color: transparent;
+}
+
+.plusButton {
+    display: flex;
+    gap: var(--gap-lg);
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.plusSpan {
+    flex-shrink: 0;
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+.modalHeader {
+    text-align: center;
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.modalTitle {
+    font-size: var(--font-size-7xl);
+    font-weight: bold;
+}
+
+.modalTitleDesc {
+
+    color: var(--color-lightslategray-100);
+}
+
+.modalBody {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-sm);
+}
+
+.modalFooter {
+    display: flex;
+    gap: var(--gap-sm);
+}
+
+
+
+
+/* Add these styles to your existing BranchFilter.module.css file */
+
+.loadingContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #6138E0;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
