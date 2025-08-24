@@ -3,6 +3,7 @@ import { useServices } from '../../../hooks/useServices';
 import { useAppointments } from '../../../hooks/useAppointments';
 import { useStaff } from '../../../hooks/useStaff';
 import { useCategories } from '../../../hooks/useCategories';
+import { CategoryListResponse, Category } from '../../../types/api-responses';
 import InputField from '../../../components/InputField/InputField';
 import Toggle from '../../../components/Toggle/Toggle';
 import Button from '../../../components/Button/Button';
@@ -48,7 +49,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     businessId = 0
 }) => {
     const { services, getServices, loading: servicesLoading } = useServices();
-    const { createAppointment, updateAppointment, loading: appointmentLoading } = useAppointments();
+    const { createAppointment, getAppointmentById, updateAppointment, loading: appointmentLoading } = useAppointments();
     const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
     const { getBusinessCategories, loading: categoriesLoading } = useCategories();
 
@@ -108,31 +109,76 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     }, [businessId]);
 
     const loadExistingAppointment = useCallback(async (appointmentId: string) => {
-        // In a real implementation, you'd fetch the appointment details from the API
-        // For now, we'll simulate loading from the current schedule data
-        // You should implement a getAppointmentById API method
+        try {
+            setIsEditMode(true);
+            const appointment = await getAppointmentById(parseInt(appointmentId));
 
-        // This is a placeholder - you need to implement getAppointmentById in your API
-        // const appointment = await getAppointmentById(appointmentId);
-        // For now, we'll just use the existing form with edit mode enabled
-        setIsEditMode(true);
-    }, []);
+            console.log('Loaded appointment for editing:', appointment);
+
+            // Map the appointment data to form structure
+            setAppointmentData({
+                businessId: appointment.businessId || businessId,
+                clientName: appointment.clientName || appointment.customerName || '',
+                mobileNumber: appointment.clientPhone || appointment.phoneNumber || '',
+                email: appointment.clientEmail || appointment.email || '',
+                categoryId: appointment.categoryId || 0,
+                serviceId: appointment.businessServiceId || appointment.serviceId || 0,
+                pricingOptionId: appointment.servicePricingOptionId || appointment.pricingOptionId || 0,
+                amount: appointment.amount?.toString() || appointment.servicePrice?.toString() || '',
+                staffId: appointment.staffId || 0,
+                paymentStatus: appointment.paymentStatus || PaymentStatus.Upcoming,
+                appointmentDate: appointment.appointmentDate || new Date().toISOString(),
+                isDraft: appointment.isDraft || false,
+                notes: appointment.notes || ''
+            });
+
+            // Set calendar date
+            if (appointment.appointmentDate) {
+                const appointmentDate = new Date(appointment.appointmentDate);
+                setCalendarSelectedDate(appointmentDate);
+
+                // Set time
+                const timeString = appointmentDate.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                setSelectedTimeSlot(timeString);
+            }
+
+        } catch (error) {
+            console.error('Failed to load appointment for editing:', error);
+            // Fall back to empty form
+            setIsEditMode(true);
+        }
+    }, [getAppointmentById, businessId]);
 
     const fetchInitialData = useCallback(async () => {
         try {
+            // Load all data in parallel
+            const promises = [];
+
             if (services.length === 0) {
-                await getServices();
+                promises.push(getServices());
             }
 
             if (staff.length === 0) {
-                await getBusinessStaff({ businessId });
+                promises.push(getBusinessStaff({ businessId }));
             }
 
-            const categoriesResponse = await getBusinessCategories();
-            setCategories(categoriesResponse.categories.map(cat => ({
-                id: cat.id,
-                name: cat.name
-            })));
+            promises.push(getBusinessCategories());
+
+            const results = await Promise.all(promises);
+
+            // Set categories from the last promise result
+            const categoriesResponse = results[results.length - 1] as CategoryListResponse;
+            if (categoriesResponse?.categories) {
+                setCategories(categoriesResponse.categories.map((cat: Category) => ({
+                    id: cat.id,
+                    name: cat.name
+                })));
+            }
+
         } catch (error) {
             console.error('Failed to fetch initial data:', error);
         }
@@ -141,37 +187,43 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            fetchInitialData();
 
-            // Check if we're editing or creating
-            if (editingAppointmentId) {
-                loadExistingAppointment(editingAppointmentId);
-            } else {
-                setIsEditMode(false);
-                resetForm();
+            const initializeModal = async () => {
+                // First, load all the initial data (categories, services, staff)
+                await fetchInitialData();
 
-                // Initialize calendar date from selectedDate prop
-                try {
-                    if (selectedDate && selectedDate.includes('/')) {
-                        const [day, month, year] = selectedDate.split('/').map(Number);
-                        const dateObj = new Date(year, month - 1, day);
-                        setCalendarSelectedDate(dateObj);
+                // Then check if we're editing or creating
+                if (editingAppointmentId) {
+                    await loadExistingAppointment(editingAppointmentId);
+                } else {
+                    setIsEditMode(false);
+                    resetForm();
+
+                    // Initialize calendar date from selectedDate prop
+                    try {
+                        if (selectedDate && selectedDate.includes('/')) {
+                            const [day, month, year] = selectedDate.split('/').map(Number);
+                            const dateObj = new Date(year, month - 1, day);
+                            setCalendarSelectedDate(dateObj);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing initial date:', error);
+                        setCalendarSelectedDate(new Date());
                     }
-                } catch (error) {
-                    console.error('Error parsing initial date:', error);
-                    setCalendarSelectedDate(new Date());
-                }
 
-                // Initialize time from selectedTime prop
-                if (selectedTime && selectedTime.includes(':')) {
-                    const [hours, minutes] = selectedTime.split(':').map(Number);
-                    const amPm = hours >= 12 ? 'PM' : 'AM';
-                    const displayHour = hours % 12 || 12;
-                    const displayMinute = minutes.toString().padStart(2, '0');
-                    const timeString = `${displayHour}:${displayMinute} ${amPm}`;
-                    setSelectedTimeSlot(timeString);
+                    // Initialize time from selectedTime prop
+                    if (selectedTime && selectedTime.includes(':')) {
+                        const [hours, minutes] = selectedTime.split(':').map(Number);
+                        const amPm = hours >= 12 ? 'PM' : 'AM';
+                        const displayHour = hours % 12 || 12;
+                        const displayMinute = minutes.toString().padStart(2, '0');
+                        const timeString = `${displayHour}:${displayMinute} ${amPm}`;
+                        setSelectedTimeSlot(timeString);
+                    }
                 }
-            }
+            };
+
+            initializeModal();
         } else {
             document.body.style.overflow = 'auto';
         }
@@ -221,7 +273,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
     // Filter services when category changes
     useEffect(() => {
-        if (appointmentData.categoryId > 0 && services.length > 0) {
+        if (appointmentData.categoryId > 0 && services.length > 0 && categories.length > 0) {
             const selectedCategory = categories.find(c => c.id === appointmentData.categoryId);
 
             if (selectedCategory) {
@@ -230,10 +282,12 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 );
 
                 setFilteredServices(servicesForCategory);
+                console.log('Filtered services for category:', selectedCategory.name, servicesForCategory);
             } else {
                 setFilteredServices([]);
             }
 
+            // Only reset service/pricing if not in edit mode or if category actually changed
             if (!isEditMode) {
                 setAppointmentData(prev => ({
                     ...prev,
@@ -250,7 +304,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
     // Update pricing options when service changes
     useEffect(() => {
-        if (appointmentData.serviceId > 0) {
+        if (appointmentData.serviceId > 0 && services.length > 0) {
             const selectedService = services.find(s => s.id === appointmentData.serviceId);
             if (selectedService && selectedService.pricingOptions) {
                 setPricingOptions(selectedService.pricingOptions.map((opt: any) => ({
@@ -260,10 +314,12 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                     currency: opt.currency || 'AED',
                     duration: opt.duration
                 })));
+                console.log('Loaded pricing options for service:', selectedService.name, selectedService.pricingOptions);
             } else {
                 setPricingOptions([]);
             }
 
+            // Only reset pricing option if not in edit mode
             if (!isEditMode) {
                 setAppointmentData(prev => ({
                     ...prev,

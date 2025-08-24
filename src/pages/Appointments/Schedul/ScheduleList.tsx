@@ -30,7 +30,7 @@ interface Placeholder {
 interface ScheduleListProps {
     scheduleData: ScheduleData[];
     dateRange: string[];
-    onDragEnd: (data: ScheduleData[]) => void;
+    onDragEnd: (data: ScheduleData[], movedAppointmentData?: { appointmentId: string, newTime: string, newDate: string }) => void;
     onTimeSlotSelect?: (time: string) => void;
     onEdit?: (appointmentId: string) => void;
     onDelete?: () => void;
@@ -108,25 +108,44 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
         setIsDragging(false);
 
         if (over) {
-            const oldIndex = scheduleData.findIndex(item => item.id === active.id);
+            const draggedAppointmentId = active.id as string;
             const overItem = positions.find(item => item.id === over.id);
 
-            if (oldIndex !== -1 && overItem && overItem.time) {
-                const updatedData = [...scheduleData];
-                const movedItem = { ...updatedData[oldIndex], time: overItem.time, date: overItem.date };
+            if (overItem && overItem.time && overItem.date) {
+                // Find the dragged appointment
+                const draggedAppointment = scheduleData.find(item => item.id === draggedAppointmentId);
 
-                updatedData.splice(oldIndex, 1);
+                if (draggedAppointment) {
+                    // Check if the position actually changed
+                    if (draggedAppointment.time !== overItem.time || draggedAppointment.date !== overItem.date) {
+                        console.log('Appointment moved:', {
+                            id: draggedAppointmentId,
+                            from: { time: draggedAppointment.time, date: draggedAppointment.date },
+                            to: { time: overItem.time, date: overItem.date }
+                        });
 
-                const overIndex = updatedData.findIndex(item => item.id === over.id);
-                if (overIndex !== -1) {
-                    updatedData.splice(overIndex + 1, 0, movedItem);
-                } else {
-                    updatedData.push(movedItem);
+                        // Create updated data
+                        const updatedData = scheduleData.map(item => {
+                            if (item.id === draggedAppointmentId) {
+                                return { ...item, time: overItem.time, date: overItem.date };
+                            }
+                            return item;
+                        });
+
+                        // Pass the moved appointment data to parent
+                        onDragEnd(updatedData, {
+                            appointmentId: draggedAppointmentId,
+                            newTime: overItem.time,
+                            newDate: overItem.date
+                        });
+                        return;
+                    }
                 }
-
-                onDragEnd(updatedData);
             }
         }
+
+        // No change occurred
+        onDragEnd(scheduleData);
     }, [scheduleData, positions, onDragEnd]);
 
     const isOverlapping = useCallback((card1: ScheduleData, card2: ScheduleData) => {

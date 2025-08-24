@@ -72,6 +72,29 @@ const Appointments: React.FC = () => {
     const { getAppointments, rescheduleAppointment } = useAppointments();
     const { showToast } = useToast();
 
+    const formatAppointmentDate = useCallback((dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+        return date.toLocaleDateString('en-GB');
+    }, []);
+
+    const formatAppointmentTime = useCallback((dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+        const minutes = date.getMinutes();
+        const roundedMinutes = Math.round(minutes / 15) * 15;
+        date.setMinutes(roundedMinutes);
+
+        if (roundedMinutes === 60) {
+            date.setMinutes(0);
+            date.setHours(date.getHours() + 1);
+        }
+
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    }, []);
+
     const handleDateChange = useCallback((date: string) => {
         setSelectedDate(date);
     }, []);
@@ -94,82 +117,6 @@ const Appointments: React.FC = () => {
 
         return `${hour.toString().padStart(2, '0')}:${minutes}`;
     }, []);
-
-    const handleDragEnd = useCallback(async (data: ScheduleAppointment[]) => {
-        // Find which appointment was moved
-        const movedAppointment = data.find((newItem, index) => {
-            const oldItem = scheduleData[index];
-            return oldItem && (newItem.time !== oldItem.time || newItem.date !== oldItem.date);
-        });
-
-        if (movedAppointment) {
-            try {
-                // Convert the new date and time to ISO format
-                const [day, month, year] = movedAppointment.date.split('/').map(Number);
-                const [time, period] = movedAppointment.time.split(' ');
-                const [hours, minutes] = time.split(':').map(Number);
-
-                let finalHours = hours;
-                if (period === 'PM' && hours !== 12) {
-                    finalHours += 12;
-                } else if (period === 'AM' && hours === 12) {
-                    finalHours = 0;
-                }
-
-                const newDateTime = new Date(year, month - 1, day, finalHours, minutes);
-
-                await rescheduleAppointment(parseInt(movedAppointment.id), newDateTime.toISOString());
-                showToast('Appointment rescheduled successfully', 'success');
-                setScheduleData(data);
-            } catch (error) {
-                showToast('Failed to reschedule appointment', 'error');
-                // Revert the change on error
-                refreshAppointments();
-            }
-        } else {
-            setScheduleData(data);
-        }
-    }, [scheduleData, rescheduleAppointment, showToast]);
-
-    const getDateRange = useCallback((startDate: string) => {
-        const start = new Date(startDate.split('/').reverse().join('-'));
-        return Array.from({ length: 7 }, (_, i) => {
-            const currentDate = new Date(start);
-            currentDate.setDate(start.getDate() + i);
-            return currentDate.toLocaleDateString('en-GB');
-        });
-    }, []);
-
-    const dateRange = useMemo(() => getDateRange(selectedDate), [selectedDate, getDateRange]);
-
-    const filteredScheduleData = useMemo(() =>
-        scheduleData.filter(item => dateRange.includes(item.date)),
-        [scheduleData, dateRange]);
-
-    const currentMonthYear = useMemo(() => getCurrentMonthYear(), []);
-
-    const formatAppointmentDate = (dateTimeString: string) => {
-        const date = new Date(dateTimeString);
-        return date.toLocaleDateString('en-GB');
-    };
-
-    const formatAppointmentTime = (dateTimeString: string) => {
-        const date = new Date(dateTimeString);
-        const minutes = date.getMinutes();
-        const roundedMinutes = Math.round(minutes / 15) * 15;
-        date.setMinutes(roundedMinutes);
-
-        if (roundedMinutes === 60) {
-            date.setMinutes(0);
-            date.setHours(date.getHours() + 1);
-        }
-
-        return date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        });
-    };
 
     const refreshAppointments = useCallback(async () => {
         try {
@@ -210,7 +157,62 @@ const Appointments: React.FC = () => {
             showToast('Failed to fetch appointments', 'error');
             console.error(error);
         }
-    }, [selectedDate, getAppointments, showToast]);
+    }, [selectedDate, getAppointments, showToast, formatAppointmentTime, formatAppointmentDate]);
+
+    const handleDragEnd = useCallback(async (data: ScheduleAppointment[], movedAppointmentData?: { appointmentId: string, newTime: string, newDate: string }) => {
+        if (movedAppointmentData) {
+            try {
+                // Convert the new date and time to ISO format
+                const [day, month, year] = movedAppointmentData.newDate.split('/').map(Number);
+                const [time, period] = movedAppointmentData.newTime.split(' ');
+                const [hours, minutes] = time.split(':').map(Number);
+
+                let finalHours = hours;
+                if (period === 'PM' && hours !== 12) {
+                    finalHours += 12;
+                } else if (period === 'AM' && hours === 12) {
+                    finalHours = 0;
+                }
+
+                const newDateTime = new Date(year, month - 1, day, finalHours, minutes);
+
+                console.log('Rescheduling appointment:', {
+                    id: movedAppointmentData.appointmentId,
+                    from: scheduleData.find(a => a.id === movedAppointmentData.appointmentId),
+                    to: { date: movedAppointmentData.newDate, time: movedAppointmentData.newTime },
+                    isoDateTime: newDateTime.toISOString()
+                });
+
+                await rescheduleAppointment(parseInt(movedAppointmentData.appointmentId), newDateTime.toISOString());
+                showToast('Appointment rescheduled successfully', 'success');
+                setScheduleData(data);
+            } catch (error) {
+                showToast('Failed to reschedule appointment', 'error');
+                console.error('Reschedule error:', error);
+                // Revert the change on error
+                refreshAppointments();
+            }
+        } else {
+            setScheduleData(data);
+        }
+    }, [scheduleData, rescheduleAppointment, showToast, refreshAppointments]);
+
+    const getDateRange = useCallback((startDate: string) => {
+        const start = new Date(startDate.split('/').reverse().join('-'));
+        return Array.from({ length: 7 }, (_, i) => {
+            const currentDate = new Date(start);
+            currentDate.setDate(start.getDate() + i);
+            return currentDate.toLocaleDateString('en-GB');
+        });
+    }, []);
+
+    const dateRange = useMemo(() => getDateRange(selectedDate), [selectedDate, getDateRange]);
+
+    const filteredScheduleData = useMemo(() =>
+        scheduleData.filter(item => dateRange.includes(item.date)),
+        [scheduleData, dateRange]);
+
+    const currentMonthYear = useMemo(() => getCurrentMonthYear(), []);
 
     useEffect(() => {
         refreshAppointments();

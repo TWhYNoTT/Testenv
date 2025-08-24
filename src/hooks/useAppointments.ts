@@ -105,8 +105,24 @@ export const useAppointments = () => {
         }
     }, []);
 
+    const getAppointmentById = useCallback(async (id: number) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.getAppointmentById(id);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to fetch appointment';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         createAppointment,
+        getAppointmentById,
         updateAppointment,
         deleteAppointment,
         rescheduleAppointment,

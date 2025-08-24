@@ -622,6 +622,13 @@ class ApiService {
         const response = await this.axiosInstance.get(`/salon-owner/appointments/available-staff?${queryParams.toString()}`);
         return response.data;
     }
+
+    async getAppointmentById(id: number): Promise<any> {
+        const response = await this.axiosInstance.get(`/salon-owner/appointments/${id}`);
+        return response.data;
+    }
+
+
 }
 
 export const apiService = new ApiService();
