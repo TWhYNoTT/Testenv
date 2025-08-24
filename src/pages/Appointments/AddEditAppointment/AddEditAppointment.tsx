@@ -194,8 +194,8 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         if (appointmentData.serviceId > 0) {
             const selectedService = services.find(s => s.id === appointmentData.serviceId);
             if (selectedService && selectedService.pricingOptions) {
-                setPricingOptions(selectedService.pricingOptions.map((opt: any, index: number) => ({
-                    id: index + 1, // Generate an ID if none exists
+                setPricingOptions(selectedService.pricingOptions.map((opt: any) => ({
+                    id: opt.id, // Use the existing ID
                     name: opt.name,
                     price: opt.price,
                     currency: opt.currency || 'AED',
