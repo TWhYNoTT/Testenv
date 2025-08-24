@@ -12,7 +12,6 @@ import Calendar from '../../../components/Calendar/Calendar';
 import TimePicker from '../../../components/TimePicker/TimePicker';
 import styles from './AddEditAppointment.module.css';
 
-// Define the enums based on provided code
 enum AppointmentStatus {
     Pending = 1,
     Approved = 2,
@@ -35,6 +34,7 @@ interface AddEditAppointmentProps {
     onSuccess: () => void;
     selectedTime: string;
     selectedDate: string;
+    editingAppointmentId?: string | null;
     businessId?: number;
 }
 
@@ -44,19 +44,19 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     isOpen,
     selectedTime,
     selectedDate,
+    editingAppointmentId,
     businessId = 0
 }) => {
     const { services, getServices, loading: servicesLoading } = useServices();
-    const { createAppointment, loading: appointmentLoading } = useAppointments();
+    const { createAppointment, updateAppointment, loading: appointmentLoading } = useAppointments();
     const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
     const { getBusinessCategories, loading: categoriesLoading } = useCategories();
 
-    // State for categories, filtered services, and pricing options
+    const [isEditMode, setIsEditMode] = useState(false);
     const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
     const [filteredServices, setFilteredServices] = useState<Array<any>>([]);
     const [pricingOptions, setPricingOptions] = useState<Array<{ id: number, name: string, price: number, currency: string, duration: string }>>([]);
 
-    // Add state for calendar selected date and time
     const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | undefined>(undefined);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
 
@@ -86,6 +86,38 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         { label: 'Late', value: PaymentStatus.Late }
     ];
 
+    const resetForm = useCallback(() => {
+        setAppointmentData({
+            businessId: businessId,
+            clientName: '',
+            mobileNumber: '',
+            email: '',
+            categoryId: 0,
+            serviceId: 0,
+            pricingOptionId: 0,
+            amount: '',
+            staffId: 0,
+            paymentStatus: PaymentStatus.Upcoming,
+            appointmentDate: new Date().toISOString(),
+            isDraft: false,
+            notes: ''
+        });
+        setErrors({});
+        setSelectedTimeSlot('');
+        setCalendarSelectedDate(undefined);
+    }, [businessId]);
+
+    const loadExistingAppointment = useCallback(async (appointmentId: string) => {
+        // In a real implementation, you'd fetch the appointment details from the API
+        // For now, we'll simulate loading from the current schedule data
+        // You should implement a getAppointmentById API method
+
+        // This is a placeholder - you need to implement getAppointmentById in your API
+        // const appointment = await getAppointmentById(appointmentId);
+        // For now, we'll just use the existing form with edit mode enabled
+        setIsEditMode(true);
+    }, []);
+
     const fetchInitialData = useCallback(async () => {
         try {
             if (services.length === 0) {
@@ -111,27 +143,34 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             document.body.style.overflow = 'hidden';
             fetchInitialData();
 
-            // Initialize calendar date from selectedDate prop
-            try {
-                if (selectedDate && selectedDate.includes('/')) {
-                    const [day, month, year] = selectedDate.split('/').map(Number);
-                    const dateObj = new Date(year, month - 1, day);
-                    setCalendarSelectedDate(dateObj);
-                }
-            } catch (error) {
-                console.error('Error parsing initial date:', error);
-                setCalendarSelectedDate(new Date());
-            }
+            // Check if we're editing or creating
+            if (editingAppointmentId) {
+                loadExistingAppointment(editingAppointmentId);
+            } else {
+                setIsEditMode(false);
+                resetForm();
 
-            // Initialize time from selectedTime prop
-            if (selectedTime && selectedTime.includes(':')) {
-                // Convert "13:30" to "1:30 PM" format
-                const [hours, minutes] = selectedTime.split(':').map(Number);
-                const amPm = hours >= 12 ? 'PM' : 'AM';
-                const displayHour = hours % 12 || 12;
-                const displayMinute = minutes.toString().padStart(2, '0');
-                const timeString = `${displayHour}:${displayMinute} ${amPm}`;
-                setSelectedTimeSlot(timeString);
+                // Initialize calendar date from selectedDate prop
+                try {
+                    if (selectedDate && selectedDate.includes('/')) {
+                        const [day, month, year] = selectedDate.split('/').map(Number);
+                        const dateObj = new Date(year, month - 1, day);
+                        setCalendarSelectedDate(dateObj);
+                    }
+                } catch (error) {
+                    console.error('Error parsing initial date:', error);
+                    setCalendarSelectedDate(new Date());
+                }
+
+                // Initialize time from selectedTime prop
+                if (selectedTime && selectedTime.includes(':')) {
+                    const [hours, minutes] = selectedTime.split(':').map(Number);
+                    const amPm = hours >= 12 ? 'PM' : 'AM';
+                    const displayHour = hours % 12 || 12;
+                    const displayMinute = minutes.toString().padStart(2, '0');
+                    const timeString = `${displayHour}:${displayMinute} ${amPm}`;
+                    setSelectedTimeSlot(timeString);
+                }
             }
         } else {
             document.body.style.overflow = 'auto';
@@ -140,16 +179,14 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         return () => {
             document.body.style.overflow = 'auto';
         };
-    }, [isOpen, fetchInitialData, selectedDate, selectedTime]);
+    }, [isOpen, editingAppointmentId, fetchInitialData, resetForm, loadExistingAppointment, selectedDate, selectedTime]);
 
-    // Update appointment date/time
     const updateAppointmentDateTime = useCallback((date?: Date, time?: string) => {
         if (!date) return;
 
         const appointmentDate = new Date(date);
 
         if (time && time.includes(':')) {
-            // Parse time string like "1:30 PM"
             const [timePart, period] = time.split(' ');
             const [hours, minutes] = timePart.split(':').map(Number);
 
@@ -162,7 +199,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
             appointmentDate.setHours(finalHours, minutes, 0, 0);
         } else {
-            // Default to current time if no time provided
             const now = new Date();
             appointmentDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
         }
@@ -173,13 +209,11 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         }));
     }, []);
 
-    // Handle calendar date change
     const handleCalendarDateChange = useCallback((date: Date) => {
         setCalendarSelectedDate(date);
         updateAppointmentDateTime(date, selectedTimeSlot);
     }, [selectedTimeSlot, updateAppointmentDateTime]);
 
-    // Handle time change
     const handleTimeChange = useCallback((time: string) => {
         setSelectedTimeSlot(time);
         updateAppointmentDateTime(calendarSelectedDate, time);
@@ -200,17 +234,19 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 setFilteredServices([]);
             }
 
-            setAppointmentData(prev => ({
-                ...prev,
-                serviceId: 0,
-                pricingOptionId: 0,
-                amount: ''
-            }));
-            setPricingOptions([]);
+            if (!isEditMode) {
+                setAppointmentData(prev => ({
+                    ...prev,
+                    serviceId: 0,
+                    pricingOptionId: 0,
+                    amount: ''
+                }));
+                setPricingOptions([]);
+            }
         } else {
             setFilteredServices([]);
         }
-    }, [appointmentData.categoryId, services, categories]);
+    }, [appointmentData.categoryId, services, categories, isEditMode]);
 
     // Update pricing options when service changes
     useEffect(() => {
@@ -228,15 +264,17 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 setPricingOptions([]);
             }
 
-            setAppointmentData(prev => ({
-                ...prev,
-                pricingOptionId: 0,
-                amount: ''
-            }));
+            if (!isEditMode) {
+                setAppointmentData(prev => ({
+                    ...prev,
+                    pricingOptionId: 0,
+                    amount: ''
+                }));
+            }
         } else {
             setPricingOptions([]);
         }
-    }, [appointmentData.serviceId, services]);
+    }, [appointmentData.serviceId, services, isEditMode]);
 
     const handleInputChange = (name: string, value: string | number | boolean) => {
         setAppointmentData(prev => ({
@@ -245,6 +283,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         }));
     };
 
+    // Helper functions for dropdown display values
     const getCategoryDisplayValue = (categoryId: number) => {
         const category = categories.find(c => c.id === categoryId);
         return category ? category.name : '';
@@ -271,6 +310,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         return status ? status.label : '';
     };
 
+    // Change handlers for dropdowns
     const handleCategoryChange = (value: string | string[]) => {
         if (typeof value === 'string') {
             const selectedCategory = categories.find(category => category.name === value);
@@ -365,7 +405,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             }
 
             const appointmentRequest = {
-                businessId: appointmentData.businessId,
                 clientName: appointmentData.clientName.trim(),
                 mobileNumber: appointmentData.mobileNumber,
                 email: appointmentData.email,
@@ -380,11 +419,18 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 notes: appointmentData.notes
             };
 
-            await createAppointment(appointmentRequest);
-            await onSuccess();
-            onClose();
+            if (isEditMode && editingAppointmentId) {
+                await updateAppointment(parseInt(editingAppointmentId), appointmentRequest);
+            } else {
+                await createAppointment({
+                    businessId: appointmentData.businessId,
+                    ...appointmentRequest
+                });
+            }
+
+            onSuccess();
         } catch (error) {
-            console.error('Error creating appointment:', error);
+            console.error('Error saving appointment:', error);
         }
     };
 
@@ -393,16 +439,14 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>
             <div className={`${styles.modalContainer} ${isOpen ? styles.open : ''}`}>
-                {(appointmentLoading) && (
+                {appointmentLoading && (
                     <div className={styles.loadingOverlay}>
                         <div className={styles.spinner}>
                             <svg viewBox="0 0 50 50">
                                 <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
                             </svg>
                             <span>
-                                {appointmentLoading ? 'Creating appointment...' :
-                                    categoriesLoading ? 'Loading categories...' :
-                                        'Loading staff...'}
+                                {isEditMode ? 'Updating appointment...' : 'Creating appointment...'}
                             </span>
                         </div>
                     </div>
@@ -410,7 +454,9 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
                 <div className={styles.headerCloseContainer}>
                     <button onClick={onClose} className={styles.closeButton}>&times;</button>
-                    <h2 className={styles.header}>New appointment</h2>
+                    <h2 className={styles.header}>
+                        {isEditMode ? 'Edit appointment' : 'New appointment'}
+                    </h2>
                 </div>
 
                 <div className={styles.appointmentForm}>
@@ -546,7 +592,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                         />
                         <Button
                             onClick={handleSubmit}
-                            label="Add"
+                            label={isEditMode ? 'Update' : 'Add'}
                             size="medium"
                             disabled={servicesLoading || staffLoading || appointmentLoading || categoriesLoading}
                         />

@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
+const API_BASE_URL = 'https://localhost:7063/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -578,6 +578,48 @@ class ApiService {
 
     async deleteBranch(id: number): Promise<boolean> {
         const response = await this.axiosInstance.delete(`/salon-owner/branches/${id}`);
+        return response.data;
+    }
+
+
+    // Update appointment
+    async updateAppointment(id: number, data: Omit<AppointmentRequest, 'businessId'>): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}`, data);
+        return response.data;
+    }
+
+    // Delete appointment
+    async deleteAppointment(id: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-owner/appointments/${id}`);
+        return response.data;
+    }
+
+    // Reschedule appointment
+    async rescheduleAppointment(id: number, newDate: string): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}/reschedule`, {
+            newAppointmentDate: newDate
+        });
+        return response.data;
+    }
+
+    // Assign staff to appointment
+    async assignStaff(appointmentId: number, staffId: number): Promise<boolean> {
+        const response = await this.axiosInstance.put('/salon-owner/appointments/assign-staff', {
+            appointmentId,
+            staffId
+        });
+        return response.data;
+    }
+
+    // Get available staff
+    async getAvailableStaff(businessId: number, appointmentDate: string, serviceId: number, pricingOptionId: number) {
+        const queryParams = new URLSearchParams();
+        queryParams.append('businessId', businessId.toString());
+        queryParams.append('appointmentDate', appointmentDate);
+        queryParams.append('serviceId', serviceId.toString());
+        queryParams.append('pricingOptionId', pricingOptionId.toString());
+
+        const response = await this.axiosInstance.get(`/salon-owner/appointments/available-staff?${queryParams.toString()}`);
         return response.data;
     }
 }

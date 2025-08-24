@@ -1,7 +1,6 @@
-import { useState, useCallback } from "react";  // Add useCallback import
+import { useState, useCallback } from "react";
 import { apiService, AppointmentRequest, AppointmentListParams } from "../services/api";
 import type { AppointmentResponse, AppointmentListResponse } from "../types/api-responses";
-
 
 export const useAppointments = () => {
     const [loading, setLoading] = useState(false);
@@ -22,13 +21,71 @@ export const useAppointments = () => {
         }
     }, []);
 
+    const updateAppointment = useCallback(async (id: number, data: Omit<AppointmentRequest, 'businessId'>) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.updateAppointment(id, data);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to update appointment';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const deleteAppointment = useCallback(async (id: number) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.deleteAppointment(id);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to delete appointment';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const rescheduleAppointment = useCallback(async (id: number, newDate: string) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.rescheduleAppointment(id, newDate);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to reschedule appointment';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const assignStaff = useCallback(async (appointmentId: number, staffId: number) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.assignStaff(appointmentId, staffId);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to assign staff';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const getAppointments = useCallback(async (params: AppointmentListParams) => {
         setLoading(true);
         setError(null);
         try {
-            // Rename parameters to match backend
             const apiParams = {
-
                 startDate: params.startDate,
                 endDate: params.endDate,
                 paymentStatus: params.paymentStatus,
@@ -50,6 +107,10 @@ export const useAppointments = () => {
 
     return {
         createAppointment,
+        updateAppointment,
+        deleteAppointment,
+        rescheduleAppointment,
+        assignStaff,
         getAppointments,
         loading,
         error

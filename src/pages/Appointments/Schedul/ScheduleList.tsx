@@ -31,14 +31,18 @@ interface ScheduleListProps {
     scheduleData: ScheduleData[];
     dateRange: string[];
     onDragEnd: (data: ScheduleData[]) => void;
-    onTimeSlotSelect?: (time: string) => void; // Add this prop
+    onTimeSlotSelect?: (time: string) => void;
+    onEdit?: (appointmentId: string) => void;
+    onDelete?: () => void;
 }
 
 const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     scheduleData,
     dateRange,
     onDragEnd,
-    onTimeSlotSelect  // Add this prop
+    onTimeSlotSelect,
+    onEdit,
+    onDelete
 }) => {
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -46,30 +50,28 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     const times = useMemo(() => {
         const timeSlots = [];
 
-        // Generate all 24 hours with 15-minute intervals
         for (let hour = 0; hour < 24; hour++) {
             for (let minute = 0; minute < 60; minute += 15) {
                 const amPm = hour >= 12 ? 'PM' : 'AM';
-                const displayHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+                const displayHour = hour % 12 || 12;
                 const displayMinute = minute.toString().padStart(2, '0');
                 timeSlots.push(`${displayHour}:${displayMinute} ${amPm}`);
             }
         }
 
-        // Start the day at 7 AM (reorder array)
-        const morningStart = 7 * 4; // 7 AM (4 slots per hour)
+        const morningStart = 7 * 4;
         return [...timeSlots.slice(morningStart), ...timeSlots.slice(0, morningStart)];
     }, []);
+
     const handleTimeSlotClick = useCallback((time: string) => {
         setSelectedTime(time);
-        onTimeSlotSelect?.(time); // Call the prop if provided
+        onTimeSlotSelect?.(time);
     }, [onTimeSlotSelect]);
 
     const getTimeIndex = useCallback((time: string) => times.indexOf(time), [times]);
     const getDateIndex = useCallback((date: string) => dateRange.indexOf(date), [dateRange]);
 
     const calculateRowSpan = useCallback((duration: string) => {
-        // Check if format is "Xh Ymin"
         if (duration.includes('h') && duration.includes('min')) {
             const hoursMatch = duration.match(/(\d+)h/);
             const minutesMatch = duration.match(/(\d+)min/);
@@ -80,8 +82,7 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
             return (hours * 60 + minutes) / 15;
         }
 
-        // Fallback for other formats
-        return 4; // Default to 1 hour
+        return 4;
     }, []);
 
     const layoutPlaceholders = useMemo(() =>
@@ -94,8 +95,7 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
                 time,
                 date
             }))
-        )
-        , [times, dateRange]);
+        ), [times, dateRange]);
 
     const positions = useMemo(() => layoutPlaceholders, [layoutPlaceholders]);
 
@@ -130,7 +130,6 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
     }, [scheduleData, positions, onDragEnd]);
 
     const isOverlapping = useCallback((card1: ScheduleData, card2: ScheduleData) => {
-        console.log(card1, card2, 'overlapping');
         const card1StartIndex = getTimeIndex(card1.time);
         const card1EndIndex = card1StartIndex + calculateRowSpan(card1.duration);
 
@@ -176,7 +175,7 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
 
     const calculateCardWidthAndPosition = useCallback((card: ScheduleData, columnIndex: number, startIndex: number, rowSpan: number) => {
         const groups = calculateOverlapGroups(columnIndex, startIndex, rowSpan);
-        console.log(groups, startIndex, 'groups');
+
         for (const group of groups) {
             if (group.some((groupCard) => groupCard.id === card.id)) {
                 const cardIndexInGroup = group.findIndex((c) => c.id === card.id);
@@ -208,7 +207,8 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
                             isPlaceholder={true}
                             isDragging={isDragging}
                             cardWidth={0}
-                            leftPosition={'0'} />
+                            leftPosition={'0'}
+                        />
                     ))}
 
                     {scheduleData.map((data) => {
@@ -231,6 +231,8 @@ const ScheduleList: React.FC<ScheduleListProps> = React.memo(({
                                 cardWidth={cardWidth}
                                 leftPosition={leftPosition}
                                 isDragging={isDragging}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
                             />
                         );
                     })}
@@ -251,15 +253,32 @@ interface DroppableCardProps {
     isDragging: boolean;
     cardWidth: number;
     leftPosition: string;
+    onEdit?: (appointmentId: string) => void;
+    onDelete?: () => void;
 }
 
 const DroppableCard: React.FC<DroppableCardProps> = React.memo(({
-    id, position, isPlaceholder, cardWidth, leftPosition, isDragging
+    id, position, isPlaceholder, cardWidth, leftPosition, isDragging, onEdit, onDelete
 }) => {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id,
         disabled: isPlaceholder,
     });
+
+    // Create modified listeners that exclude the menu area
+    const dragListeners = isPlaceholder ? {} : {
+        ...listeners,
+        onPointerDown: (e: React.PointerEvent) => {
+            // Don't start drag if clicking on menu or its children
+            const target = e.target as HTMLElement;
+            if (target.closest('.menu') || target.closest('[class*="menu"]') ||
+                target.closest('[class*="dropdown"]')) {
+                e.stopPropagation();
+                return;
+            }
+            listeners?.onPointerDown?.(e as any);
+        }
+    };
 
     const { isOver: droppableIsOver, setNodeRef: setDroppableNodeRef } = useDroppable({
         id,
@@ -339,11 +358,14 @@ const DroppableCard: React.FC<DroppableCardProps> = React.memo(({
                     status={position.status}
                     image={position.image}
                     isShrinked={currCardWidth < 260}
+                    appointmentId={position.id}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
                 />
             );
         }
         return null;
-    }, [position, currCardWidth]);
+    }, [position, currCardWidth, onEdit, onDelete]);
 
     return (
         <div
@@ -356,7 +378,7 @@ const DroppableCard: React.FC<DroppableCardProps> = React.memo(({
             }}
             style={style}
             {...attributes}
-            {...listeners}
+            {...dragListeners}
             className={`${styles.scheduleCardWrapper} ${isPlaceholder ? styles.isPlaceholder : ''}`}
             onMouseEnter={handleMouseEnter}
             onMouseMove={handleMouseMove}

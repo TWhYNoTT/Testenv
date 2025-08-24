@@ -9,7 +9,6 @@ import AddEditAppointment from './AddEditAppointment/AddEditAppointment';
 import { useToast } from '../../contexts/ToastContext';
 import { useAppointments } from '../../hooks/useAppointments';
 
-
 export interface ScheduleAppointment {
     id: string;
     service: string;
@@ -26,12 +25,12 @@ export interface ScheduleAppointment {
 export interface ApiAppointment {
     id: number;
     serviceName: string;
-    customerName: string;  // For registered users
-    clientName?: string;   // For direct clients
+    customerName: string;
+    clientName?: string;
     phoneNumber: string;
-    clientPhone?: string;  // For direct clients
+    clientPhone?: string;
     email: string;
-    clientEmail?: string;  // For direct clients
+    clientEmail?: string;
     appointmentDate: string;
     duration: string;
     servicePrice: number;
@@ -55,21 +54,10 @@ const getCurrentMonthYear = () => {
     return `${monthNames[date.getMonth()]}, ${date.getFullYear()}`;
 };
 
-// const initialScheduleData: ScheduleAppointment[] = [
-//     { id: '1', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '12:30 PM', date: '18/08/2024' },
-//     { id: '2', service: 'Permanent Hair Colour', customer: 'Salama Khaled', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Unpaid', image: './assets/icons/avatar.png', time: '7:15 AM', date: '19/08/2024' },
-//     { id: '3', service: 'Permanent Hair Colour', customer: 'Alaa Omar', contact: '0123 456 789', duration: '1h 30min', price: '200 AED', status: 'Late', image: './assets/icons/avatar.png', time: '8:00 AM', date: '20/08/2024' },
-//     { id: '4', service: 'Permanent Hair Colour', customer: 'Nada Ahmed', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '8:15 AM', date: '21/08/2024' },
-//     { id: '5', service: 'Permanent Hair Colour', customer: 'Soha Ali', contact: '0123 456 789', duration: '1h 0min', price: '120 AED', status: 'Upcoming', image: './assets/icons/avatar.png', time: '9:15 AM', date: '22/08/2024' },
-//     { id: '6', service: 'Permanent Hair Colour', customer: 'Aya Mohammed', contact: '0123 456 789', duration: '2h 0min', price: '120 AED', status: 'Draft', image: './assets/icons/avatar.png', time: '10:00 AM', date: '23/08/2024' },
-//     { id: '7', service: 'Permanent Hair Colour', customer: 'Yasmin Aliaaaa', contact: '0123 456 789', duration: '1h 15min', price: '300 AED', status: 'Paid', image: './assets/icons/avatar.png', time: '10:30 AM', date: '24/08/2024' },
-
-// ];
-
 const Appointments: React.FC = () => {
     const [scheduleData, setScheduleData] = useState<ScheduleAppointment[]>([]);
-
     const [isAddEditOpen, setIsAddEditOpen] = useState(false);
+    const [editingAppointment, setEditingAppointment] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>(() => {
         const today = new Date();
         today.setDate(today.getDate() - today.getDay());
@@ -81,13 +69,11 @@ const Appointments: React.FC = () => {
         return today.toLocaleDateString('en-GB');
     });
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-    const { getAppointments } = useAppointments();
+    const { getAppointments, rescheduleAppointment } = useAppointments();
     const { showToast } = useToast();
 
-    // Update handleDateChange to properly memoize dependencies
     const handleDateChange = useCallback((date: string) => {
         setSelectedDate(date);
-        // Remove the automatic fetch here since it will be handled by the useEffect
     }, []);
 
     const handleTimeSlotSelect = useCallback((time: string) => {
@@ -96,8 +82,6 @@ const Appointments: React.FC = () => {
 
     const convertTimeToAPIFormat = useCallback((timeSlot: string | null) => {
         if (!timeSlot) return '';
-
-        // Convert "1:00 PM" to "13:00"
         const [time, period] = timeSlot.split(' ');
         const [hours, minutes] = time.split(':');
         let hour = parseInt(hours);
@@ -111,9 +95,41 @@ const Appointments: React.FC = () => {
         return `${hour.toString().padStart(2, '0')}:${minutes}`;
     }, []);
 
-    const handleDragEnd = useCallback((data: ScheduleAppointment[]) => {
-        setScheduleData(data);
-    }, []);
+    const handleDragEnd = useCallback(async (data: ScheduleAppointment[]) => {
+        // Find which appointment was moved
+        const movedAppointment = data.find((newItem, index) => {
+            const oldItem = scheduleData[index];
+            return oldItem && (newItem.time !== oldItem.time || newItem.date !== oldItem.date);
+        });
+
+        if (movedAppointment) {
+            try {
+                // Convert the new date and time to ISO format
+                const [day, month, year] = movedAppointment.date.split('/').map(Number);
+                const [time, period] = movedAppointment.time.split(' ');
+                const [hours, minutes] = time.split(':').map(Number);
+
+                let finalHours = hours;
+                if (period === 'PM' && hours !== 12) {
+                    finalHours += 12;
+                } else if (period === 'AM' && hours === 12) {
+                    finalHours = 0;
+                }
+
+                const newDateTime = new Date(year, month - 1, day, finalHours, minutes);
+
+                await rescheduleAppointment(parseInt(movedAppointment.id), newDateTime.toISOString());
+                showToast('Appointment rescheduled successfully', 'success');
+                setScheduleData(data);
+            } catch (error) {
+                showToast('Failed to reschedule appointment', 'error');
+                // Revert the change on error
+                refreshAppointments();
+            }
+        } else {
+            setScheduleData(data);
+        }
+    }, [scheduleData, rescheduleAppointment, showToast]);
 
     const getDateRange = useCallback((startDate: string) => {
         const start = new Date(startDate.split('/').reverse().join('-'));
@@ -132,47 +148,46 @@ const Appointments: React.FC = () => {
 
     const currentMonthYear = useMemo(() => getCurrentMonthYear(), []);
 
-    const getStatusText = useCallback((status: number): string => {
-        switch (status) {
-            case 0: return 'Upcoming';
-            case 1: return 'Paid';
-            case 2: return 'Late';
-            case 3: return 'Unpaid';
-            case 4: return 'Draft';
-            default: return 'Unknown';
-        }
-    }, []);
+    const formatAppointmentDate = (dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+        return date.toLocaleDateString('en-GB');
+    };
 
-    const formatTime = useCallback((timeString: string) => {
-        const [hours, minutes] = timeString.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const formattedHour = hour % 12 || 12;
-        return `${formattedHour}:${minutes} ${ampm}`;
-    }, []);
+    const formatAppointmentTime = (dateTimeString: string) => {
+        const date = new Date(dateTimeString);
+        const minutes = date.getMinutes();
+        const roundedMinutes = Math.round(minutes / 15) * 15;
+        date.setMinutes(roundedMinutes);
+
+        if (roundedMinutes === 60) {
+            date.setMinutes(0);
+            date.setHours(date.getHours() + 1);
+        }
+
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
 
     const refreshAppointments = useCallback(async () => {
         try {
-            // Convert DD/MM/YYYY to YYYY-MM-DD
             const fromDateParts = selectedDate.split('/');
             const startDate = `${fromDateParts[2]}-${fromDateParts[1]}-${fromDateParts[0]}`;
 
-            // Calculate end date (7 days later)
             const toDateObj = new Date(startDate);
             toDateObj.setDate(toDateObj.getDate() + 6);
             const endDate = toDateObj.toISOString().split('T')[0];
 
             const response = await getAppointments({
-                startDate, // Changed from fromDate
-                endDate,   // Changed from toDate
-                // Add businessId from your auth context or wherever it's stored
-
-                page: 1,   // Changed from pageNumber
+                startDate,
+                endDate,
+                page: 1,
                 pageSize: 50
             });
 
             const transformedData: ScheduleAppointment[] = response.appointments.map(appointment => {
-                // Parse duration HH:MM:SS to hours and minutes
                 const [durationHours, durationMinutes] = appointment.duration.split(':').map(Number);
                 const formattedDuration = `${durationHours}h ${durationMinutes}min`;
 
@@ -189,7 +204,7 @@ const Appointments: React.FC = () => {
                     date: formatAppointmentDate(appointment.appointmentDate)
                 };
             });
-            console.log(transformedData);
+
             setScheduleData(transformedData);
         } catch (error) {
             showToast('Failed to fetch appointments', 'error');
@@ -197,53 +212,33 @@ const Appointments: React.FC = () => {
         }
     }, [selectedDate, getAppointments, showToast]);
 
-    const formatAppointmentDate = (dateTimeString: string) => {
-        const date = new Date(dateTimeString);
-        return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
-    };
-
-    const formatAppointmentTime = (dateTimeString: string) => {
-        const date = new Date(dateTimeString);
-
-        // Round to nearest 15 minutes
-        const minutes = date.getMinutes();
-        const roundedMinutes = Math.round(minutes / 15) * 15;
-        date.setMinutes(roundedMinutes);
-
-        // Handle case where rounding pushes to next hour
-        if (roundedMinutes === 60) {
-            date.setMinutes(0);
-            date.setHours(date.getHours() + 1);
-        }
-
-        return date.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        }); // Format: 1:30 PM
-    };
-
-    const formatDuration = (durationString: string) => {
-        const [hours, minutes, _] = durationString.split(':').map(Number);
-        return `${hours}h ${minutes}min`;
-    };
-
-
-
-
     useEffect(() => {
         refreshAppointments();
     }, [refreshAppointments]);
 
-    // Update handleAddAppointmentSuccess to use refreshAppointments
     const handleAddAppointmentSuccess = useCallback(() => {
         showToast('Appointment created successfully', 'success');
-        refreshAppointments(); // Call refresh instead of changing selectedDate
+        refreshAppointments();
+        setIsAddEditOpen(false);
+        setEditingAppointment(null);
     }, [showToast, refreshAppointments]);
 
+    const handleEditAppointment = useCallback((appointmentId: string) => {
+        setEditingAppointment(appointmentId);
+        setIsAddEditOpen(true);
+    }, []);
+
+    const handleDeleteAppointment = useCallback(() => {
+        refreshAppointments();
+    }, [refreshAppointments]);
+
     const handleDateClick = useCallback((date: string) => {
-        // This will be called when a date is clicked in the DatePicker
         setSelectedDate0(date);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsAddEditOpen(false);
+        setEditingAppointment(null);
     }, []);
 
     return (
@@ -263,7 +258,7 @@ const Appointments: React.FC = () => {
             <DatePicker
                 onDateChange={handleDateChange}
                 selectedDate={selectedDate}
-                onDateClick={handleDateClick}  // Add this prop
+                onDateClick={handleDateClick}
             />
 
             <DndContext>
@@ -271,16 +266,20 @@ const Appointments: React.FC = () => {
                     scheduleData={filteredScheduleData}
                     dateRange={dateRange}
                     onDragEnd={handleDragEnd}
-                    onTimeSlotSelect={handleTimeSlotSelect} // Add this prop
+                    onTimeSlotSelect={handleTimeSlotSelect}
+                    onEdit={handleEditAppointment}
+                    onDelete={handleDeleteAppointment}
                 />
             </DndContext>
 
             <AddEditAppointment
                 isOpen={isAddEditOpen}
-                onClose={() => setIsAddEditOpen(false)}
+                onClose={handleCloseModal}
                 onSuccess={handleAddAppointmentSuccess}
-                selectedTime={convertTimeToAPIFormat(selectedTimeSlot)} // Add this prop
+                selectedTime={convertTimeToAPIFormat(selectedTimeSlot)}
                 selectedDate={selectedDate0}
+                editingAppointmentId={editingAppointment}
+                businessId={0}
             />
         </div>
     );
