@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useServices } from '../../../hooks/useServices';
 import { useAppointments } from '../../../hooks/useAppointments';
 import { useStaff } from '../../../hooks/useStaff';
-import { useCategories } from '../../../hooks/useCategories'; // Add this import
+import { useCategories } from '../../../hooks/useCategories';
 import InputField from '../../../components/InputField/InputField';
 import Toggle from '../../../components/Toggle/Toggle';
 import Button from '../../../components/Button/Button';
 import Dropdown from '../../../components/Dropdown/Dropdown';
 import TextArea from '../../../components/TextArea/TextArea';
+import Calendar from '../../../components/Calendar/Calendar';
+import TimePicker from '../../../components/TimePicker/TimePicker';
 import styles from './AddEditAppointment.module.css';
 
 // Define the enums based on provided code
@@ -47,13 +49,16 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const { services, getServices, loading: servicesLoading } = useServices();
     const { createAppointment, loading: appointmentLoading } = useAppointments();
     const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
-    // Use the categories hook
     const { getBusinessCategories, loading: categoriesLoading } = useCategories();
 
     // State for categories, filtered services, and pricing options
     const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
     const [filteredServices, setFilteredServices] = useState<Array<any>>([]);
     const [pricingOptions, setPricingOptions] = useState<Array<{ id: number, name: string, price: number, currency: string, duration: string }>>([]);
+
+    // Add state for calendar selected date and time
+    const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | undefined>(undefined);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
 
     const [appointmentData, setAppointmentData] = useState({
         businessId: businessId,
@@ -83,17 +88,14 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
     const fetchInitialData = useCallback(async () => {
         try {
-            // Fetch services if not already loaded
             if (services.length === 0) {
                 await getServices();
             }
 
-            // Fetch staff data if businessId is provided
             if (staff.length === 0) {
                 await getBusinessStaff({ businessId });
             }
 
-            // Fetch categories
             const categoriesResponse = await getBusinessCategories();
             setCategories(categoriesResponse.categories.map(cat => ({
                 id: cat.id,
@@ -109,45 +111,27 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             document.body.style.overflow = 'hidden';
             fetchInitialData();
 
-            // Fix the date parsing to create a valid date object
+            // Initialize calendar date from selectedDate prop
             try {
-                let formattedDate: any;
-
-                // Parse the date parts correctly
                 if (selectedDate && selectedDate.includes('/')) {
                     const [day, month, year] = selectedDate.split('/').map(Number);
-
-                    // Create a proper date object
-                    const dateObj = new Date(year, month - 1, day); // month is 0-indexed in JS
-
-                    // If we have a time, add it to the date
-                    if (selectedTime && selectedTime.includes(':')) {
-                        const [hours, minutes] = selectedTime.split(':').map(Number);
-                        dateObj.setHours(hours, minutes, 0, 0);
-                    } else {
-                        // Default to current time if no time provided
-                        const now = new Date();
-                        dateObj.setHours(now.getHours(), now.getMinutes(), 0, 0);
-                    }
-
-                    // Now create the ISO string
-                    formattedDate = dateObj.toISOString();
-                } else {
-                    // Fallback to current date/time
-                    formattedDate = new Date().toISOString();
+                    const dateObj = new Date(year, month - 1, day);
+                    setCalendarSelectedDate(dateObj);
                 }
-
-                setAppointmentData(prev => ({
-                    ...prev,
-                    appointmentDate: formattedDate
-                }));
             } catch (error) {
-                console.error('Error formatting date:', error, { selectedDate, selectedTime });
-                // Fallback to current date if there's a parsing error
-                setAppointmentData(prev => ({
-                    ...prev,
-                    appointmentDate: new Date().toISOString()
-                }));
+                console.error('Error parsing initial date:', error);
+                setCalendarSelectedDate(new Date());
+            }
+
+            // Initialize time from selectedTime prop
+            if (selectedTime && selectedTime.includes(':')) {
+                // Convert "13:30" to "1:30 PM" format
+                const [hours, minutes] = selectedTime.split(':').map(Number);
+                const amPm = hours >= 12 ? 'PM' : 'AM';
+                const displayHour = hours % 12 || 12;
+                const displayMinute = minutes.toString().padStart(2, '0');
+                const timeString = `${displayHour}:${displayMinute} ${amPm}`;
+                setSelectedTimeSlot(timeString);
             }
         } else {
             document.body.style.overflow = 'auto';
@@ -158,15 +142,55 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         };
     }, [isOpen, fetchInitialData, selectedDate, selectedTime]);
 
+    // Update appointment date/time
+    const updateAppointmentDateTime = useCallback((date?: Date, time?: string) => {
+        if (!date) return;
+
+        const appointmentDate = new Date(date);
+
+        if (time && time.includes(':')) {
+            // Parse time string like "1:30 PM"
+            const [timePart, period] = time.split(' ');
+            const [hours, minutes] = timePart.split(':').map(Number);
+
+            let finalHours = hours;
+            if (period === 'PM' && hours !== 12) {
+                finalHours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                finalHours = 0;
+            }
+
+            appointmentDate.setHours(finalHours, minutes, 0, 0);
+        } else {
+            // Default to current time if no time provided
+            const now = new Date();
+            appointmentDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
+        }
+
+        setAppointmentData(prev => ({
+            ...prev,
+            appointmentDate: appointmentDate.toISOString()
+        }));
+    }, []);
+
+    // Handle calendar date change
+    const handleCalendarDateChange = useCallback((date: Date) => {
+        setCalendarSelectedDate(date);
+        updateAppointmentDateTime(date, selectedTimeSlot);
+    }, [selectedTimeSlot, updateAppointmentDateTime]);
+
+    // Handle time change
+    const handleTimeChange = useCallback((time: string) => {
+        setSelectedTimeSlot(time);
+        updateAppointmentDateTime(calendarSelectedDate, time);
+    }, [calendarSelectedDate, updateAppointmentDateTime]);
 
     // Filter services when category changes
     useEffect(() => {
         if (appointmentData.categoryId > 0 && services.length > 0) {
-            // Get the selected category name
             const selectedCategory = categories.find(c => c.id === appointmentData.categoryId);
 
             if (selectedCategory) {
-                // Filter services by matching the categoryName
                 const servicesForCategory = services.filter(service =>
                     service.categoryName.toLowerCase() === selectedCategory.name.toLowerCase()
                 );
@@ -176,7 +200,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 setFilteredServices([]);
             }
 
-            // Reset service and pricing option selections when category changes
             setAppointmentData(prev => ({
                 ...prev,
                 serviceId: 0,
@@ -195,7 +218,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             const selectedService = services.find(s => s.id === appointmentData.serviceId);
             if (selectedService && selectedService.pricingOptions) {
                 setPricingOptions(selectedService.pricingOptions.map((opt: any) => ({
-                    id: opt.id, // Use the existing ID
+                    id: opt.id,
                     name: opt.name,
                     price: opt.price,
                     currency: opt.currency || 'AED',
@@ -205,7 +228,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 setPricingOptions([]);
             }
 
-            // Reset pricing option selection when service changes
             setAppointmentData(prev => ({
                 ...prev,
                 pricingOptionId: 0,
@@ -272,7 +294,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             const selectedOption = pricingOptions.find(option => option.name === value);
             if (selectedOption) {
                 handleInputChange('pricingOptionId', selectedOption.id);
-                // Update amount with the pricing option's price
                 if (selectedOption.price) {
                     handleInputChange('amount', selectedOption.price.toString());
                 }
@@ -301,7 +322,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        // Client Name validation
         if (!appointmentData.clientName || appointmentData.clientName.length < 3 || appointmentData.clientName.length > 100) {
             newErrors.clientName = 'Name must be between 3 and 100 characters';
         }
@@ -309,33 +329,27 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             newErrors.clientName = 'Name can only contain letters and spaces';
         }
 
-        // Mobile Number validation
         if (!/^\d{10,15}$/.test(appointmentData.mobileNumber)) {
             newErrors.mobileNumber = 'Mobile number must be between 10 and 15 digits';
         }
 
-        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(appointmentData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
-        // Category validation
         if (!appointmentData.categoryId || appointmentData.categoryId <= 0) {
             newErrors.categoryId = 'Please select a category';
         }
 
-        // Service validation
         if (!appointmentData.serviceId || appointmentData.serviceId <= 0) {
             newErrors.serviceId = 'Please select a service';
         }
 
-        // Pricing option validation
         if (!appointmentData.pricingOptionId || appointmentData.pricingOptionId <= 0) {
             newErrors.pricingOptionId = 'Please select a pricing option';
         }
 
-        // Amount validation
         if (!appointmentData.amount || parseFloat(appointmentData.amount) <= 0) {
             newErrors.amount = 'Amount must be greater than 0';
         }
@@ -350,15 +364,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 return;
             }
 
-            // Create a properly formatted date string for the API
-            let formattedDate = appointmentData.appointmentDate;
-
-            // Double-check that we have a valid date before submitting
-            if (!formattedDate || formattedDate === 'Invalid Date') {
-                // Fallback to current date/time
-                formattedDate = new Date().toISOString();
-            }
-
             const appointmentRequest = {
                 businessId: appointmentData.businessId,
                 clientName: appointmentData.clientName.trim(),
@@ -370,7 +375,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 amount: parseFloat(appointmentData.amount),
                 staffId: appointmentData.staffId,
                 paymentStatus: appointmentData.paymentStatus,
-                appointmentDate: formattedDate,
+                appointmentDate: appointmentData.appointmentDate,
                 isDraft: appointmentData.isDraft,
                 notes: appointmentData.notes
             };
@@ -438,6 +443,23 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                         placeholder="Enter email address"
                         feedback={errors.email ? 'error' : undefined}
                         feedbackMessage={errors.email}
+                    />
+
+                    <Calendar
+                        label="Appointment Date"
+                        selectedDate={calendarSelectedDate}
+                        onDateChange={handleCalendarDateChange}
+                        value={calendarSelectedDate ? 'dateselected' : 'Select appointment date'}
+                        leftAligned={false}
+                        noBorderRadius={true}
+                    />
+
+                    <TimePicker
+                        label="Appointment Time"
+                        selectedTime={selectedTimeSlot}
+                        onTimeChange={handleTimeChange}
+                        value={selectedTimeSlot || 'Select appointment time'}
+                        noBorderRadius={true}
                     />
 
                     <Dropdown
