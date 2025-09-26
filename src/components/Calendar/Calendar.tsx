@@ -19,6 +19,8 @@ type CalendarProps = {
     message?: string;
     selectedDate?: Date;
     onDateChange?: (date: Date) => void;
+    leftAligned?: boolean;
+    noBorderRadius?: boolean;
 };
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -33,6 +35,8 @@ const Calendar: React.FC<CalendarProps> = ({
     message = '',
     selectedDate: initialSelectedDate,
     onDateChange = () => { },
+    leftAligned = true,
+    noBorderRadius = false,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(initialSelectedDate || null);
@@ -163,12 +167,12 @@ const Calendar: React.FC<CalendarProps> = ({
         <div className={styles.calendarWrapper} ref={calendarRef}>
             {label && <label className={styles.label}>{label}</label>}
             <div className={styles.dropdown} onClick={toggleCalendar}>
-                <div className={`${styles.selected} ${isOpen ? styles.isOpen : ''}`}>
+                <div className={`${styles.selected} ${isOpen ? styles.isOpen : ''} ${noBorderRadius ? styles.noBorderRadius : ''}`}>
                     {value === 'alltime' ? 'All' : (value === 'dateselected' ? (selectedDate ? selectedDate.toDateString() : 'Select a date') : 'Select a date')}
 
                 </div>
                 {isOpen && (
-                    <div className={styles.calendarContainer} onClick={(e) => { e.stopPropagation() }}>
+                    <div className={`${styles.calendarContainer} ${leftAligned ? styles.leftAligned : ''}`} onClick={(e) => { e.stopPropagation() }}>
                         <div className={styles.navigation}>
                             <div className={`${styles.navButton} ${styles.prev} `} onClick={handlePrevMonth} ></div >
                             <div className={styles.yearMonthWrp}>

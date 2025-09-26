@@ -1,74 +1,336 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useServices } from '../../../hooks/useServices';
-import { useAppointments } from '../../../hooks/useAppointments';  // Add this import
+import { useAppointments } from '../../../hooks/useAppointments';
+import { useStaff } from '../../../hooks/useStaff';
+import { useCategories } from '../../../hooks/useCategories';
+import { CategoryListResponse, Category } from '../../../types/api-responses';
 import InputField from '../../../components/InputField/InputField';
 import Toggle from '../../../components/Toggle/Toggle';
 import Button from '../../../components/Button/Button';
 import Dropdown from '../../../components/Dropdown/Dropdown';
-import { AppointmentStatus } from '../../../types/enums';
-import { format } from 'date-fns'; // Add this import
-
+import TextArea from '../../../components/TextArea/TextArea';
+import Calendar from '../../../components/Calendar/Calendar';
+import TimePicker from '../../../components/TimePicker/TimePicker';
 import styles from './AddEditAppointment.module.css';
+
+enum AppointmentStatus {
+    Pending = 1,
+    Approved = 2,
+    Completed = 3,
+    Cancelled = 4,
+    NoShow = 5
+}
+
+enum PaymentStatus {
+    Paid = 1,
+    Unpaid = 2,
+    Upcoming = 3,
+    Draft = 4,
+    Late = 5
+}
 
 interface AddEditAppointmentProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    selectedTime: string;
+    selectedDate: string;
+    editingAppointmentId?: string | null;
+    businessId?: number;
 }
 
-const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSuccess, isOpen }) => {
+const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
+    onClose,
+    onSuccess,
+    isOpen,
+    selectedTime,
+    selectedDate,
+    editingAppointmentId,
+    businessId = 0
+}) => {
     const { services, getServices, loading: servicesLoading } = useServices();
-    const { createAppointment, loading: appointmentLoading } = useAppointments();  // Add this line
+    const { createAppointment, getAppointmentById, updateAppointment, loading: appointmentLoading } = useAppointments();
+    const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
+    const { getBusinessCategories, loading: categoriesLoading } = useCategories();
+
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
+    const [filteredServices, setFilteredServices] = useState<Array<any>>([]);
+    const [pricingOptions, setPricingOptions] = useState<Array<{ id: number, name: string, price: number, currency: string, duration: string }>>([]);
+
+    const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | undefined>(undefined);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
 
     const [appointmentData, setAppointmentData] = useState({
+        businessId: businessId,
         clientName: '',
         mobileNumber: '',
-        emailAddress: '',
-        category: '',
-        service: 0,  // Changed to number
+        email: '',
+        categoryId: 0,
+        serviceId: 0,
+        pricingOptionId: 0,
         amount: '',
-        assignedTo: '',
-        status: AppointmentStatus.Upcoming,  // Changed to use enum directly
-        saveAsDraft: false
+        staffId: 0,
+        paymentStatus: PaymentStatus.Upcoming,
+        appointmentDate: new Date().toISOString(),
+        isDraft: false,
+        notes: ''
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const statusOptions = [
-        { label: 'Upcoming', value: AppointmentStatus.Upcoming },
-        { label: 'Paid', value: AppointmentStatus.Paid },
-        { label: 'Late', value: AppointmentStatus.Late },
-        { label: 'Unpaid', value: AppointmentStatus.Unpaid },
-        { label: 'Draft', value: AppointmentStatus.Draft }
+    const paymentStatusOptions = [
+        { label: 'Paid', value: PaymentStatus.Paid },
+        { label: 'Unpaid', value: PaymentStatus.Unpaid },
+        { label: 'Upcoming', value: PaymentStatus.Upcoming },
+        { label: 'Draft', value: PaymentStatus.Draft },
+        { label: 'Late', value: PaymentStatus.Late }
     ];
 
-    useEffect(() => {
-        let mounted = true;
+    const resetForm = useCallback(() => {
+        setAppointmentData({
+            businessId: businessId,
+            clientName: '',
+            mobileNumber: '',
+            email: '',
+            categoryId: 0,
+            serviceId: 0,
+            pricingOptionId: 0,
+            amount: '',
+            staffId: 0,
+            paymentStatus: PaymentStatus.Upcoming,
+            appointmentDate: new Date().toISOString(),
+            isDraft: false,
+            notes: ''
+        });
+        setErrors({});
+        setSelectedTimeSlot('');
+        setCalendarSelectedDate(undefined);
+    }, [businessId]);
 
+    const loadExistingAppointment = useCallback(async (appointmentId: string) => {
+        try {
+            setIsEditMode(true);
+            const appointment = await getAppointmentById(parseInt(appointmentId));
+
+            console.log('Loaded appointment for editing:', appointment);
+
+            // Map the appointment data to form structure
+            setAppointmentData({
+                businessId: appointment.businessId || businessId,
+                clientName: appointment.clientName || appointment.customerName || '',
+                mobileNumber: appointment.clientPhone || appointment.phoneNumber || '',
+                email: appointment.clientEmail || appointment.email || '',
+                categoryId: appointment.categoryId || 0,
+                serviceId: appointment.businessServiceId || appointment.serviceId || 0,
+                pricingOptionId: appointment.servicePricingOptionId || appointment.pricingOptionId || 0,
+                amount: appointment.amount?.toString() || appointment.servicePrice?.toString() || '',
+                staffId: appointment.staffId || 0,
+                paymentStatus: appointment.paymentStatus || PaymentStatus.Upcoming,
+                appointmentDate: appointment.appointmentDate || new Date().toISOString(),
+                isDraft: appointment.isDraft || false,
+                notes: appointment.notes || ''
+            });
+
+            // Set calendar date
+            if (appointment.appointmentDate) {
+                const appointmentDate = new Date(appointment.appointmentDate);
+                setCalendarSelectedDate(appointmentDate);
+
+                // Set time
+                const timeString = appointmentDate.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                setSelectedTimeSlot(timeString);
+            }
+
+        } catch (error) {
+            console.error('Failed to load appointment for editing:', error);
+            // Fall back to empty form
+            setIsEditMode(true);
+        }
+    }, [getAppointmentById, businessId]);
+
+    const fetchInitialData = useCallback(async () => {
+        try {
+            // Load all data in parallel
+            const promises = [];
+
+            if (services.length === 0) {
+                promises.push(getServices());
+            }
+
+            if (staff.length === 0) {
+                promises.push(getBusinessStaff({ businessId }));
+            }
+
+            promises.push(getBusinessCategories());
+
+            const results = await Promise.all(promises);
+
+            // Set categories from the last promise result
+            const categoriesResponse = results[results.length - 1] as CategoryListResponse;
+            if (categoriesResponse?.categories) {
+                setCategories(categoriesResponse.categories.map((cat: Category) => ({
+                    id: cat.id,
+                    name: cat.name
+                })));
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch initial data:', error);
+        }
+    }, [getServices, getBusinessStaff, getBusinessCategories, services.length, businessId]);
+
+    useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            // Only fetch if we haven't already
-            if (services.length === 0) {
-                getServices().catch(error => {
-                    if (mounted) {
-                        console.error('Failed to fetch services:', error);
+
+            const initializeModal = async () => {
+                // First, load all the initial data (categories, services, staff)
+                await fetchInitialData();
+
+                // Then check if we're editing or creating
+                if (editingAppointmentId) {
+                    await loadExistingAppointment(editingAppointmentId);
+                } else {
+                    setIsEditMode(false);
+                    resetForm();
+
+                    // Initialize calendar date from selectedDate prop
+                    try {
+                        if (selectedDate && selectedDate.includes('/')) {
+                            const [day, month, year] = selectedDate.split('/').map(Number);
+                            const dateObj = new Date(year, month - 1, day);
+                            setCalendarSelectedDate(dateObj);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing initial date:', error);
+                        setCalendarSelectedDate(new Date());
                     }
-                });
-            }
+
+                    // Initialize time from selectedTime prop
+                    if (selectedTime && selectedTime.includes(':')) {
+                        const [hours, minutes] = selectedTime.split(':').map(Number);
+                        const amPm = hours >= 12 ? 'PM' : 'AM';
+                        const displayHour = hours % 12 || 12;
+                        const displayMinute = minutes.toString().padStart(2, '0');
+                        const timeString = `${displayHour}:${displayMinute} ${amPm}`;
+                        setSelectedTimeSlot(timeString);
+                    }
+                }
+            };
+
+            initializeModal();
         } else {
             document.body.style.overflow = 'auto';
         }
 
         return () => {
-            mounted = false;
             document.body.style.overflow = 'auto';
         };
-    }, [isOpen]); // Remove getServices from dependencies
+    }, [isOpen, editingAppointmentId, fetchInitialData, resetForm, loadExistingAppointment, selectedDate, selectedTime]);
 
-    const serviceOptions = services.map(service => ({
-        label: service.name,
-        value: service.id.toString()
-    }));
+    const updateAppointmentDateTime = useCallback((date?: Date, time?: string) => {
+        if (!date) return;
+
+        const appointmentDate = new Date(date);
+
+        if (time && time.includes(':')) {
+            const [timePart, period] = time.split(' ');
+            const [hours, minutes] = timePart.split(':').map(Number);
+
+            let finalHours = hours;
+            if (period === 'PM' && hours !== 12) {
+                finalHours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                finalHours = 0;
+            }
+
+            appointmentDate.setHours(finalHours, minutes, 0, 0);
+        } else {
+            const now = new Date();
+            appointmentDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
+        }
+
+        setAppointmentData(prev => ({
+            ...prev,
+            appointmentDate: appointmentDate.toISOString()
+        }));
+    }, []);
+
+    const handleCalendarDateChange = useCallback((date: Date) => {
+        setCalendarSelectedDate(date);
+        updateAppointmentDateTime(date, selectedTimeSlot);
+    }, [selectedTimeSlot, updateAppointmentDateTime]);
+
+    const handleTimeChange = useCallback((time: string) => {
+        setSelectedTimeSlot(time);
+        updateAppointmentDateTime(calendarSelectedDate, time);
+    }, [calendarSelectedDate, updateAppointmentDateTime]);
+
+    // Filter services when category changes
+    useEffect(() => {
+        if (appointmentData.categoryId > 0 && services.length > 0 && categories.length > 0) {
+            const selectedCategory = categories.find(c => c.id === appointmentData.categoryId);
+
+            if (selectedCategory) {
+                const servicesForCategory = services.filter(service =>
+                    service.categoryName.toLowerCase() === selectedCategory.name.toLowerCase()
+                );
+
+                setFilteredServices(servicesForCategory);
+                console.log('Filtered services for category:', selectedCategory.name, servicesForCategory);
+            } else {
+                setFilteredServices([]);
+            }
+
+            // Only reset service/pricing if not in edit mode or if category actually changed
+            if (!isEditMode) {
+                setAppointmentData(prev => ({
+                    ...prev,
+                    serviceId: 0,
+                    pricingOptionId: 0,
+                    amount: ''
+                }));
+                setPricingOptions([]);
+            }
+        } else {
+            setFilteredServices([]);
+        }
+    }, [appointmentData.categoryId, services, categories, isEditMode]);
+
+    // Update pricing options when service changes
+    useEffect(() => {
+        if (appointmentData.serviceId > 0 && services.length > 0) {
+            const selectedService = services.find(s => s.id === appointmentData.serviceId);
+            if (selectedService && selectedService.pricingOptions) {
+                setPricingOptions(selectedService.pricingOptions.map((opt: any) => ({
+                    id: opt.id,
+                    name: opt.name,
+                    price: opt.price,
+                    currency: opt.currency || 'AED',
+                    duration: opt.duration
+                })));
+                console.log('Loaded pricing options for service:', selectedService.name, selectedService.pricingOptions);
+            } else {
+                setPricingOptions([]);
+            }
+
+            // Only reset pricing option if not in edit mode
+            if (!isEditMode) {
+                setAppointmentData(prev => ({
+                    ...prev,
+                    pricingOptionId: 0,
+                    amount: ''
+                }));
+            }
+        } else {
+            setPricingOptions([]);
+        }
+    }, [appointmentData.serviceId, services, isEditMode]);
 
     const handleInputChange = (name: string, value: string | number | boolean) => {
         setAppointmentData(prev => ({
@@ -77,30 +339,78 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
         }));
     };
 
+    // Helper functions for dropdown display values
+    const getCategoryDisplayValue = (categoryId: number) => {
+        const category = categories.find(c => c.id === categoryId);
+        return category ? category.name : '';
+    };
+
     const getServiceDisplayValue = (serviceId: number) => {
-        const service = services.find(s => s.id === serviceId);
+        const service = filteredServices.find(s => s.id === serviceId) ||
+            services.find(s => s.id === serviceId);
         return service ? service.name : '';
     };
 
-    const getStatusDisplayValue = (statusValue: AppointmentStatus) => {
-        const status = statusOptions.find(s => s.value === statusValue);
+    const getPricingOptionDisplayValue = (pricingOptionId: number) => {
+        const option = pricingOptions.find(p => p.id === pricingOptionId);
+        return option ? option.name : '';
+    };
+
+    const getStaffDisplayValue = (staffId: number) => {
+        const member = staff.find(s => s.id === staffId);
+        return member ? member.fullName : '';
+    };
+
+    const getPaymentStatusDisplayValue = (statusValue: PaymentStatus) => {
+        const status = paymentStatusOptions.find(s => s.value === statusValue);
         return status ? status.label : '';
     };
 
-    const handleServiceChange = (value: string | string[]) => {
+    // Change handlers for dropdowns
+    const handleCategoryChange = (value: string | string[]) => {
         if (typeof value === 'string') {
-            const selectedService = services.find(service => service.name === value);
-            if (selectedService) {
-                handleInputChange('service', selectedService.id);
+            const selectedCategory = categories.find(category => category.name === value);
+            if (selectedCategory) {
+                handleInputChange('categoryId', selectedCategory.id);
             }
         }
     };
 
-    const handleStatusChange = (value: string | string[]) => {
+    const handleServiceChange = (value: string | string[]) => {
         if (typeof value === 'string') {
-            const selectedStatus = statusOptions.find(status => status.label === value);
+            const selectedService = filteredServices.find(service => service.name === value);
+            if (selectedService) {
+                handleInputChange('serviceId', selectedService.id);
+            }
+        }
+    };
+
+    const handlePricingOptionChange = (value: string | string[]) => {
+        if (typeof value === 'string') {
+            const selectedOption = pricingOptions.find(option => option.name === value);
+            if (selectedOption) {
+                handleInputChange('pricingOptionId', selectedOption.id);
+                if (selectedOption.price) {
+                    handleInputChange('amount', selectedOption.price.toString());
+                }
+            }
+        }
+    };
+
+    const handleStaffChange = (value: string | string[]) => {
+        if (typeof value === 'string') {
+            const selectedStaff = staff.find(s => s.fullName === value);
+            if (selectedStaff) {
+                handleInputChange('staffId', selectedStaff.id);
+            }
+        }
+    };
+
+    const handlePaymentStatusChange = (value: string | string[]) => {
+        if (typeof value === 'string') {
+            const selectedStatus = paymentStatusOptions.find(status => status.label === value);
             if (selectedStatus) {
-                handleInputChange('status', selectedStatus.value);
+                handleInputChange('paymentStatus', selectedStatus.value);
             }
         }
     };
@@ -108,7 +418,6 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        // Client Name validation
         if (!appointmentData.clientName || appointmentData.clientName.length < 3 || appointmentData.clientName.length > 100) {
             newErrors.clientName = 'Name must be between 3 and 100 characters';
         }
@@ -116,23 +425,27 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
             newErrors.clientName = 'Name can only contain letters and spaces';
         }
 
-        // Mobile Number validation
         if (!/^\d{10,15}$/.test(appointmentData.mobileNumber)) {
             newErrors.mobileNumber = 'Mobile number must be between 10 and 15 digits';
         }
 
-        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(appointmentData.emailAddress)) {
+        if (!emailRegex.test(appointmentData.email)) {
             newErrors.email = 'Please enter a valid email address';
         }
 
-        // Service validation
-        if (!appointmentData.service || appointmentData.service <= 0) {
-            newErrors.service = 'Please select a service';
+        if (!appointmentData.categoryId || appointmentData.categoryId <= 0) {
+            newErrors.categoryId = 'Please select a category';
         }
 
-        // Amount validation
+        if (!appointmentData.serviceId || appointmentData.serviceId <= 0) {
+            newErrors.serviceId = 'Please select a service';
+        }
+
+        if (!appointmentData.pricingOptionId || appointmentData.pricingOptionId <= 0) {
+            newErrors.pricingOptionId = 'Please select a pricing option';
+        }
+
         if (!appointmentData.amount || parseFloat(appointmentData.amount) <= 0) {
             newErrors.amount = 'Amount must be greater than 0';
         }
@@ -147,26 +460,33 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
                 return;
             }
 
-            const today = new Date();
             const appointmentRequest = {
                 clientName: appointmentData.clientName.trim(),
                 mobileNumber: appointmentData.mobileNumber,
-                email: appointmentData.emailAddress,
-                serviceId: appointmentData.service,
+                email: appointmentData.email,
+                categoryId: appointmentData.categoryId,
+                serviceId: appointmentData.serviceId,
+                pricingOptionId: appointmentData.pricingOptionId,
                 amount: parseFloat(appointmentData.amount),
-                // Format date as YYYY-MM-DD
-                appointmentDate: format(today, 'yyyy-MM-dd'),
-                // Format time as HH:mm
-                appointmentTime: format(today, 'HH:mm'),
-                isDraft: appointmentData.saveAsDraft,
-                status: appointmentData.status
+                staffId: appointmentData.staffId,
+                paymentStatus: appointmentData.paymentStatus,
+                appointmentDate: appointmentData.appointmentDate,
+                isDraft: appointmentData.isDraft,
+                notes: appointmentData.notes
             };
 
-            await createAppointment(appointmentRequest);
-            await onSuccess();
-            onClose();
+            if (isEditMode && editingAppointmentId) {
+                await updateAppointment(parseInt(editingAppointmentId), appointmentRequest);
+            } else {
+                await createAppointment({
+                    businessId: appointmentData.businessId,
+                    ...appointmentRequest
+                });
+            }
+
+            onSuccess();
         } catch (error) {
-            console.error('Error creating appointment:', error);
+            console.error('Error saving appointment:', error);
         }
     };
 
@@ -175,20 +495,24 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>
             <div className={`${styles.modalContainer} ${isOpen ? styles.open : ''}`}>
-                {(appointmentLoading) && (
+                {appointmentLoading && (
                     <div className={styles.loadingOverlay}>
                         <div className={styles.spinner}>
                             <svg viewBox="0 0 50 50">
                                 <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
                             </svg>
-                            <span>Creating appointment...</span>
+                            <span>
+                                {isEditMode ? 'Updating appointment...' : 'Creating appointment...'}
+                            </span>
                         </div>
                     </div>
                 )}
 
                 <div className={styles.headerCloseContainer}>
                     <button onClick={onClose} className={styles.closeButton}>&times;</button>
-                    <h2 className={styles.header}>New appointment</h2>
+                    <h2 className={styles.header}>
+                        {isEditMode ? 'Edit appointment' : 'New appointment'}
+                    </h2>
                 </div>
 
                 <div className={styles.appointmentForm}>
@@ -214,30 +538,62 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
 
                     <InputField
                         label="Email address"
-                        name="emailAddress"
-                        value={appointmentData.emailAddress}
-                        onChange={(value) => handleInputChange('emailAddress', value)}
+                        name="email"
+                        value={appointmentData.email}
+                        onChange={(value) => handleInputChange('email', value)}
                         type="email"
                         placeholder="Enter email address"
                         feedback={errors.email ? 'error' : undefined}
                         feedbackMessage={errors.email}
                     />
 
+                    <Calendar
+                        label="Appointment Date"
+                        selectedDate={calendarSelectedDate}
+                        onDateChange={handleCalendarDateChange}
+                        value={calendarSelectedDate ? 'dateselected' : 'Select appointment date'}
+                        leftAligned={false}
+                        noBorderRadius={true}
+                    />
+
+                    <TimePicker
+                        label="Appointment Time"
+                        selectedTime={selectedTimeSlot}
+                        onTimeChange={handleTimeChange}
+                        value={selectedTimeSlot || 'Select appointment time'}
+                        noBorderRadius={true}
+                    />
+
                     <Dropdown
                         label="Category"
-                        options={['Haircut', 'Coloring', 'Styling', 'Treatment']}
-                        value={appointmentData.category}
-
-
+                        options={categories.map(category => category.name)}
+                        value={getCategoryDisplayValue(appointmentData.categoryId)}
+                        onChange={handleCategoryChange}
+                        isLoading={categoriesLoading}
+                        disabled={categoriesLoading}
+                        feedback={errors.categoryId ? 'error' : undefined}
+                        feedbackMessage={errors.categoryId}
                     />
 
                     <Dropdown
                         label="Service"
-                        options={services.map(service => service.name)}
-                        value={getServiceDisplayValue(appointmentData.service)}
+                        options={filteredServices.map(service => service.name)}
+                        value={getServiceDisplayValue(appointmentData.serviceId)}
                         onChange={handleServiceChange}
                         isLoading={servicesLoading}
-                        disabled={servicesLoading}
+                        disabled={servicesLoading || appointmentData.categoryId <= 0 || filteredServices.length === 0}
+                        feedback={errors.serviceId ? 'error' : undefined}
+                        feedbackMessage={errors.serviceId}
+                    />
+
+                    <Dropdown
+                        label="Pricing Option"
+                        options={pricingOptions.map(option => option.name)}
+                        value={getPricingOptionDisplayValue(appointmentData.pricingOptionId)}
+                        onChange={handlePricingOptionChange}
+                        disabled={appointmentData.serviceId <= 0 || pricingOptions.length === 0}
+                        feedback={errors.pricingOptionId ? 'error' : undefined}
+                        feedbackMessage={errors.pricingOptionId}
                     />
 
                     <InputField
@@ -253,25 +609,34 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
                     />
 
                     <Dropdown
-                        label="Assign to someone"
-                        options={['Ahmad Housam', 'Adam Zanaty']}
-                        value={appointmentData.assignedTo}
-
-
+                        label="Assign to staff"
+                        options={staff.map(s => s.fullName)}
+                        value={getStaffDisplayValue(appointmentData.staffId)}
+                        onChange={handleStaffChange}
+                        isLoading={staffLoading}
+                        disabled={staffLoading}
                     />
 
                     <Dropdown
-                        label="Status"
-                        options={statusOptions.map(status => status.label)}
-                        value={getStatusDisplayValue(appointmentData.status)}
-                        onChange={handleStatusChange}
+                        label="Payment Status"
+                        options={paymentStatusOptions.map(status => status.label)}
+                        value={getPaymentStatusDisplayValue(appointmentData.paymentStatus)}
+                        onChange={handlePaymentStatusChange}
+                    />
+
+                    <TextArea
+                        label="Notes"
+                        name="notes"
+                        value={appointmentData.notes}
+                        onChange={(value) => handleInputChange('notes', value)}
+                        placeholder="Enter any additional notes..."
                     />
 
                     <Toggle
-                        name="saveAsDraft"
+                        name="isDraft"
                         label="Save as draft"
-                        checked={appointmentData.saveAsDraft}
-                        onChange={(value) => handleInputChange('saveAsDraft', value)}
+                        checked={appointmentData.isDraft}
+                        onChange={(value) => handleInputChange('isDraft', value)}
                     />
 
                     <div className={styles.buttonContainer}>
@@ -283,9 +648,9 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({ onClose, onSucc
                         />
                         <Button
                             onClick={handleSubmit}
-                            label="Add"
+                            label={isEditMode ? 'Update' : 'Add'}
                             size="medium"
-                            disabled={servicesLoading || appointmentLoading}
+                            disabled={servicesLoading || staffLoading || appointmentLoading || categoriesLoading}
                         />
                     </div>
                 </div>

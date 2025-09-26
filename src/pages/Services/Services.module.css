@@ -193,3 +193,119 @@
         stroke-dashoffset: -124;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+.card {
+    position: relative;
+    display: grid;
+    gap: var(--gap-md);
+}
+
+.categoryActions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+}
+
+.removeButton {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ff4444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+    background: #ff4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+
+
+
+
+
+.card {
+    position: relative;
+    display: grid;
+    gap: var(--gap-md);
+}
+
+.categoryMenu {
+    position: absolute;
+    top: var(--paddin-sm);
+    right: var(--paddin-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease-in-out;
+}
+
+.categoryMenu:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+.menuIcon {
+    height: 16px;
+    width: auto;
+}
+
+.categoryDropdownMenu {
+    position: absolute;
+    top: 40px;
+    right: 8px;
+    background-color: var(--color-background-component);
+    box-shadow: var(--box-shadow-card);
+    border-radius: var(--br-md);
+    overflow: hidden;
+    z-index: 1000;
+    padding: 8px 0;
+    min-width: 140px;
+}
+
+.categoryDropdownItem {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    gap: var(--gap-md);
+    transition: background-color 0.2s;
+    font-size: var(--font-size-md);
+    color: var(--color-late-circle);
+}
+
+.categoryDropdownItem:hover {
+    background-color: var(--primary-hover-tran);
+}
+
+.categoryDropdownItem .icon {
+    width: 16px;
+    height: 16px;
+}

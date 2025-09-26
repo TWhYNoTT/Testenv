@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Wizard.module.css';
 import Step1 from './Step1/Step1';
@@ -11,6 +11,7 @@ import Hint from '../Hint/Hint';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { ServiceType } from '../../types/enums';
 import { useBizContext } from '../../contexts/BusinessContext';
+import { useAuth } from '../../hooks/useAuth'; // Import useAuth hook
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Toast } from '../Toast/Toast';
@@ -30,6 +31,7 @@ const Wizard: React.FC = () => {
     const { businessData, updateBusinessData, submitBusiness, loading } = useBizContext();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const { showLoadingScreen } = useLoading();
+    const { refreshAccessToken } = useAuth(); // Use the auth hook
 
     interface BusinessHour {
         dayOfWeek: number;
@@ -112,9 +114,19 @@ const Wizard: React.FC = () => {
         if (step === 4) {
             try {
                 await submitBusiness();
+                
+                // After successful business creation, refresh the token
+                const refreshSuccess = await refreshAccessToken();
+                
                 showLoadingScreen(() => {
-                    navigate('/settings/accountsettings');
+                    if (refreshSuccess) {
+                        navigate('/settings/accountsettings');
+                    } else {
+                        // If token refresh failed, navigate to login
+                        navigate('/form/login');
+                    }
                 });
+                
             } catch (error: any) {
                 if (error.errors?.Business) {
                     setErrorMessage(error.errors.Business[0]);

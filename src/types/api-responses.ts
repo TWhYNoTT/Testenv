@@ -78,3 +78,82 @@ export interface AppointmentResponse {
     isDraft: boolean;
     status: string;
 }
+
+export interface AppointmentService {
+    serviceId: number;
+    serviceName: string;
+    categoryName: string;
+    amount: number;
+    duration: string;
+}
+
+export interface AppointmentDetails {
+    id: number;
+    serviceName: string;
+    customerName: string;
+    phoneNumber: string;
+    email: string;
+    appointmentDate: string;
+    duration: string;
+    servicePrice: number;
+    paymentStatus: number;
+    paymentStatusString: string;
+    status: number;
+    statusString: string;
+    isDraft: boolean;
+    staffId?: number;
+    staffName?: string;
+    isRegisteredCustomer: boolean;
+}
+
+export interface AppointmentListResponse {
+    appointments: AppointmentDetails[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+// Add to api-responses.ts
+export interface BusinessStaffDto {
+    id: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    position?: string;
+    isActive: boolean;
+    rating: number;
+    totalRatings: number;
+    schedules: StaffScheduleDto[];
+}
+
+export interface StaffScheduleDto {
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+}
+
+export interface BusinessStaffListResponse {
+    staff: BusinessStaffDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+// Branch types
+export interface BranchDto {
+    id: number;
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
+    createdAt: string;
+}
+
+export interface BusinessBranchListResponse {
+    branches: BranchDto[];
+    totalCount: number;
+}

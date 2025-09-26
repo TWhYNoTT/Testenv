@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styles from './Step2.module.css';
 import CategoryCard from '../../../components/CategoryCard/CategoryCard';
 import Checkbox from '../../../components/Checkbox/Checkbox';
@@ -32,24 +32,23 @@ const Step2: React.FC<Step2Props> = ({
     const { getCategories, loading, error } = useCategories();
     const [categories, setCategories] = useState<Category[]>([]);
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await getCategories();
-                // Transform the API response categories to match our local interface
-                const transformedCategories = response.categories.map(cat => ({
-                    id: String(cat.id),
-                    name: cat.name,
-                    imageUrl: cat.imageUrl
-                }));
-                setCategories(transformedCategories);
-            } catch (err) {
-                console.error('Failed to fetch categories:', err);
-            }
-        };
+    const fetchCategories = useCallback(async () => {
+        try {
+            const response = await getCategories();
+            const transformedCategories = response.categories.map(cat => ({
+                id: String(cat.id),
+                name: cat.name,
+                imageUrl: cat.imageUrl
+            }));
+            setCategories(transformedCategories);
+        } catch (err) {
+            console.error('Failed to fetch categories:', err);
+        }
+    }, [getCategories]);
 
+    useEffect(() => {
         fetchCategories();
-    }, []);
+    }, [fetchCategories]);
 
     const handleCardClick = (categoryId: string) => {
         console.log('Clicked category:', categoryId);

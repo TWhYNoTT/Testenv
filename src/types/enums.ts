@@ -23,9 +23,9 @@ export enum Gender {
 }
 
 export enum AppointmentStatus {
-    Upcoming = 0,
     Paid = 1,
-    Late = 2,
-    Unpaid = 3,
-    Draft = 6
+    Unpaid = 2,
+    Upcoming = 3,
+    Draft = 4,
+    Late = 5
 }

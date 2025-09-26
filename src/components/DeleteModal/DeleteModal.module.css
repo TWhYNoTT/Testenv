@@ -9,27 +9,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* transition: opacity 0.3s ease-in-out; */
     z-index: 10000;
+    opacity: 0;
     pointer-events: none;
-
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
 
 .modalOverlay.open {
-    animation: showDeleteModal 0.3s ease-in-out;
-    -webkit-animation: showDeleteModal 0.3s ease-in-out;
+    opacity: 1;
     pointer-events: auto;
-}
-
-@keyframes showDeleteModal {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-
+    visibility: visible;
 }
 
 .modalContent {
@@ -38,8 +28,6 @@
     border-radius: var(--br-md);
     padding: var(--paddin-4xl);
     box-shadow: var(--box-shadow-card);
-    /* min-width: 500px;
-    max-width: 70%; */
     position: relative;
     -webkit-border-radius: var(--br-md);
     -moz-border-radius: var(--br-md);
@@ -47,16 +35,19 @@
     -o-border-radius: var(--br-md);
     gap: var(--gap-5xl);
     text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease-in-out;
 }
 
+.modalContent.open {
+    transform: scale(1);
+}
 
 .header {
     font-size: var(--font-size-6xl);
     font-weight: var(--font-weight-bold);
     color: var(--color-dark-v1);
 }
-
-
 
 .closeButton {
     position: absolute;
@@ -76,7 +67,6 @@
 .descText {
     color: var(--color-lightslategray-100);
     font-size: var(--font-size-sm);
-
 }
 
 .buttonsContainer {
@@ -91,6 +81,5 @@ div.buttonsContainer>div>button {
     -moz-border-radius: var(--br-sm);
     -ms-border-radius: var(--br-sm);
     -o-border-radius: var(--br-sm);
-    /* font-size: var(--font-size-md); */
     padding: var(--paddin-sm) var(--paddin-3xl);
 }

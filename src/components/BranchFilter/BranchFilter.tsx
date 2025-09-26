@@ -1,38 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Checkbox from '../Checkbox/Checkbox';
 import Button from '../Button/Button';
 import Modal from './Modal/Modal';
 import styles from './BranchFilter.module.css';
+import { useBranches } from '../../hooks/useBranches';
+import { useToast } from '../../contexts/ToastContext';
+import type { BranchDto } from '../../types/api-responses';
 
-const allBranches = [
-    { id: 1, name: 'Devanza', city: 'Dubai' },
-    { id: 2, name: 'Devanza', city: 'Abu Dhabi' },
-    { id: 3, name: 'Devanza', city: 'Dubai' },
-    { id: 4, name: 'Devanza', city: 'Jordan, Amman' },
-    { id: 5, name: 'Devanza', city: 'Germany' },
-    { id: 6, name: 'Devanza', city: 'Dubai' },
-    { id: 7, name: 'Devanza', city: 'Dubai' },
-    { id: 8, name: 'Branch 1', city: 'City 1' },
-    { id: 9, name: 'Branch 2', city: 'City 2' },
-    { id: 10, name: 'Branch 3', city: 'City 3' },
-    { id: 11, name: 'Branch 4', city: 'City 4' },
-    { id: 12, name: 'Branch 5', city: 'City 5' },
-    { id: 13, name: 'Branch 6', city: 'City 6' },
-    { id: 14, name: 'Branch 7', city: 'City 7' },
-    { id: 15, name: 'Branch 8', city: 'City 8' },
-    { id: 16, name: 'Branch 9', city: 'City 9' },
-    { id: 17, name: 'Branch 10', city: 'City 10' },
-    { id: 18, name: 'Branch 11', city: 'City 11' },
-    { id: 19, name: 'Branch 12', city: 'City 12' },
-];
+interface FilterBranch {
+    id: number;
+    name: string;
+    city: string;
+}
 
 const BranchFilter: React.FC = () => {
-    const initialVisibleBranches = allBranches.slice(0, 7);
-    const additionalBranches = allBranches.slice(7);
+    const { showToast } = useToast();
+    const { getBranches, loading } = useBranches();
 
-
+    const [allBranches, setAllBranches] = useState<FilterBranch[]>([]);
     const [selectedBranches, setSelectedBranches] = useState<number[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
+
+    // Load branches on component mount
+    const loadBranches = useCallback(async () => {
+        try {
+            const response = await getBranches();
+            const mappedBranches: FilterBranch[] = response.branches
+                .filter(branch => branch.active) // Only show active branches
+                .map((branch: BranchDto) => ({
+                    id: branch.id,
+                    name: branch.name,
+                    city: branch.address
+                }));
+            setAllBranches(mappedBranches);
+        } catch (err) {
+            showToast('Failed to load branches', 'error');
+        }
+    }, [getBranches, showToast]);
+
+    useEffect(() => {
+        loadBranches();
+    }, [loadBranches]);
+
+    const initialVisibleBranches = allBranches.slice(0, 7);
+    const additionalBranches = allBranches.slice(7);
 
     const toggleBranch = (branchId: number) => {
         setSelectedBranches((prev) =>
@@ -51,9 +62,28 @@ const BranchFilter: React.FC = () => {
     const openModal = () => setModalOpen(true);
     const closeModal = () => setModalOpen(false);
 
+    // Show loading state or no branches message
+    if (loading) {
+        return (
+            <div className={styles.branchFilterContainer}>
+                <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}></div>
+                    <span>Loading branches...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (allBranches.length === 0) {
+        return (
+            <div className={styles.branchFilterContainer}>
+                <div>No active branches available</div>
+            </div>
+        );
+    }
+
     return (
         <div>
-
             <div className={styles.branchFilterContainer}>
                 {initialVisibleBranches.map((branch) => (
                     <Checkbox
@@ -65,18 +95,17 @@ const BranchFilter: React.FC = () => {
                         variant="button"
                     />
                 ))}
-                <div className={styles.plusButton}>
-                    <span className={styles.plusSpan}>+{additionalBranches.length} Branches</span>
-
-                    <Button label="Filter" variant="primary" onClick={openModal} size='medium' />
-
-                </div>
+                {additionalBranches.length > 0 && (
+                    <div className={styles.plusButton}>
+                        <span className={styles.plusSpan}>+{additionalBranches.length} Branches</span>
+                        <Button label="Filter" variant="primary" onClick={openModal} size='medium' />
+                    </div>
+                )}
             </div>
             <Modal isOpen={modalOpen} onClose={closeModal}>
                 <div className={styles.modalHeader}>
                     <h2 className={styles.modalTitle}>Filter Branches</h2>
                     <h3 className={styles.modalTitleDesc}>Get accurate results by filtering out store branches</h3>
-
                 </div>
                 <div className={styles.modalBody}>
                     {allBranches.map((branch) => (

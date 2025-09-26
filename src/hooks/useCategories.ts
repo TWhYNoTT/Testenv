@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { apiService, CategoryRequest } from "../services/api";
 import type { CategoryListResponse, RequestCategoryResponse } from "../types/api-responses";
 
@@ -6,7 +6,7 @@ export const useCategories = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const getCategories = async (): Promise<CategoryListResponse> => {
+    const getCategories = useCallback(async (): Promise<CategoryListResponse> => {
         setLoading(true);
         setError(null);
         try {
@@ -19,9 +19,9 @@ export const useCategories = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const getMyRequestedCategories = async (): Promise<CategoryListResponse> => {
+    const getMyRequestedCategories = useCallback(async (): Promise<CategoryListResponse> => {
         setLoading(true);
         setError(null);
         try {
@@ -34,9 +34,9 @@ export const useCategories = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const getBusinessCategories = async (): Promise<CategoryListResponse> => {
+    const getBusinessCategories = useCallback(async (): Promise<CategoryListResponse> => {
         setLoading(true);
         setError(null);
         try {
@@ -49,9 +49,9 @@ export const useCategories = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const requestCategory = async (data: CategoryRequest): Promise<RequestCategoryResponse> => {
+    const requestCategory = useCallback(async (data: CategoryRequest): Promise<RequestCategoryResponse> => {
         setLoading(true);
         setError(null);
         try {
@@ -70,13 +70,29 @@ export const useCategories = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    const removeCategoryFromBusiness = useCallback(async (categoryId: number): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.removeCategoryFromBusiness(categoryId);
+            return response;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to remove category';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     return {
         getCategories,
         getMyRequestedCategories,
         getBusinessCategories,
         requestCategory,
+        removeCategoryFromBusiness,
         loading,
         error
     };

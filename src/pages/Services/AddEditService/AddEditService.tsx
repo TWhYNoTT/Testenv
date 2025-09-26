@@ -2,69 +2,43 @@ import React, { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useServices } from "../../../hooks/useServices";
 import { useCategories } from "../../../hooks/useCategories";
 import { Category } from "../../../types/api-responses";
-import { ServiceRequest } from "../../../services/api"; // Add this import
+import { ServiceRequest, UpdateServiceRequest } from "../../../services/api";
 import InputField from "../../../components/InputField/InputField";
 import Toggle from "../../../components/Toggle/Toggle";
 import Button from "../../../components/Button/Button";
 import Checkbox from "../../../components/Checkbox/Checkbox";
 import ProgressBar from "../../../components/ProgressBar/ProgressBar";
 import Dropdown from "../../../components/Dropdown/Dropdown";
-
-
-import styles from './AddEditService.module.css';
 import SearchBar from "../../../components/SearchBar/SearchBar";
-
-// type PricingOption = {
-//     pricingOptionName: string;
-//     duration: string;
-//     price: number;
-// };
-
-// type AddEditServiceProps = {
-//     serviceData: {
-//         serviceName: string;
-//         category: string;
-//         branch: string;
-//         selectedServiceType: 'Men only' | 'Women only' | 'Everyone';
-//         homeServicesAvailable: boolean;
-//         pricingOptions: PricingOption[];
-//         assignedEmployees: { id: number; name: string; role: string }[];
-//     };
-//     setServiceData: React.Dispatch<React.SetStateAction<{
-//         serviceName: string;
-//         category: string;
-//         branch: string;
-//         selectedServiceType: 'Men only' | 'Women only' | 'Everyone';
-//         homeServicesAvailable: boolean;
-//         pricingOptions: PricingOption[];
-//         assignedEmployees: { id: number; name: string; role: string }[];
-//     }>>;
-// };
-
+import styles from './AddEditService.module.css';
 
 interface AddEditProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    editingServiceId?: number | null;
 }
 
-
-//{ serviceData, setServiceData }
-const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) => {
+const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, editingServiceId }) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+    const [isLoadingService, setIsLoadingService] = useState(false);
     const { getBusinessCategories } = useCategories();
-    const { createService, loading } = useServices();
+    const { createService, updateService, getService, loading } = useServices();
+
+    const isEditMode = !!editingServiceId;
 
     const [serviceData, setServiceData] = useState({
         categoryId: 0,
         name: '',
         image: null as File | null,
+        removeExistingImage: false,
         minDuration: '00:30:00',
-        maxDuration: '00:30:00',
+        maxDuration: '01:00:00',
         serviceType: 1,
         hasHomeService: false,
         description: '',
+        isActive: true,
         pricingOptions: [] as Array<{
             name: string;
             price: number;
@@ -73,7 +47,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         }>
     });
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         setIsLoadingCategories(true);
         try {
             const response = await getBusinessCategories();
@@ -83,13 +57,45 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         } finally {
             setIsLoadingCategories(false);
         }
-    };
+    }, [getBusinessCategories]);
+
+    const loadServiceData = useCallback(async (serviceId: number) => {
+        setIsLoadingService(true);
+        try {
+            const service = await getService(serviceId);
+            setServiceData({
+                categoryId: 0, // Will be set after categories are loaded
+                name: service.name,
+                image: null,
+                removeExistingImage: false,
+                minDuration: service.minDuration,
+                maxDuration: service.maxDuration,
+                serviceType: service.serviceType,
+                hasHomeService: service.hasHomeService,
+                description: service.description || '',
+                isActive: service.isActive,
+                pricingOptions: service.pricingOptions.map(option => ({
+                    name: option.name,
+                    price: option.price,
+                    currency: option.currency,
+                    duration: option.duration
+                }))
+            });
+        } catch (error) {
+            console.error('Error loading service:', error);
+        } finally {
+            setIsLoadingService(false);
+        }
+    }, [getService]);
 
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
+            if (isEditMode && editingServiceId) {
+                loadServiceData(editingServiceId);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, isEditMode, editingServiceId, fetchCategories, loadServiceData]);
 
     useEffect(() => {
         if (isOpen) {
@@ -98,7 +104,6 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
             document.body.style.overflow = 'auto';
         }
 
-        // Cleanup on unmount
         return () => {
             document.body.style.overflow = 'auto';
         };
@@ -106,31 +111,52 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
 
     const handleSubmit = async () => {
         try {
-            const requestData: ServiceRequest = {
-                ...serviceData,
-                image: serviceData.image || undefined // Convert null to undefined
-            };
-            await createService(requestData);
-            await onSuccess(); // Call onSuccess after successful creation
-            onClose(); // This will trigger the parent's handleModalClose
+            if (isEditMode && editingServiceId) {
+                const updateData: UpdateServiceRequest = {
+                    name: serviceData.name,
+                    image: serviceData.image || undefined,
+                    removeExistingImage: serviceData.removeExistingImage,
+                    minDuration: serviceData.minDuration,
+                    maxDuration: serviceData.maxDuration,
+                    serviceType: serviceData.serviceType,
+                    hasHomeService: serviceData.hasHomeService,
+                    description: serviceData.description,
+                    isActive: serviceData.isActive,
+                    pricingOptions: serviceData.pricingOptions
+                };
+                await updateService(editingServiceId, updateData);
+            } else {
+                const requestData: ServiceRequest = {
+                    categoryId: serviceData.categoryId,
+                    name: serviceData.name,
+                    image: serviceData.image || undefined,
+                    minDuration: serviceData.minDuration,
+                    maxDuration: serviceData.maxDuration,
+                    serviceType: serviceData.serviceType,
+                    hasHomeService: serviceData.hasHomeService,
+                    description: serviceData.description,
+                    pricingOptions: serviceData.pricingOptions
+                };
+                await createService(requestData);
+            }
+            await onSuccess();
+            onClose();
         } catch (error) {
-            console.error('Error creating service:', error);
+            console.error('Error saving service:', error);
         }
     };
 
     const [step, setStep] = useState(1);
 
     const nextStep = () => {
-        if (step < 3)
-            setStep(step + 1);
+        if (step < 3) setStep(step + 1);
     };
 
     const prevStep = () => {
-        if (step > 1)
-            setStep(step - 1);
+        if (step > 1) setStep(step - 1);
     };
 
-    const handleInputChange = (name: string, value: string | number | boolean | File) => {
+    const handleInputChange = (name: string, value: string | number | boolean | File | null) => {
         setServiceData(prev => ({
             ...prev,
             [name]: value
@@ -141,7 +167,13 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
         const file = event.target.files?.[0];
         if (file) {
             handleInputChange('image', file);
+            handleInputChange('removeExistingImage', false);
         }
+    };
+
+    const handleRemoveImage = () => {
+        handleInputChange('image', null);
+        handleInputChange('removeExistingImage', true);
     };
 
     const handlePricingOptionAdd = () => {
@@ -190,13 +222,13 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>
             <div className={`${styles.modalContainer} ${isOpen ? styles.open : ''}`}>
-                {loading && (
+                {(loading || isLoadingService) && (
                     <div className={styles.loadingOverlay}>
                         <div className={styles.spinner}>
                             <svg viewBox="0 0 50 50">
                                 <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
                             </svg>
-                            <span>Creating service...</span>
+                            <span>{isEditMode ? 'Updating service...' : 'Creating service...'}</span>
                         </div>
                     </div>
                 )}
@@ -204,15 +236,14 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                     <button onClick={onClose} className={styles.closeButton} >&times;</button>
                     <ProgressBar progress={(step / 3) * 100} label={`Step ${step} out of 3`} />
                     <h2 className={`${styles.header} headerText`}>
-
-                        {step === 1 && "Service information"}
-                        {step === 2 && "Pricing & duration"}
-                        {step === 3 && "Assign employee"}
-
+                        {isEditMode ? 'Edit service' : 'Add service'}
+                        {step === 1 && " - Service information"}
+                        {step === 2 && " - Pricing & duration"}
+                        {step === 3 && " - Assign employee"}
                     </h2>
                 </div>
                 <div className={styles.headerCloseInputsContainer}>
-                    {step === 1 &&
+                    {step === 1 && (
                         <>
                             <div className={styles.uploadphoto}>
                                 <input
@@ -236,6 +267,14 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                         </>
                                     )}
                                 </label>
+                                {isEditMode && (serviceData.image || !serviceData.removeExistingImage) && (
+                                    <Button
+                                        label="Remove Image"
+                                        onClick={handleRemoveImage}
+                                        size="small"
+                                        variant="secondary"
+                                    />
+                                )}
                             </div>
                             <InputField
                                 label="Service name"
@@ -244,19 +283,16 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                 onChange={(value) => handleInputChange('name', value)}
                                 placeholder="Service name"
                             />
-                            <Dropdown
-                                label="Category"
-                                options={getCategoryOptions()}
-                                value={categories.find(cat => cat.id === serviceData.categoryId)?.name || ''}
-                                onChange={(value) => handleInputChange('categoryId', getCategoryIdByName(value as string))}
-                                isLoading={isLoadingCategories}
-                            />
-                            <Dropdown
-                                label="Branch"
-                            // value={serviceData.branch}
-                            // onChange={(value) => handleInputChange('branch', Array.isArray(value) ? value.join() : value)}
-
-                            />
+                            {!isEditMode && (
+                                <Dropdown
+                                    label="Category"
+                                    options={getCategoryOptions()}
+                                    value={categories.find(cat => cat.id === serviceData.categoryId)?.name || ''}
+                                    onChange={(value) => handleInputChange('categoryId', getCategoryIdByName(value as string))}
+                                    isLoading={isLoadingCategories}
+                                />
+                            )}
+                            <Dropdown label="Branch" />
                             <div className={styles.checkboxGroup}>
                                 <Checkbox
                                     label="Men only"
@@ -277,23 +313,26 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                     variant="button"
                                 />
                             </div>
-
-
                             <Toggle
-
                                 name='homeServicesAvailable'
                                 label="Home service available"
                                 checked={serviceData.hasHomeService}
                                 onChange={(value) => handleInputChange('hasHomeService', value)}
                             />
-                        </>}
-                    {step === 2 &&
+                            {isEditMode && (
+                                <Toggle
+                                    name='isActive'
+                                    label="Service active"
+                                    checked={serviceData.isActive}
+                                    onChange={(value) => handleInputChange('isActive', value)}
+                                />
+                            )}
+                        </>
+                    )}
+                    {step === 2 && (
                         <>
                             {serviceData.pricingOptions.map((option, index) => (
                                 <div key={index} className={styles.pricingOptionContainer}>
-
-
-
                                     {serviceData.pricingOptions.length > 1 && (
                                         <div className={styles.deletebutton}>
                                             <Button
@@ -313,8 +352,6 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                             />
                                         </div>
                                     )}
-
-
                                     <div className={styles.pricingOptionHeader}>
                                         <InputField
                                             label="Pricing option name"
@@ -323,7 +360,6 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                             onChange={(value) => handlePricingOptionChange(index, 'name', value)}
                                             placeholder="Pricing option name"
                                         />
-
                                     </div>
                                     <InputField
                                         label="Duration"
@@ -352,18 +388,15 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                 fontColor="#6138e0"
                                 icon={
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10.0753 19L9.92529 1" stroke="#6138E0" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M1 10.075L19 9.92505" stroke="#6138E0" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M10.0753 19L9.92529 1" stroke="#6138E0" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M1 10.075L19 9.92505" stroke="#6138E0" strokeWidth="2" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
                                 }
                             />
                         </>
-                    }
-                    {step === 3 &&
+                    )}
+                    {step === 3 && (
                         <>
-
-
-
                             <div className={styles.searchSection}>
                                 <SearchBar placeholder="Search employee" />
                             </div>
@@ -375,69 +408,24 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen }) 
                                         <span className={styles.empName}>Ahmad Housam</span>
                                         <span className={styles.empTitle}>Junior stylist</span>
                                     </div>
-
                                 </div>
-
                             </div>
-                            <div className={styles.empsContainer}>
-                                <div className={styles.empCard}>
-                                    <Checkbox />
-                                    <img className={styles.empImg} src="./assets/icons/emp1.png" alt="" />
-                                    <div className={styles.empDetails}>
-                                        <span className={styles.empName}>Adam Zanaty</span>
-                                        <span className={styles.empTitle}>Salon manager</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                            <div className={styles.empsContainer}>
-                                <div className={styles.empCard}>
-                                    <Checkbox />
-                                    <img className={styles.empImg} src="./assets/icons/emp.png" alt="" />
-                                    <div className={styles.empDetails}>
-                                        <span className={styles.empName}>Ahmad Housam</span>
-                                        <span className={styles.empTitle}>Junior stylist</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                            <div className={styles.empsContainer}>
-                                <div className={styles.empCard}>
-                                    <Checkbox />
-                                    <img className={styles.empImg} src="./assets/icons/emp1.png" alt="" />
-                                    <div className={styles.empDetails}>
-                                        <span className={styles.empName}>Adam Zanaty</span>
-                                        <span className={styles.empTitle}>Salon manager</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-
                         </>
-                    }
-
+                    )}
 
                     <div className={styles.buttonContainer}>
-
                         <Button onClick={prevStep} label='Back' size='medium' noAppearance={true} disabled={step === 1} variant={step === 1 ? 'disabled' : 'primary'} />
                         <Button
                             onClick={step === 3 ? handleSubmit : nextStep}
-                            label={step === 3 ? 'Done' : 'Next'}
+                            label={step === 3 ? (isEditMode ? 'Update' : 'Done') : 'Next'}
                             size='medium'
-                            disabled={loading}
+                            disabled={loading || isLoadingService}
                         />
-
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 
 export default AddEditService;
-

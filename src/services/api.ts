@@ -1,7 +1,7 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
-import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse } from '../types/api-responses';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
@@ -99,6 +99,19 @@ export interface ServiceRequest {
     pricingOptions: ServicePricingOptionDto[];
 }
 
+export interface UpdateServiceRequest {
+    name: string;
+    image?: File;
+    removeExistingImage: boolean;
+    minDuration: string;
+    maxDuration: string;
+    serviceType: number;
+    hasHomeService: boolean;
+    description?: string;
+    isActive: boolean;
+    pricingOptions: ServicePricingOptionDto[];
+}
+
 export interface VerifyAccountRequest {
     userId: number;
     userType: number;
@@ -130,15 +143,61 @@ export interface ServiceListResponse {
 }
 
 export interface AppointmentRequest {
+    businessId: number;
     clientName: string;
     mobileNumber: string;
     email: string;
+    categoryId: number;
     serviceId: number;
+    pricingOptionId: number;
     amount: number;
-    appointmentDate: string;  // YYYY-MM-DD format
-    appointmentTime: string;  // HH:mm format
+    staffId?: number | null;  // Optional to match backend
+    paymentStatus: number;
+    appointmentDate: string;  // Ensure format is correct (YYYY-MM-DDTHH:MM:SS)
     isDraft: boolean;
-    status: AppointmentStatus;  // Using enum directly
+    notes?: string;
+}
+
+export interface AppointmentListParams {
+    startDate?: string;         // Changed from fromDate
+    endDate?: string;           // Changed from toDate
+    paymentStatus?: number;     // Changed from status
+    categoryId?: number;        // Added to match backend
+    page?: number;              // Changed from pageNumber
+    pageSize?: number;
+}
+
+export interface RegisterStaffRequest {
+    businessId: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    position?: string;
+    isActive: boolean;
+}
+
+export interface StaffListParams {
+    businessId: number;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface CreateBranchRequest {
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
+}
+
+export interface UpdateBranchRequest {
+    id: number;
+    name: string;
+    address: string;
+    primaryHeadQuarter: boolean;
+    active: boolean;
+    description: string;
 }
 
 class ApiService {
@@ -267,7 +326,7 @@ class ApiService {
         delete this.axiosInstance.defaults.headers.common['Authorization'];
     }
 
-    private async refreshAccessToken(refreshToken: string) {
+    public async refreshAccessToken(refreshToken: string) {
         return await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
     }
 
@@ -341,6 +400,11 @@ class ApiService {
         return response.data;
     }
 
+    async removeCategoryFromBusiness(categoryId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/category/business/${categoryId}`);
+        return response.status === 200;
+    }
+
     // Service APIs
     async createService(data: ServiceRequest): Promise<CreateServiceResponse> {
         const formData = new FormData();
@@ -371,11 +435,10 @@ class ApiService {
             formData,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'accept': 'text/plain',
 
-                },
-                withCredentials: true // Changed from credentials: 'include'
+                    'accept': 'text/plain'
+
+                }
             }
         );
         return response.data;
@@ -386,6 +449,41 @@ class ApiService {
         return response.data;
     }
 
+    async getService(serviceId: number): Promise<Service> {
+        const response = await this.axiosInstance.get(`/service/${serviceId}`);
+        return response.data;
+    }
+
+    async updateService(serviceId: number, data: UpdateServiceRequest): Promise<boolean> {
+        const formData = new FormData();
+
+        formData.append('Name', data.name);
+        formData.append('MinDuration', data.minDuration);
+        formData.append('MaxDuration', data.maxDuration);
+        formData.append('ServiceType', data.serviceType.toString());
+        formData.append('HasHomeService', data.hasHomeService.toString());
+        formData.append('IsActive', data.isActive.toString());
+        formData.append('RemoveExistingImage', data.removeExistingImage.toString());
+        formData.append('PricingOptionsJson', JSON.stringify(data.pricingOptions));
+
+        if (data.image) {
+            formData.append('Image', data.image);
+        }
+        if (data.description) {
+            formData.append('Description', data.description);
+        }
+
+        const response = await this.axiosInstance.put(`/service/${serviceId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.status === 200;
+    }
+
+    async deleteService(serviceId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/service/${serviceId}`);
+        return response.status === 200;
+    }
+
     // User APIs
     async getCurrentUser(): Promise<User> {
         const response = await this.axiosInstance.get('/Auth/me');
@@ -394,9 +492,143 @@ class ApiService {
 
     // Appointment APIs
     async createAppointment(data: AppointmentRequest): Promise<AppointmentResponse> {
-        const response = await this.axiosInstance.post('/appointment', data);
+        const response = await this.axiosInstance.post('/salon-owner/appointments', data);
         return response.data;
     }
+
+    async getAppointments(params: AppointmentListParams): Promise<AppointmentListResponse> {
+        const queryParams = new URLSearchParams();
+
+        // Use the correct parameter names expected by your backend
+        if (params.startDate) {
+            queryParams.append('startDate', params.startDate);
+        }
+
+        if (params.endDate) {
+            queryParams.append('endDate', params.endDate);
+        }
+
+        if (params.paymentStatus !== undefined) {
+            queryParams.append('paymentStatus', params.paymentStatus.toString());
+        }
+
+        if (params.categoryId !== undefined) {
+            queryParams.append('categoryId', params.categoryId.toString());
+        }
+
+        if (params.page) {
+            queryParams.append('page', params.page.toString());
+        }
+
+        if (params.pageSize) {
+            queryParams.append('pageSize', params.pageSize.toString());
+        }
+
+        const response = await this.axiosInstance.get(`/salon-owner/appointments?${queryParams.toString()}`);
+        return response.data;
+    }
+
+    async registerStaff(data: RegisterStaffRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-staff/register', data);
+        return response.data;
+    }
+
+    async getBusinessStaff(params: StaffListParams): Promise<BusinessStaffListResponse> {
+        const queryParams = new URLSearchParams();
+
+        queryParams.append('businessId', params.businessId.toString());
+
+        if (params.page) {
+            queryParams.append('page', params.page.toString());
+        }
+
+        if (params.pageSize) {
+            queryParams.append('pageSize', params.pageSize.toString());
+        }
+
+        const response = await this.axiosInstance.get(`/salon-staff?${queryParams.toString()}`);
+        return response.data;
+    }
+
+    async deleteStaff(staffId: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-staff/${staffId}`);
+        return response.data.success;
+    }
+
+    // Branch APIs
+    async getBranches(): Promise<BusinessBranchListResponse> {
+        const response = await this.axiosInstance.get('/salon-owner/branches');
+        return response.data;
+    }
+
+    async getBranchById(id: number): Promise<BranchDto> {
+        const response = await this.axiosInstance.get(`/salon-owner/branches/${id}`);
+        return response.data;
+    }
+
+    async createBranch(data: CreateBranchRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-owner/branches', data);
+        return response.data;
+    }
+
+    async updateBranch(id: number, data: UpdateBranchRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/branches/${id}`, data);
+        return response.data;
+    }
+
+    async deleteBranch(id: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-owner/branches/${id}`);
+        return response.data;
+    }
+
+
+    // Update appointment
+    async updateAppointment(id: number, data: Omit<AppointmentRequest, 'businessId'>): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}`, data);
+        return response.data;
+    }
+
+    // Delete appointment
+    async deleteAppointment(id: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-owner/appointments/${id}`);
+        return response.data;
+    }
+
+    // Reschedule appointment
+    async rescheduleAppointment(id: number, newDate: string): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}/reschedule`, {
+            newAppointmentDate: newDate
+        });
+        return response.data;
+    }
+
+    // Assign staff to appointment
+    async assignStaff(appointmentId: number, staffId: number): Promise<boolean> {
+        const response = await this.axiosInstance.put('/salon-owner/appointments/assign-staff', {
+            appointmentId,
+            staffId
+        });
+        return response.data;
+    }
+
+    // Get available staff
+    async getAvailableStaff(businessId: number, appointmentDate: string, serviceId: number, pricingOptionId: number) {
+        const queryParams = new URLSearchParams();
+        queryParams.append('businessId', businessId.toString());
+        queryParams.append('appointmentDate', appointmentDate);
+        queryParams.append('serviceId', serviceId.toString());
+        queryParams.append('pricingOptionId', pricingOptionId.toString());
+
+        const response = await this.axiosInstance.get(`/salon-owner/appointments/available-staff?${queryParams.toString()}`);
+        return response.data;
+    }
+
+    async getAppointmentById(id: number): Promise<any> {
+        const response = await this.axiosInstance.get(`/salon-owner/appointments/${id}`);
+        return response.data;
+    }
+
+
 }
 
 export const apiService = new ApiService();

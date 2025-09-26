@@ -43,7 +43,6 @@
     width: 100%;
     height: 100vh;
 
-
     position: relative;
     -webkit-border-radius: var(--br-lg) 0 0 var(--br-lg);
     -moz-border-radius: var(--br-lg) 0 0 var(--br-lg);
@@ -122,7 +121,84 @@
     cursor: pointer;
 }
 
+.closeButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 .header {
     color: var(--color-dark-v1);
+}
+
+/* Loading Overlay Styles */
+.loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -webkit-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -moz-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -ms-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -o-border-radius: var(--br-lg) 0 0 var(--br-lg);
+}
+
+.loadingContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background: var(--color-background-component);
+    padding: 24px;
+    border-radius: var(--br-lg);
+    box-shadow: var(--box-shadow-card);
+    -webkit-border-radius: var(--br-lg);
+    -moz-border-radius: var(--br-lg);
+    -ms-border-radius: var(--br-lg);
+    -o-border-radius: var(--br-lg);
+}
+
+.loadingContent span {
+    color: var(--color-text);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+        -webkit-transform: rotate(360deg);
+        -moz-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
+        -o-transform: rotate(360deg);
+    }
 }

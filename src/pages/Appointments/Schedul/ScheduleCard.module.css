@@ -26,8 +26,7 @@
 
 
 
-.scheduleCard.isShrinked img,
-.scheduleCard.isShrinked .menu {
+.scheduleCard.isShrinked img {
 
     display: none;
 
@@ -240,4 +239,214 @@
     height: 1px;
     background-color: var(--color-disabled-13);
     margin: 0 var(--margin-sm);
+}
+
+
+
+
+
+
+
+
+
+/* Add these styles to your ScheduleCard.module.css */
+
+.confirmDelete {
+    padding: var(--paddin-md);
+    text-align: center;
+}
+
+.confirmDelete p {
+    margin: 0 0 var(--margin-md) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.confirmButtons {
+    display: flex;
+    gap: var(--gap-sm);
+    justify-content: center;
+}
+
+.cancelBtn,
+.deleteBtn {
+    padding: var(--paddin-xs) var(--paddin-sm);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-disabled);
+    background: var(--color-background);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+    -webkit-border-radius: var(--border-radius-sm);
+    -moz-border-radius: var(--border-radius-sm);
+    -ms-border-radius: var(--border-radius-sm);
+    -o-border-radius: var(--border-radius-sm);
+    -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+    background: var(--color-background-hover, rgba(0, 0, 0, 0.05));
+}
+
+.deleteBtn {
+    background: #DF0000;
+    color: white;
+    border-color: #DF0000;
+}
+
+.deleteBtn:hover {
+    background: #c50000;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+
+/* Add these styles to your ScheduleCard.module.css */
+
+.menu {
+    pointer-events: auto !important;
+    z-index: 1000;
+}
+
+.confirmDelete {
+    padding: var(--paddin-md);
+    text-align: center;
+}
+
+.confirmDelete p {
+    margin: 0 0 var(--margin-md) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.confirmButtons {
+    display: flex;
+    gap: var(--gap-sm);
+    justify-content: center;
+}
+
+.cancelBtn,
+.deleteBtn {
+    padding: var(--paddin-xs) var(--paddin-sm);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-disabled);
+    background: var(--color-background);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+    -webkit-border-radius: var(--border-radius-sm);
+    -moz-border-radius: var(--border-radius-sm);
+    -ms-border-radius: var(--border-radius-sm);
+    -o-border-radius: var(--border-radius-sm);
+    -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+    background: var(--color-background-hover, rgba(0, 0, 0, 0.05));
+}
+
+.deleteBtn {
+    background: #DF0000;
+    color: white;
+    border-color: #DF0000;
+}
+
+.deleteBtn:hover {
+    background: #c50000;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+
+
+
+
+
+
+/* Add these styles to your ScheduleCard.module.css */
+
+.menu {
+    pointer-events: auto !important;
+    z-index: 1000;
+    touch-action: none;
+}
+
+.dropdownMenu {
+    pointer-events: auto !important;
+    z-index: 1001;
+}
+
+.dropdownItem {
+    pointer-events: auto !important;
+}
+
+.confirmDelete {
+    padding: var(--paddin-md);
+    text-align: center;
+    pointer-events: auto !important;
+}
+
+.confirmDelete p {
+    margin: 0 0 var(--margin-md) 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.confirmButtons {
+    display: flex;
+    gap: var(--gap-sm);
+    justify-content: center;
+}
+
+.cancelBtn,
+.deleteBtn {
+    padding: var(--paddin-xs) var(--paddin-sm);
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-disabled);
+    background: var(--color-background);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+    pointer-events: auto !important;
+    -webkit-border-radius: var(--border-radius-sm);
+    -moz-border-radius: var(--border-radius-sm);
+    -ms-border-radius: var(--border-radius-sm);
+    -o-border-radius: var(--border-radius-sm);
+    -webkit-transition: all 0.2s ease;
+    -moz-transition: all 0.2s ease;
+    -ms-transition: all 0.2s ease;
+    -o-transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+    background: var(--color-background-hover, rgba(0, 0, 0, 0.05));
+}
+
+.deleteBtn {
+    background: #DF0000;
+    color: white;
+    border-color: #DF0000;
+}
+
+.deleteBtn:hover {
+    background: #c50000;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

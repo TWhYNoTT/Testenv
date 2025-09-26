@@ -31,15 +31,11 @@ interface Step4Props {
 
 const Step4: React.FC<Step4Props> = ({
     locationData,
-    setLocationData,
+
     onFieldChange,
     onToggleChange,
     errors
 }) => {
-    const handleInputChange = (name: keyof LocationData) => (event: React.ChangeEvent<HTMLInputElement> | string) => {
-        const value = typeof event === 'string' ? event : event.target.value;
-        onFieldChange(name, value);
-    };
 
     const handleHomeServiceToggle = () => {
         onToggleChange('hasHomeService', !locationData.hasHomeService);

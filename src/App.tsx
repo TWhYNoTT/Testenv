@@ -5,7 +5,7 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 import FormLayout from './forms/FormLayout';
 
-// Page Components
+// Page Components 
 import Dashboard from './pages/Dashboard/Dashboard';
 import Branches from './pages/Branches/Branches';
 import AppointmentsPage from './pages/Appointments/Appointments';
@@ -32,7 +32,7 @@ import { BusinessProviderWithRouter } from './contexts/BusinessProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ErrorProvider } from './contexts/ErrorContext';
-import { AppProvider } from './contexts/AppProvider';
+
 import { LoadingProvider } from './contexts/LoadingContext';
 import { UserProvider } from './contexts/UserContext';
 

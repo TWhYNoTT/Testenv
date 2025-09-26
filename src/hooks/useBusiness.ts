@@ -1,13 +1,14 @@
-import { useState } from "react";
+// src/hooks/useBusiness.ts
+import { useState, useCallback } from "react";
 import { apiService, BusinessRequest } from "../services/api";
 import type { BusinessDetailsResponse } from "../types/api-responses";
 
-// src/hooks/useBusiness.ts
 export const useBusiness = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const createBusiness = async (data: BusinessRequest) => {
+    // Memoize with useCallback
+    const createBusiness = useCallback(async (data: BusinessRequest) => {
         setLoading(true);
         setError(null);
         try {
@@ -19,9 +20,10 @@ export const useBusiness = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const checkBusinessExists = async (): Promise<BusinessDetailsResponse | null> => {
+    // Memoize with useCallback
+    const checkBusinessExists = useCallback(async (): Promise<BusinessDetailsResponse | null> => {
         setLoading(true);
         setError(null);
         try {
@@ -36,7 +38,7 @@ export const useBusiness = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     return {
         createBusiness,

@@ -1,0 +1,345 @@
+.modalBackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.modalBackground.open {
+    animation: modalDisplay 0.3s ease-in-out;
+    pointer-events: auto;
+    -webkit-animation: modalDisplay 0.3s ease-in-out;
+}
+
+@keyframes modalDisplay {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.modalContainer {
+    display: grid;
+    align-content: space-between;
+    background: var(--color-background-component);
+    border-radius: var(--br-lg) 0 0 var(--br-lg);
+    padding: var(--paddin-4xl);
+    box-shadow: var(--box-shadow-card);
+    overflow: auto;
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    -webkit-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -moz-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -ms-border-radius: var(--br-lg) 0 0 var(--br-lg);
+    -o-border-radius: var(--br-lg) 0 0 var(--br-lg);
+}
+
+@media (min-width:500px) {
+    .modalContainer {
+        width: 400px;
+    }
+}
+
+.modalContainer.open {
+    animation: modalContainerDisplay 0.3s ease-in-out;
+    -webkit-animation: modalContainerDisplay 0.3s ease-in-out;
+}
+
+@keyframes modalContainerDisplay {
+    0% {
+        transform: translateX(100%);
+        -webkit-transform: translateX(100%);
+        -moz-transform: translateX(100%);
+        -ms-transform: translateX(100%);
+        -o-transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.headerCloseInputsContainer {
+    display: grid;
+    gap: var(--gap-md);
+}
+
+.toggleContainer {
+    margin: var(--margin-md) 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toggleContainer label {
+    font-weight: var(--font-weight-regular);
+    color: var(--color-dark-v1);
+}
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--margin-lg);
+}
+
+.cancelAddSave {
+    display: flex;
+    gap: var(--gap-sm);
+}
+
+.deleteButton {
+    color: var(--color-crimson);
+}
+
+.closeButton {
+    position: absolute;
+    top: var(--paddin-4xl);
+    right: var(--paddin-4xl);
+    background: none;
+    border: none;
+    font-size: var(--font-size-4xl);
+    cursor: pointer;
+}
+
+.header {
+    color: var(--color-dark-v1);
+    margin-bottom: var(--margin-md);
+}
+
+.required {
+    color: var(--color-crimson);
+    margin-left: 4px;
+}
+
+.photoUploadSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    margin: var(--margin-md) 0;
+}
+
+.photoUploadLabel {
+    font-weight: var(--font-weight-regular);
+    color: var(--color-dark-v1);
+    margin-bottom: var(--margin-xs);
+}
+
+.photoUploadContainer {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-md);
+}
+
+.avatarPreview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--color-disabled-7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatarPreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.uploadButton {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    cursor: pointer;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-regular);
+}
+
+.uploadInput {
+    display: none;
+}
+
+.fieldGroup {
+    margin-bottom: var(--margin-md);
+}
+
+.fieldLabel {
+    font-weight: var(--font-weight-regular);
+    color: var(--color-dark-v1);
+    margin-bottom: var(--margin-xs);
+}
+
+.passwordNote {
+    font-size: var(--font-size-xs);
+    color: var(--color-disabled-1);
+    margin-top: var(--margin-xs);
+}
+
+.errorMessage {
+    color: var(--color-crimson);
+    font-size: var(--font-size-xs);
+    margin-top: var(--margin-xs);
+}
+
+/* Status indicators for the employee table */
+.active {
+    color: var(--color-forestgreen);
+    background-color: rgba(0, 178, 82, 0.1);
+    padding: var(--paddin-xs) var(--paddin-sm);
+    border-radius: var(--br-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+.inactive {
+    color: var(--color-crimson);
+    background-color: rgba(229, 45, 66, 0.1);
+    padding: var(--paddin-xs) var(--paddin-sm);
+    border-radius: var(--br-sm);
+    font-weight: var(--font-weight-bold);
+}
+
+/* For employee table name cell with avatar */
+.nameCell {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Position selector styles */
+.positionSelectContainer {
+    margin-bottom: var(--margin-md);
+}
+
+/* Additional styles for form validation */
+.invalidField {
+    border-color: var(--color-crimson) !important;
+}
+
+.validField {
+    border-color: var(--color-forestgreen) !important;
+}
+
+/* For handling the optional image upload */
+.imageUploadContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    margin: var(--margin-md) 0;
+}
+
+.dropZone {
+    border: 2px dashed var(--color-disabled-6);
+    border-radius: var(--br-md);
+    padding: var(--paddin-md);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.dropZone:hover {
+    border-color: var(--color-primary);
+}
+
+.dropZoneActive {
+    border-color: var(--color-primary);
+    background-color: rgba(97, 56, 224, 0.05);
+}
+
+.tableButtonContainer {
+    display: flex;
+    gap: var(--gap-sm);
+}
+
+
+/* Work Schedule Styles */
+.schedulesSection {
+    margin-top: var(--margin-lg);
+    border-top: 1px solid var(--color-disabled-6);
+    padding-top: var(--paddin-md);
+}
+
+.sectionTitle {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-dark-v1);
+    margin-bottom: var(--margin-md);
+}
+
+.schedulesList {
+    display: grid;
+    gap: var(--gap-sm);
+}
+
+.scheduleItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--paddin-sm);
+    background-color: var(--color-disabled-16);
+    border-radius: var(--br-sm);
+}
+
+.dayName {
+    font-weight: var(--font-weight-bold);
+}
+
+.scheduleTime {
+    font-weight: var(--font-weight-normal);
+}
+
+.unavailable {
+    color: var(--color-crimson);
+}
+
+/* Rating styles */
+.ratingCell {
+    display: flex;
+    align-items: center;
+}
+
+.ratingValue {
+    display: flex;
+    align-items: center;
+}
+
+.ratingValue::before {
+    content: '★';
+    color: #FFC107;
+    margin-right: 4px;
+}
+
+/* Pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--margin-lg);
+    gap: var(--gap-md);
+}
+
+.pageInfo {
+    font-size: var(--font-size-md);
+    color: var(--color-dark-v1);
+}
