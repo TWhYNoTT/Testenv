@@ -63,7 +63,25 @@ export const useAuth = () => {
             setLoading(false);
         }
     };
-    
+
+    const socialLogin = async (provider: number, idToken: string, userType: ProfileType, termsAccepted = true) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await apiService.socialAuth({ provider, idToken, userType, termsAccepted });
+            if (response.accessToken && response.refreshToken) {
+                setTokens(response.accessToken, response.refreshToken);
+                showToast('Successfully logged in', 'success');
+            }
+            return response;
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'An error occurred');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const refreshAccessToken = async (): Promise<boolean> => {
         if (!refreshToken) {
             clearTokens();
@@ -75,7 +93,7 @@ export const useAuth = () => {
 
         try {
             const response = await apiService.refreshAccessToken(refreshToken);
-            
+
             if (response.data.accessToken && response.data.refreshToken) {
                 setTokens(response.data.accessToken, response.data.refreshToken);
                 return true;
@@ -95,6 +113,7 @@ export const useAuth = () => {
         login,
         register,
         refreshAccessToken,
+        socialLogin,
         loading,
         error
     };

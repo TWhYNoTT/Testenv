@@ -339,6 +339,14 @@ class ApiService {
         return response.data;
     }
 
+    async socialAuth(data: { provider: number; idToken: string; userType: 1 | 2; termsAccepted: boolean }) {
+        const response = await this.axiosInstance.post('/auth/social', data);
+        if (response.data.accessToken && response.data.refreshToken) {
+            this.setTokens(response.data.accessToken, response.data.refreshToken);
+        }
+        return response.data;
+    }
+
     async register(data: RegisterRequest) {
         const response = await this.axiosInstance.post('/auth/register', data);
         return response.data;

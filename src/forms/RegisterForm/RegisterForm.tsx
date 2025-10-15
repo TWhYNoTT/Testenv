@@ -5,6 +5,8 @@ import Button from '../../components/Button/Button';
 import styles from './registerForm.module.css';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
+import { fbLogin } from '../../lib/facebook';
+import { googleSignIn } from '../../lib/google';
 
 
 interface RegisterFormProps {
@@ -13,7 +15,7 @@ interface RegisterFormProps {
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
     const navigate = useNavigate();
-    const { register, loading } = useAuth();
+    const { register, loading, socialLogin } = useAuth();
     const { showToast } = useToast();
 
 
@@ -92,6 +94,57 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
         }
     };
 
+    const handleFacebookRegister = async () => {
+        try {
+            const response: any = await fbLogin();
+            const accessToken = response.authResponse.accessToken;
+
+            // Sign up via social login endpoint (Facebook provider = 2). TermsAccepted = true for sign-up.
+            await socialLogin(2, accessToken, 2, true);
+
+            showToast('Signed up successfully using Facebook.', 'success');
+            // navigate to login or dashboard depending on flow — reuse existing flow by redirecting to login
+            // in many cases backend returns tokens and you may want to refresh user and navigate; adjust as necessary.
+        } catch (err: any) {
+            // Handle structured errors from fbLogin or backend
+            if (err?.cancelled) {
+                showToast(err.message || 'Facebook sign-up process was canceled. You can try signing up again or use another method.', 'info');
+            } else if (err?.response?.data?.errors?.Service) {
+                showToast('Facebook authentication service is currently unavailable. Please try again later.', 'error');
+            } else if (err?.response?.data?.errors?.Account) {
+                showToast(err.response.data.errors.Account.join('. '), 'error');
+            } else if (err?.response?.data?.errors?.Email) {
+                showToast(err.response.data.errors.Email.join('. '), 'error');
+            } else {
+                showToast(err?.message || 'Facebook authentication failed. Please check your credentials or try again later.', 'error');
+            }
+        }
+    };
+
+    const handleGoogleRegister = async () => {
+        try {
+            const resp: any = await googleSignIn(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+            const idToken = resp.idToken;
+
+            // Sign up via social login endpoint (Google provider = 1). TermsAccepted = true for sign-up.
+            await socialLogin(1, idToken, 2, true);
+
+            showToast('Signed up successfully using Google.', 'success');
+        } catch (err: any) {
+            if (err?.cancelled) {
+                showToast(err.message || 'Google sign-up process was canceled. You can try signing up again or use another method.', 'info');
+            } else if (err?.response?.data?.errors?.Service) {
+                showToast('Google authentication service is currently unavailable. Please try again later.', 'error');
+            } else if (err?.response?.data?.errors?.Account) {
+                showToast(err.response.data.errors.Account.join('. '), 'error');
+            } else if (err?.response?.data?.errors?.Email) {
+                showToast(err.response.data.errors.Email.join('. '), 'error');
+            } else {
+                showToast(err?.message || 'Google authentication failed. Please check your credentials or try again later.', 'error');
+            }
+        }
+    };
+
     return (
         <form className={styles.registerForm} onSubmit={handleRegister}>
             <div>
@@ -155,7 +208,22 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
 
             <h3 className={styles.socialText}>Or continue with your social profile</h3>
             <div className={styles.socialProfile}>
-                {/* Your social icons here */}
+                <div className={styles.socialIcon} onClick={handleFacebookRegister}>
+                    <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24.5" cy="24.5" r="24" stroke="#8191AB" />
+                        <g clipPath="url(#clip0_504_845)">
+                            <path d="M29.2 19.8H25.4V17.3C25.4 16.4 26 16.1 26.5 16.1C26.9 16.1 29.2 16.1 29.2 16.1V12H25.4C21.3 12 20.4 15.1 20.4 17V19.7H18V24H20.4C20.4 29.4 20.4 36 20.4 36H25.4C25.4 36 25.4 29.4 25.4 24H28.8L29.2 19.8Z" fill="#8191AB" />
+                        </g>
+                    </svg>
+                </div>
+                <div className={styles.socialIcon} onClick={handleGoogleRegister}>
+                    <svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="24.5" cy="24.5" r="24" stroke="#8191AB" />
+                        <g>
+                            <path d="M24 17v6h9c-.5 3-3 8-9 8-6 0-11-5-11-11s5-11 11-11c3 0 5 1 6 2l-4 3c-.5-.5-1.5-1-2-1-2 0-4 2-4 5s2 5 4 5c2 0 3-1 3-2h-3v-3h6z" fill="#8191AB" />
+                        </g>
+                    </svg>
+                </div>
             </div>
 
             <div className={styles.loginOption}>
