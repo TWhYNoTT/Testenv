@@ -78,6 +78,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
                 checkAndNavigate();
             });
         } catch (err: any) {
+            const serverErrors = err?.response?.data?.errors;
+            if (serverErrors?.TermsAccepted) {
+                showToast(serverErrors.TermsAccepted.join('. '), 'error');
+                return;
+            }
             if (err?.cancelled) {
                 showToast(err.message || 'Facebook sign-in process was canceled. You can try signing in again or use another method.', 'info');
             } else if (err?.response?.data?.errors?.Service) {
@@ -104,6 +109,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
                 checkAndNavigate();
             });
         } catch (err: any) {
+            const serverErrors = err?.response?.data?.errors;
+            if (serverErrors?.TermsAccepted) {
+                showToast(serverErrors.TermsAccepted.join('. '), 'error');
+                return;
+            }
             if (err?.cancelled) {
                 showToast(err.message || 'Google sign-in process was canceled. You can try signing in again or use another method.', 'info');
             } else if (err?.response?.data?.errors?.Service) {

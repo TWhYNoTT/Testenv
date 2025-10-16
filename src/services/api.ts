@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://localhost:7063/api';
+const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -340,7 +340,15 @@ class ApiService {
     }
 
     async socialAuth(data: { provider: number; idToken: string; userType: 1 | 2; termsAccepted: boolean }) {
-        const response = await this.axiosInstance.post('/auth/social', data);
+        // Debug: log payload being sent to server to help diagnose validation issues
+        try {
+            // eslint-disable-next-line no-console
+            console.debug('[api] POST /auth/social payload', data);
+        } catch { }
+
+        // Send both camelCase and PascalCase fields to be defensive against server model binding
+        const payload = { ...data, TermsAccepted: data.termsAccepted } as any;
+        const response = await this.axiosInstance.post('/auth/social', payload);
         if (response.data.accessToken && response.data.refreshToken) {
             this.setTokens(response.data.accessToken, response.data.refreshToken);
         }

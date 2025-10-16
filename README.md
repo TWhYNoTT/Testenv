@@ -44,20 +44,3 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
-
-## Facebook Login Setup
-
-This project supports social login via Facebook. To enable it locally:
-
-1. Create a Facebook App at https://developers.facebook.com/ and get the App ID.
-2. In the frontend project root, create a `.env` file (or add to your existing env) with:
-
-```
-REACT_APP_FACEBOOK_APP_ID=your_facebook_app_id_here
-```
-
-3. Restart the dev server if it's running (env vars are read at start).
-
-Notes:
-- The app uses the Facebook JS SDK to obtain an access token and sends it to the backend `/api/auth/social` endpoint.
-- The backend expects the social provider enum (Facebook = 2) and will verify the token server-side.

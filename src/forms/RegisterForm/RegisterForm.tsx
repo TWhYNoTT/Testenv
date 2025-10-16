@@ -89,8 +89,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
 
             navigate('/form/login');
 
-        } catch (err) {
+        } catch (err: any) {
+            const serverErrors = err?.response?.data?.errors;
+            if (serverErrors?.TermsAccepted) {
+                showToast(serverErrors.TermsAccepted.join('. '), 'error');
+                return;
+            }
 
+            showToast(err?.response?.data?.message || 'Registration failed', 'error');
         }
     };
 
@@ -107,6 +113,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
             // in many cases backend returns tokens and you may want to refresh user and navigate; adjust as necessary.
         } catch (err: any) {
             // Handle structured errors from fbLogin or backend
+            const serverErrors = err?.response?.data?.errors;
+            if (serverErrors?.TermsAccepted) {
+                showToast(serverErrors.TermsAccepted.join('. '), 'error');
+                return;
+            }
             if (err?.cancelled) {
                 showToast(err.message || 'Facebook sign-up process was canceled. You can try signing up again or use another method.', 'info');
             } else if (err?.response?.data?.errors?.Service) {
@@ -131,6 +142,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
 
             showToast('Signed up successfully using Google.', 'success');
         } catch (err: any) {
+            const serverErrors = err?.response?.data?.errors;
+            if (serverErrors?.TermsAccepted) {
+                showToast(serverErrors.TermsAccepted.join('. '), 'error');
+                return;
+            }
             if (err?.cancelled) {
                 showToast(err.message || 'Google sign-up process was canceled. You can try signing up again or use another method.', 'info');
             } else if (err?.response?.data?.errors?.Service) {

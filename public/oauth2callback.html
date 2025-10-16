@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>OAuth2 Callback</title>
+</head>
+
+<body>
+    <script>
+        (function () {
+            // Parse hash fragment: #id_token=...&access_token=...&...
+            function parseHash(hash) {
+                const params = {};
+                hash = hash.replace(/^#/, '');
+                hash.split('&').forEach(pair => {
+                    const [k, v] = pair.split('=');
+                    if (k) params[k] = decodeURIComponent(v || '');
+                });
+                return params;
+            }
+
+            const params = parseHash(window.location.hash || window.location.search || '');
+            const message = { type: 'oauth2callback', provider: 'google' };
+            if (params.error) {
+                message.error = params.error_description || params.error;
+            } else {
+                message.id_token = params.id_token || null;
+                message.access_token = params.access_token || null;
+                message.expires_in = params.expires_in || null;
+            }
+
+            try {
+                if (window.opener && !window.opener.closed) {
+                    // Post message back to opener (same origin assumed)
+                    window.opener.postMessage(message, window.location.origin);
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // Close the popup after a short delay
+            setTimeout(() => {
+                try { window.close(); } catch (e) { }
+            }, 500);
+        })();
+    </script>
+</body>
+
+</html>
