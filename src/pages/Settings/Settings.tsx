@@ -28,6 +28,17 @@ const Settings: React.FC = () => {
                             <p>Manage account settings and payment information</p>
                         </div>
                     </div>
+                    <div onClick={() => handleSettingCardClick('profile')} className={styles.settingCard}>
+                        <svg width="47" height="38" viewBox="0 0 47 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M23.5 19C28.3 19 32.5 14.8 32.5 10C32.5 5.2 28.3 1 23.5 1C18.7 1 14.5 5.2 14.5 10C14.5 14.8 18.7 19 23.5 19Z" stroke="#6138E0" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M1 36C1 25 10 19 23.5 19C37 19 46 25 46 36" stroke="#6138E0" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+
+                        <div className={styles.cardContent}>
+                            <h4>Profile</h4>
+                            <p>View and edit your personal profile</p>
+                        </div>
+                    </div>
                     <div onClick={() => handleSettingCardClick('paymentsettings')} className={styles.settingCard}>
                         <svg width="42" height="29" viewBox="0 0 42 29" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M38.0002 1C39.4868 1 40.643 2.16649 40.643 3.66626V24.6631C40.643 26.1628 39.4868 27.3293 38.0002 27.3293H3.64287C2.15625 27.3293 1 26.1628 1 24.6631V3.66626C1 2.16649 2.15625 1 3.64287 1H38.0002Z" stroke="#6138E0" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" />

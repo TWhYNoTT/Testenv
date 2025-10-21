@@ -216,6 +216,30 @@ export interface UpdateBranchRequest {
     description: string;
 }
 
+// User Profile types
+export interface UserProfileResponseDto {
+    id: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    countryCode: string;
+    profileType: string;
+}
+
+export interface UpdateUserProfileRequest {
+    userProfileId: number;
+    fullName: string;
+    phoneNumber: string;
+    countryCode: string;
+}
+
+export interface ChangePasswordRequestDto {
+    userProfileId: number;
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
 class ApiService {
     private axiosInstance: AxiosInstance;
     private isRefreshing = false;
@@ -530,6 +554,31 @@ class ApiService {
     async getCurrentUser(): Promise<User> {
         const response = await this.axiosInstance.get('/Auth/me');
         return response.data;
+    }
+
+    // User Profile APIs
+    async getUserProfile(): Promise<UserProfileResponseDto> {
+        const response = await this.axiosInstance.get('/user-profile');
+        return response.data;
+    }
+
+    async updateUserProfile(data: UpdateUserProfileRequest): Promise<boolean> {
+        // backend expects the userProfileId from token, but we still send it in body for safety
+        const response = await this.axiosInstance.put('/user-profile', {
+            fullName: data.fullName,
+            phoneNumber: data.phoneNumber,
+            countryCode: data.countryCode
+        });
+        return response.status === 200;
+    }
+
+    async changePassword(data: ChangePasswordRequestDto): Promise<boolean> {
+        const response = await this.axiosInstance.post('/user-profile/change-password', {
+            currentPassword: data.currentPassword,
+            newPassword: data.newPassword,
+            confirmPassword: data.confirmPassword
+        });
+        return response.status === 200;
     }
 
     // Appointment APIs

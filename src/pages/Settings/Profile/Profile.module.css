@@ -1,0 +1,147 @@
+.profilePage {
+    padding: 24px;
+}
+
+.headerBack {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.section {
+    background: var(--color-white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 18px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.single {
+    grid-column: 1 / -1;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.passwordInputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.smallNote {
+    font-size: 13px;
+    color: var(--color-darkgray);
+}
+
+/* Card layout for profile read-only */
+.profileCard {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--color-white);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-neutral-light);
+}
+
+.cardRow:last-child {
+    border-bottom: none;
+}
+
+.cardLabel {
+    color: var(--color-darkgray);
+}
+
+.cardValue {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.editButtonWrapper {
+    margin-top: 18px;
+}
+
+.fullWidthBtn {
+    width: 100%;
+}
+
+.inlineInputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.gridInputs {
+    display: grid;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+}
+
+.phoneRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.countryCodeBadge {
+    display: inline-flex;
+    min-width: 72px;
+    max-width: 100px;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--color-background-inputs);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.phoneValue {
+    flex: 1;
+    text-align: right;
+    font-weight: 600;
+}
+
+.phoneInputs {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 12px;
+    margin-top: 12px;
+    align-items: center;
+}
+
+.buttonRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.changePasswordSection {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-neutral-light);
+}
