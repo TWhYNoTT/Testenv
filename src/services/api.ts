@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
+const API_BASE_URL = 'https://127.0.0.1:7063/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -116,6 +116,22 @@ export interface VerifyAccountRequest {
     userId: number;
     userType: number;
     verificationToken: string;
+}
+
+// Password reset types
+export interface InitiatePasswordResetRequest {
+    identifier: string; // email or phone
+    userType: 1 | 2;
+}
+
+export interface InitiatePasswordResetResponse {
+    userId: number;
+}
+
+export interface ResetPasswordRequest {
+    userId: number;
+    resetToken: string;
+    newPassword: string;
 }
 
 export interface Service {
@@ -358,6 +374,16 @@ class ApiService {
     async register(data: RegisterRequest) {
         const response = await this.axiosInstance.post('/auth/register', data);
         return response.data;
+    }
+
+    async requestPasswordReset(data: InitiatePasswordResetRequest): Promise<InitiatePasswordResetResponse> {
+        const response = await this.axiosInstance.post('/auth/request-reset', data);
+        return response.data;
+    }
+
+    async resetPassword(data: ResetPasswordRequest): Promise<boolean> {
+        const response = await this.axiosInstance.post('/auth/reset-password', data);
+        return response.status === 200;
     }
 
     async verifyAccount(data: VerifyAccountRequest) {

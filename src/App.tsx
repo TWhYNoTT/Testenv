@@ -18,6 +18,7 @@ import UserRoles from './pages/Settings/UserRoles/UserRoles';
 import PaymentSettings from './pages/Settings/PaymentSettings/PaymentSettings';
 import Help from './pages/Help/Help';
 import VerifyAccount from './pages/VerifyAccount/VerifyAccount';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 import LoadingScreen from './pages/LoadingScreen/LoadingScreen';
 
 // Form Components
@@ -153,6 +154,9 @@ const App: React.FC = () => {
                                             </MainLayout>
                                         }
                                     />
+
+                                    {/* Reset Password Route (use same FormLayout as other auth forms) */}
+                                    <Route path="/reset-password" element={<FormLayout><ResetPassword /></FormLayout>} />
 
                                     {/* Authentication Routes */}
                                     <Route path="/form/*" element={<FormWrapper />} />
