@@ -144,8 +144,8 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         placeholder="e.g. Stylist, Manager, etc."
                     />
 
-                    {/* Role selector - only show when adding and user can manage staff */}
-                    {isAdd && canManageStaff && (
+                    {/* Role selector - show when user can manage staff (add or edit) */}
+                    {canManageStaff && (
                         <div className={styles.inputWrapper}>
                             <label className={styles.inputLabel}>Role</label>
                             <select

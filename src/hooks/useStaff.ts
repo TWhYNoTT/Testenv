@@ -62,6 +62,21 @@ export const useStaff = () => {
         }
     }, []);
 
+    const updateStaff = useCallback(async (staffId: number, data: any): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const success = await apiService.updateStaff(staffId, data);
+            return success;
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to update staff';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         staff,
         totalCount,
@@ -71,6 +86,7 @@ export const useStaff = () => {
         getBusinessStaff,
         registerStaff,
         deleteStaff,
+        updateStaff,
         loading,
         error
     };

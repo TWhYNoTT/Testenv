@@ -25,32 +25,66 @@ const ResetPassword: React.FC = () => {
         if (t) setToken(t);
     }, [searchParams]);
 
+    const validatePassword = (pwd: string): boolean => {
+        if (!pwd || pwd.length < 8 || pwd.length > 20) {
+            return false;
+        }
+
+        const hasUpperCase = /[A-Z]/.test(pwd);
+        const hasLowerCase = /[a-z]/.test(pwd);
+        const hasDigit = /[0-9]/.test(pwd);
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(pwd);
+
+        return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar;
+    };
+
     const handleReset = async () => {
         setError(null);
-        if (!password || !confirmPassword) {
-            const msg = 'Please fill in all password fields';
+
+        // Validate required fields
+        if (!password) {
+            const msg = 'New Password is required';
             setError(msg);
             showToast(msg, 'error');
             return;
         }
+
+        if (!confirmPassword) {
+            const msg = 'Confirm New Password is required';
+            setError(msg);
+            showToast(msg, 'error');
+            return;
+        }
+
+        // Validate password format
+        if (!validatePassword(password)) {
+            const msg = 'Password must contain at least 8 characters, including uppercase, lowercase, a number, and a special character.';
+            setError(msg);
+            showToast(msg, 'error');
+            return;
+        }
+
+        // Validate passwords match
         if (password !== confirmPassword) {
-            const msg = 'Passwords do not match';
+            const msg = 'Passwords do not match. Please try again.';
             setError(msg);
             showToast(msg, 'error');
             return;
         }
+
         if (!token) {
-            const msg = 'Missing reset token';
+            const msg = 'Reset link expired or invalid. Please request a new link.';
             setError(msg);
             showToast(msg, 'error');
             return;
         }
+
         setLoading(true);
         try {
             const payload = { userId: userId || 0, resetToken: token, newPassword: password };
             const success = await apiService.resetPassword(payload);
             if (success) {
-                showToast('Password reset successful', 'success');
+                showToast('Password updated successfully.', 'success');
                 navigate('/form/login');
             } else {
                 const msg = 'Failed to reset password';
@@ -58,9 +92,34 @@ const ResetPassword: React.FC = () => {
                 showToast(msg, 'error');
             }
         } catch (err: any) {
-            const msg = err?.response?.data?.message || 'Failed to reset password';
-            setError(msg);
-            showToast(msg, 'error');
+            // Check for expired or invalid token
+            const serverErrors = err?.response?.data?.errors;
+            const serverMessage = err?.response?.data?.message;
+
+            if (serverErrors?.Reset && Array.isArray(serverErrors.Reset)) {
+                const errorMsg = serverErrors.Reset[0];
+                if (errorMsg.toLowerCase().includes('expired') || errorMsg.toLowerCase().includes('invalid')) {
+                    const msg = 'Reset link expired or invalid. Please request a new link.';
+                    setError(msg);
+                    showToast(msg, 'error');
+                } else {
+                    setError(errorMsg);
+                    showToast(errorMsg, 'error');
+                }
+            } else if (serverMessage) {
+                if (serverMessage.toLowerCase().includes('expired') || serverMessage.toLowerCase().includes('invalid')) {
+                    const msg = 'Reset link expired or invalid. Please request a new link.';
+                    setError(msg);
+                    showToast(msg, 'error');
+                } else {
+                    setError(serverMessage);
+                    showToast(serverMessage, 'error');
+                }
+            } else {
+                const msg = 'Failed to reset password';
+                setError(msg);
+                showToast(msg, 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -76,17 +135,17 @@ const ResetPassword: React.FC = () => {
             </div>
             <div className={styles.forgetFields}>
                 <InputField
-                    label="Enter your new password"
+                    label="New Password"
                     value={password}
                     onChange={setPassword}
-                    placeholder="Password"
+                    placeholder="Enter New Password"
                     type="password"
                 />
                 <InputField
-                    label="Confirm your new password"
+                    label="Confirm New Password"
                     value={confirmPassword}
                     onChange={setConfirmPassword}
-                    placeholder="Password"
+                    placeholder="Re-Enter New Password"
                     type="password"
                 />
             </div>
@@ -94,7 +153,7 @@ const ResetPassword: React.FC = () => {
             <div className={styles.buttonWrpr}>
                 <Button
                     type="button"
-                    label={loading ? 'Resetting...' : 'Reset password'}
+                    label={loading ? 'Resetting...' : 'Reset Password'}
                     onClick={handleReset}
                     variant="primary"
                     disabled={loading}

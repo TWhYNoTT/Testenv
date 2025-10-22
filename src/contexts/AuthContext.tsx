@@ -55,13 +55,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const claims = parseJwt(accessToken);
-    const userType = claims ? (claims['userType'] ? parseInt(claims['userType']) : null) : null;
-    const staffRole = claims ? (claims['staffRole'] ? parseInt(claims['staffRole']) : null) : null;
+
+    // Helper to parse either numeric or string enum claims
+    const parseEnumClaim = (val: any): number | null => {
+        if (val === null || val === undefined) return null;
+        // If it's already a number or numeric string, parse it
+        if (typeof val === 'number') return val;
+        if (typeof val === 'string') {
+            // numeric string?
+            const n = parseInt(val);
+            if (!isNaN(n)) return n;
+            // map known enum names to numeric values used by backend
+            const map: Record<string, number> = {
+                'SalonOwner': 2,
+                'SalonStaff': 3,
+                'Customer': 1,
+                'StaffManager': 1,
+                'Staff': 2
+            };
+            const normalized = val.trim();
+            if (map[normalized] !== undefined) return map[normalized];
+        }
+        return null;
+    };
+
+    const userType = claims ? parseEnumClaim(claims['userType']) : null;
+    const staffRole = claims ? parseEnumClaim(claims['staffRole']) : null;
     const staffId = claims ? (claims['staffId'] ? parseInt(claims['staffId']) : null) : null;
     const businessIdClaim = claims ? (claims['businessId'] ? parseInt(claims['businessId']) : null) : null;
 
-    const isSalonOwner = userType === 2; // ProfileType.SalonOwner == 2
-    const isStaffManager = staffRole === 1; // SalonStaffRole.StaffManager == 1
+    // Compute abilities from parsed claims. Keep constants in sync with backend enums.
+    // ProfileType.SalonOwner == 2
+    // SalonStaffRole.StaffManager == 1
+    const isSalonOwner = userType === 2;
+    const isStaffManager = staffRole === 1;
     const canManageStaff = isSalonOwner || isStaffManager;
     const canDeleteStaff = isSalonOwner;
 

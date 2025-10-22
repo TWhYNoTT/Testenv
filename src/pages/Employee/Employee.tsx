@@ -24,6 +24,7 @@ const Employee: React.FC = () => {
         getBusinessStaff,
         registerStaff,
         deleteStaff,
+        updateStaff,
         loading
     } = useStaff();
 
@@ -122,6 +123,7 @@ const Employee: React.FC = () => {
             position: employeeToEdit.position,
             isActive: employeeToEdit.isActive,
             schedules: employeeToEdit.schedules,
+            role: employeeToEdit.role ?? 2
         });
         setIsAddMode(false);
         setIsModalOpen(true);
@@ -154,8 +156,15 @@ const Employee: React.FC = () => {
                 await registerStaff(staffRequest);
                 showToast('Employee added successfully', 'success');
             } else {
-                // Here you would implement the update staff method
-                // For now, we'll just show a toast
+                // Call update API
+                await updateStaff(employeeData.id, {
+                    fullName: employeeData.fullName,
+                    email: employeeData.email,
+                    phoneNumber: employeeData.phoneNumber,
+                    position: employeeData.position,
+                    isActive: employeeData.isActive,
+                    role: employeeData.role
+                });
                 showToast('Employee updated successfully', 'success');
             }
 

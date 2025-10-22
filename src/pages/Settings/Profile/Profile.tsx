@@ -87,21 +87,21 @@ const Profile: React.FC = () => {
             <div className={styles.cardRow}>
                 <div>
                     <div className={styles.cardLabel}>Full Name</div>
-                    <div className={styles.smallNote}>Shown to customers when they book or see receipts.</div>
+
                 </div>
                 <div className={styles.cardValue}>{profile?.fullName || ''}</div>
             </div>
             <div className={styles.cardRow}>
                 <div>
                     <div className={styles.cardLabel}>Email</div>
-                    <div className={styles.smallNote}>Used for account notifications and password resets.</div>
+
                 </div>
                 <div className={styles.cardValue}>{profile?.email || ''}</div>
             </div>
             <div className={styles.cardRow}>
                 <div>
                     <div className={styles.cardLabel}>Phone</div>
-                    <div className={styles.smallNote}>Used for SMS notifications and to contact you about appointments.</div>
+
                 </div>
                 <div className={styles.phoneRow}>
                     <div className={styles.countryCodeBadge}>{profile?.countryCode || ''}</div>
@@ -111,7 +111,7 @@ const Profile: React.FC = () => {
             <div className={styles.cardRow}>
                 <div>
                     <div className={styles.cardLabel}>Password</div>
-                    <div className={styles.smallNote}>Password is hidden for security. Use Change password to update it.</div>
+
                 </div>
                 <div className={styles.cardValue}>{'••••••••'}</div>
             </div>
@@ -127,14 +127,12 @@ const Profile: React.FC = () => {
             ) : (
                 <div style={{ marginTop: 12 }}>
                     <div className={styles.gridInputs}>
-                        <InputField name="fullName" placeholder="John Doe" label="Full Name" value={form.fullName} onChange={(v) => handleChange('fullName', v)} disabled={saving} required feedbackMessage="This name will be visible to customers on bookings and receipts." />
+                        <InputField name="fullName" placeholder="John Doe" label="Full Name" value={form.fullName} onChange={(v) => handleChange('fullName', v)} disabled={saving} required />
                         <div className={styles.phoneInputs}>
-                            <InputField name="countryCode" placeholder="+1" label="Country code" value={form.countryCode} onChange={(v) => handleChange('countryCode', v)} disabled={saving} feedbackMessage="Include leading + (e.g. +1)" />
-                            <InputField name="phoneNumber" placeholder="501234567" label="Phone Number" value={form.phoneNumber} onChange={(v) => handleChange('phoneNumber', v)} disabled={saving} feedbackMessage="Enter phone number without the country code (numbers only)." />
+                            <InputField name="countryCode" placeholder="+1" label="Country code" value={form.countryCode} onChange={(v) => handleChange('countryCode', v)} disabled={saving} />
+                            <InputField name="phoneNumber" placeholder="501234567" label="Phone Number" value={form.phoneNumber} onChange={(v) => handleChange('phoneNumber', v)} disabled={saving} />
                         </div>
-                        <div className={styles.smallNote} style={{ marginTop: 8 }}>
-                            Country code should include the leading + and phone number should be without the country code.
-                        </div>
+
                     </div>
                     <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
                         <Button label={saving ? 'Saving...' : 'Save'} onClick={handleSave} variant={saving ? 'disabled' : 'primary'} disabled={saving} />
@@ -152,8 +150,8 @@ const Profile: React.FC = () => {
                     <div>
                         <div style={{ marginTop: 12 }}>
                             <InputField name="currentPassword" type="password" label="Current password" value={pw.currentPassword} onChange={(v) => setPw(p => ({ ...p, currentPassword: v }))} disabled={pwSaving} />
-                            <InputField name="newPassword" type="password" label="New password" value={pw.newPassword} onChange={(v) => setPw(p => ({ ...p, newPassword: v }))} disabled={pwSaving} feedbackMessage="Password should be at least 8 characters." />
-                            <InputField name="confirmPassword" type="password" label="Confirm password" value={pw.confirmPassword} onChange={(v) => setPw(p => ({ ...p, confirmPassword: v }))} disabled={pwSaving} feedbackMessage="Re-enter the new password to confirm." />
+                            <InputField name="newPassword" type="password" label="New password" value={pw.newPassword} onChange={(v) => setPw(p => ({ ...p, newPassword: v }))} disabled={pwSaving} />
+                            <InputField name="confirmPassword" type="password" label="Confirm password" value={pw.confirmPassword} onChange={(v) => setPw(p => ({ ...p, confirmPassword: v }))} disabled={pwSaving} />
                         </div>
                         <div className={styles.buttonRow}>
                             <Button label={pwSaving ? 'Saving...' : 'Save password'} onClick={handlePwChange} variant={pwSaving ? 'disabled' : 'primary'} disabled={pwSaving} />

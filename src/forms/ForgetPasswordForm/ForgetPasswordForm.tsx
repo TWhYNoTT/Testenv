@@ -32,8 +32,8 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
             return;
         }
 
-        // simple email regex
-        const emailRegex = /^\S+@\S+\.\S+$/;
+        // RFC 5322 compliant email validation regex
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
         if (!emailRegex.test(email)) {
             const msg = 'Invalid email format. Please enter a valid email.';
             setError(msg);
@@ -46,7 +46,7 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
             // Only salon owner (ProfileType.SalonOwner === 2)
             const response = await apiService.requestPasswordReset({ identifier: email, userType: ProfileType.SalonOwner as 2 });
             if (response?.userId) setUserId(response.userId);
-            showToast('A password reset link has been sent if the account exists', 'info');
+            showToast('Reset password link sent to your email.', 'success');
             setStep('step2');
         } catch (err: any) {
             // Map backend validation errors to user-friendly messages
@@ -59,6 +59,10 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
                     const msg = 'No account found for this email. Please try again.';
                     setError(msg);
                     showToast(msg, 'error');
+                } else if (first.toLowerCase().includes('failed to send email') || first.toLowerCase().includes('smtp') || first.toLowerCase().includes('email')) {
+                    const msg = 'Failed to send email. Please try again later.';
+                    setError(msg);
+                    showToast(msg, 'error');
                 } else {
                     setError(first);
                     showToast(first, 'error');
@@ -69,12 +73,16 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
                     const msg = 'No account found for this email. Please try again.';
                     setError(msg);
                     showToast(msg, 'error');
+                } else if (serverMessage.toLowerCase().includes('failed to send email') || serverMessage.toLowerCase().includes('smtp') || serverMessage.toLowerCase().includes('email')) {
+                    const msg = 'Failed to send email. Please try again later.';
+                    setError(msg);
+                    showToast(msg, 'error');
                 } else {
                     setError(serverMessage);
                     showToast(serverMessage, 'error');
                 }
             } else {
-                const msg = 'Failed to send reset request';
+                const msg = 'Failed to send email. Please try again later.';
                 setError(msg);
                 showToast(msg, 'error');
             }
@@ -102,7 +110,7 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
                             label="Email"
                             value={email}
                             onChange={setEmail}
-                            placeholder="Enter your email"
+                            placeholder="yourmail@mail.com"
                             type="email"
                         />
                     </div>
@@ -115,6 +123,16 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
                             variant="primary"
                             disabled={loading}
                         />
+                    </div>
+                    <div className={styles.loginOptions} style={{ marginTop: '1rem', textAlign: 'center' }}>
+                        <span className={styles.link}>
+                            <Button
+                                label='Back to Login'
+                                onClick={() => toggleForm('login')}
+                                noAppearance={true}
+                                size='small'
+                            />
+                        </span>
                     </div>
                 </form>
             }
