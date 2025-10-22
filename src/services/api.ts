@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://127.0.0.1:7063/api';
+const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -191,6 +191,7 @@ export interface RegisterStaffRequest {
     password: string;
     position?: string;
     isActive: boolean;
+    role?: 1 | 2; // 1 = StaffManager, 2 = Staff
 }
 
 export interface StaffListParams {
@@ -620,7 +621,7 @@ class ApiService {
     }
 
     async registerStaff(data: RegisterStaffRequest): Promise<number> {
-        const response = await this.axiosInstance.post('/salon-staff/register', data);
+        const response = await this.axiosInstance.post('/salon-owner-staff/register', data);
         return response.data;
     }
 
@@ -637,12 +638,12 @@ class ApiService {
             queryParams.append('pageSize', params.pageSize.toString());
         }
 
-        const response = await this.axiosInstance.get(`/salon-staff?${queryParams.toString()}`);
+        const response = await this.axiosInstance.get(`/salon-owner-staff?${queryParams.toString()}`);
         return response.data;
     }
 
     async deleteStaff(staffId: number): Promise<boolean> {
-        const response = await this.axiosInstance.delete(`/salon-staff/${staffId}`);
+        const response = await this.axiosInstance.delete(`/salon-owner-staff/${staffId}`);
         return response.data.success;
     }
 

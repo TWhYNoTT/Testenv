@@ -9,6 +9,7 @@ import { useStaff } from '../../hooks/useStaff';
 import { useToast } from '../../contexts/ToastContext';
 import { RegisterStaffRequest } from '../../services/api';
 import type { BusinessStaffDto } from '../../types/api-responses';
+import { useAuthContext } from '../../contexts/AuthContext';
 import EmployeeModal from '../../components/Employee/EmployeeModal';
 
 const Employee: React.FC = () => {
@@ -25,6 +26,8 @@ const Employee: React.FC = () => {
         deleteStaff,
         loading
     } = useStaff();
+
+    const { canManageStaff, canDeleteStaff } = useAuthContext();
 
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -144,7 +147,8 @@ const Employee: React.FC = () => {
                     phoneNumber: employeeData.phoneNumber,
                     password: employeeData.password,
                     position: employeeData.position,
-                    isActive: employeeData.isActive
+                    isActive: employeeData.isActive,
+                    role: employeeData.role
                 };
 
                 await registerStaff(staffRequest);
@@ -186,13 +190,15 @@ const Employee: React.FC = () => {
         ),
         '': (_: any, rowIndex: number) => (
             <div className={styles.tableButtonContainer}>
-                <Button
-                    label="Delete"
-                    onClick={() => handleDeleteClick(filteredData[rowIndex].id)}
-                    noAppearance={true}
-                    backgroundColor="transparent"
-                    fontColor="red"
-                />
+                {canDeleteStaff && (
+                    <Button
+                        label="Delete"
+                        onClick={() => handleDeleteClick(filteredData[rowIndex].id)}
+                        noAppearance={true}
+                        backgroundColor="transparent"
+                        fontColor="red"
+                    />
+                )}
                 <Button
                     label="Edit"
                     onClick={() => handleEditClick(rowIndex)}
@@ -208,7 +214,9 @@ const Employee: React.FC = () => {
         <div className={styles.employeePage}>
             <div className={styles.header}>
                 <h2 className={`xH1`}>Employees</h2>
-                <Button label="Add employee +" onClick={handleAddClick} size="medium" />
+                {canManageStaff && (
+                    <Button label="Add employee +" onClick={handleAddClick} size="medium" />
+                )}
             </div>
 
             <div className={styles.filters}>

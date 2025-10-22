@@ -120,6 +120,7 @@ export interface BusinessStaffDto {
     fullName: string;
     email: string;
     phoneNumber: string;
+    role?: number; // 1 = StaffManager, 2 = Staff
     position?: string;
     isActive: boolean;
     rating: number;

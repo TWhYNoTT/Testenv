@@ -3,6 +3,7 @@ import InputField from '../InputField/InputField';
 import Button from '../Button/Button';
 import Toggle from '../Toggle/Toggle';
 import styles from './EmployeeModal.module.css';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 interface EmployeeModalProps {
     isOpen: boolean;
@@ -27,6 +28,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         phoneNumber: '',
         password: '',
         position: '',
+        role: 2,
         isActive: true,
         schedules: [
             {
@@ -38,6 +40,8 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         ]
     });
 
+    const { canManageStaff } = useAuthContext();
+
     useEffect(() => {
         setData(initialData || {
             fullName: '',
@@ -45,6 +49,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
             phoneNumber: '',
             password: '',
             position: '',
+            role: 2,
             isActive: true,
             schedules: [
                 {
@@ -138,6 +143,21 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         onChange={(value) => handleInputChange('position', value)}
                         placeholder="e.g. Stylist, Manager, etc."
                     />
+
+                    {/* Role selector - only show when adding and user can manage staff */}
+                    {isAdd && canManageStaff && (
+                        <div className={styles.inputWrapper}>
+                            <label className={styles.inputLabel}>Role</label>
+                            <select
+                                value={data.role}
+                                onChange={(e) => setData({ ...data, role: parseInt(e.target.value) })}
+                                className={styles.select}
+                            >
+                                <option value={1}>Staff Manager</option>
+                                <option value={2}>Staff</option>
+                            </select>
+                        </div>
+                    )}
 
                     <div className={styles.toggleContainer}>
                         <Toggle

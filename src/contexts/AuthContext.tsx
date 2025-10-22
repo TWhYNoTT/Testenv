@@ -9,6 +9,15 @@ interface AuthContextType {
     setTokens: (accessToken: string, refreshToken: string) => void;
     clearTokens: () => void;
     isAuthenticated: boolean;
+    // Parsed claims
+    userType?: number | null;
+    staffRole?: number | null;
+    staffId?: number | null;
+    businessId?: number | null;
+    isSalonOwner: boolean;
+    isStaffManager: boolean;
+    canManageStaff: boolean;
+    canDeleteStaff: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,13 +42,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         navigate('/form/login');
     };
 
+    // Helper to decode JWT payload
+    const parseJwt = (token: string | null) => {
+        if (!token) return null;
+        try {
+            const payload = token.split('.')[1];
+            const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+            return decoded;
+        } catch {
+            return null;
+        }
+    };
+
+    const claims = parseJwt(accessToken);
+    const userType = claims ? (claims['userType'] ? parseInt(claims['userType']) : null) : null;
+    const staffRole = claims ? (claims['staffRole'] ? parseInt(claims['staffRole']) : null) : null;
+    const staffId = claims ? (claims['staffId'] ? parseInt(claims['staffId']) : null) : null;
+    const businessIdClaim = claims ? (claims['businessId'] ? parseInt(claims['businessId']) : null) : null;
+
+    const isSalonOwner = userType === 2; // ProfileType.SalonOwner == 2
+    const isStaffManager = staffRole === 1; // SalonStaffRole.StaffManager == 1
+    const canManageStaff = isSalonOwner || isStaffManager;
+    const canDeleteStaff = isSalonOwner;
+
     return (
         <AuthContext.Provider value={{
             accessToken,
             refreshToken,
             setTokens,
             clearTokens,
-            isAuthenticated: !!accessToken
+            isAuthenticated: !!accessToken,
+            userType,
+            staffRole,
+            staffId,
+            businessId: businessIdClaim,
+            isSalonOwner,
+            isStaffManager,
+            canManageStaff,
+            canDeleteStaff
         }}>
             {children}
         </AuthContext.Provider>
