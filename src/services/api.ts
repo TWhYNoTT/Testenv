@@ -6,7 +6,7 @@ import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
-const API_BASE_URL = 'https://127.0.0.1:7063/api';
+const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -188,7 +188,7 @@ export interface RegisterStaffRequest {
     fullName: string;
     email: string;
     phoneNumber: string;
-    password: string;
+    // Password removed - staff will set via invitation email
     position?: string;
     isActive: boolean;
     role?: 1 | 2; // 1 = StaffManager, 2 = Staff
@@ -207,6 +207,33 @@ export interface StaffListParams {
     businessId: number;
     page?: number;
     pageSize?: number;
+}
+
+// Staff Invitation types
+export interface ValidateInvitationRequest {
+    token: string;
+}
+
+export interface InvitationDetailsResponse {
+    invitationId: number;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    position: string;
+    businessName: string;
+    role: 1 | 2;
+    expiresAt: string;
+}
+
+export interface AcceptInvitationRequest {
+    token: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export interface AcceptInvitationResponse {
+    staffId: number;
+    message: string;
 }
 
 export interface CreateBranchRequest {
@@ -239,6 +266,7 @@ export interface UserProfileResponseDto {
 export interface UpdateUserProfileRequest {
     userProfileId: number;
     fullName: string;
+    email: string;
     phoneNumber: string;
     countryCode: string;
 }
@@ -576,6 +604,7 @@ class ApiService {
         // backend expects the userProfileId from token, but we still send it in body for safety
         const response = await this.axiosInstance.put('/user-profile', {
             fullName: data.fullName,
+            email: data.email,
             phoneNumber: data.phoneNumber,
             countryCode: data.countryCode
         });
@@ -735,6 +764,16 @@ class ApiService {
         return response.data;
     }
 
+    // Staff Invitation APIs
+    async validateInvitationToken(token: string): Promise<InvitationDetailsResponse> {
+        const response = await this.axiosInstance.get(`/staff-invitation/validate?token=${encodeURIComponent(token)}`);
+        return response.data;
+    }
+
+    async acceptInvitation(data: AcceptInvitationRequest): Promise<AcceptInvitationResponse> {
+        const response = await this.axiosInstance.post('/staff-invitation/accept', data);
+        return response.data;
+    }
 
 }
 

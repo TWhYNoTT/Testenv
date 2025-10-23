@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from '../InputField/InputField';
 import Button from '../Button/Button';
 import Toggle from '../Toggle/Toggle';
+import Dropdown from '../Dropdown/Dropdown';
 import styles from './EmployeeModal.module.css';
 import { useAuthContext } from '../../contexts/AuthContext';
 
@@ -12,6 +13,7 @@ interface EmployeeModalProps {
     onSave: (employee: any) => void;
     isAdd?: boolean;
     onDeleteClicked: () => void;
+    loading?: boolean;
 }
 
 const EmployeeModal: React.FC<EmployeeModalProps> = ({
@@ -20,13 +22,13 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
     initialData,
     onSave,
     onDeleteClicked,
-    isAdd
+    isAdd,
+    loading = false
 }) => {
     const [data, setData] = useState<any>(initialData || {
         fullName: '',
         email: '',
         phoneNumber: '',
-        password: '',
         position: '',
         role: 2,
         isActive: true,
@@ -47,7 +49,6 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
             fullName: '',
             email: '',
             phoneNumber: '',
-            password: '',
             position: '',
             role: 2,
             isActive: true,
@@ -71,11 +72,18 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
     };
 
     const handleSave = () => {
+        if (loading) return;
         onSave(data);
     };
 
     const handleDelete = () => {
+        if (loading) return;
         onDeleteClicked();
+    };
+
+    const handleClose = () => {
+        if (loading) return;
+        onClose();
     };
 
     // Helper function to get day name
@@ -92,8 +100,18 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
     return (
         <div className={`${styles.modalBackground} ${styles.open}`}>
             <div className={`${styles.modalContainer} ${styles.open}`}>
+                {loading && (
+                    <div className={styles.loadingOverlay}>
+                        <div className={styles.spinner}>
+                            <svg viewBox="0 0 50 50">
+                                <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                            </svg>
+                            <span>{isAdd ? 'Sending invitation...' : 'Saving...'}</span>
+                        </div>
+                    </div>
+                )}
                 <div className={styles.headerCloseInputsContainer}>
-                    <button className={styles.closeButton} onClick={onClose}>&times;</button>
+                    <button className={styles.closeButton} onClick={handleClose} disabled={loading}>&times;</button>
                     <h2 className={`${styles.header} headerText`}>{isAdd ? 'Add Employee' : 'Edit Employee'}</h2>
 
                     <InputField
@@ -103,6 +121,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         onChange={(value) => handleInputChange('fullName', value)}
                         placeholder="Employee Full Name"
                         required
+                        disabled={loading}
                     />
 
                     <InputField
@@ -113,6 +132,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         onChange={(value) => handleInputChange('email', value)}
                         placeholder="Email Address"
                         required
+                        disabled={loading}
                     />
 
                     <InputField
@@ -122,19 +142,8 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         onChange={(value) => handleInputChange('phoneNumber', value)}
                         placeholder="Phone Number"
                         required
+                        disabled={loading}
                     />
-
-                    {isAdd && (
-                        <InputField
-                            label="Password"
-                            name="password"
-                            type="password"
-                            value={data.password}
-                            onChange={(value) => handleInputChange('password', value)}
-                            placeholder="Password"
-                            required
-                        />
-                    )}
 
                     <InputField
                         label="Position"
@@ -142,21 +151,25 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         value={data.position || ''}
                         onChange={(value) => handleInputChange('position', value)}
                         placeholder="e.g. Stylist, Manager, etc."
+                        disabled={loading}
                     />
 
                     {/* Role selector - show when user can manage staff (add or edit) */}
                     {canManageStaff && (
-                        <div className={styles.inputWrapper}>
-                            <label className={styles.inputLabel}>Role</label>
-                            <select
-                                value={data.role}
-                                onChange={(e) => setData({ ...data, role: parseInt(e.target.value) })}
-                                className={styles.select}
-                            >
-                                <option value={1}>Staff Manager</option>
-                                <option value={2}>Staff</option>
-                            </select>
-                        </div>
+
+
+                        <Dropdown
+                            options={["Staff Manager", "Staff"]}
+                            value={data.role === 1 ? 'Staff Manager' : 'Staff'}
+                            onChange={(v) => {
+                                const roleValue = typeof v === 'string' ? (v === 'Staff Manager' ? 1 : 2) : 2;
+                                setData({ ...data, role: roleValue });
+                            }}
+                            defaultMessage="Select role"
+                            disabled={loading}
+                            label="Role"
+                        />
+
                     )}
 
                     <div className={styles.toggleContainer}>
@@ -165,6 +178,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                             messageIfNotChecked='Inactive'
                             checked={data.isActive}
                             onChange={handleToggleChange}
+                            disabled={loading}
                         />
                     </div>
 
@@ -199,6 +213,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                                 label="Delete employee"
                                 onClick={handleDelete}
                                 size='small'
+                                disabled={loading}
                                 icon={
                                     <svg width="17" height="20" viewBox="0 0 17 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M13.7637 4.67346L12.938 17.6342C12.938 18.3814 12.3523 18.9926 11.638 18.9926H4.55157C3.838 18.9926 3.25443 18.3814 3.25443 17.6342L2.42871 4.67346" stroke="#E52D42" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -216,8 +231,13 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         )}
                     </div>
                     <div className={styles.cancelAddSave}>
-                        <Button label="Cancel" onClick={onClose} noAppearance={true} size='small' />
-                        <Button label={isAdd ? 'Add' : 'Save'} onClick={handleSave} size='small' />
+                        <Button label="Cancel" onClick={handleClose} noAppearance={true} size='small' disabled={loading} />
+                        <Button
+                            label={loading ? (isAdd ? 'Sending...' : 'Saving...') : (isAdd ? 'Add' : 'Save')}
+                            onClick={handleSave}
+                            size='small'
+                            disabled={loading}
+                        />
                     </div>
                 </div>
             </div>

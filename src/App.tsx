@@ -20,6 +20,7 @@ import Help from './pages/Help/Help';
 import Profile from './pages/Settings/Profile/Profile';
 import VerifyAccount from './pages/VerifyAccount/VerifyAccount';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
+import AcceptInvitation from './pages/AcceptInvitation/AcceptInvitation';
 import LoadingScreen from './pages/LoadingScreen/LoadingScreen';
 
 // Form Components
@@ -168,6 +169,9 @@ const App: React.FC = () => {
 
                                         {/* Reset Password Route (use same FormLayout as other auth forms) */}
                                         <Route path="/reset-password" element={<FormLayout><ResetPassword /></FormLayout>} />
+
+                                        {/* Staff Invitation Acceptance Route */}
+                                        <Route path="/staff/accept-invitation" element={<AcceptInvitation />} />
 
                                         {/* Authentication Routes */}
                                         <Route path="/form/*" element={<FormWrapper />} />

@@ -147,14 +147,13 @@ const Employee: React.FC = () => {
                     fullName: employeeData.fullName,
                     email: employeeData.email,
                     phoneNumber: employeeData.phoneNumber,
-                    password: employeeData.password,
                     position: employeeData.position,
                     isActive: employeeData.isActive,
                     role: employeeData.role
                 };
 
                 await registerStaff(staffRequest);
-                showToast('Employee added successfully', 'success');
+                showToast('Invitation sent successfully to ' + employeeData.email, 'success');
             } else {
                 // Call update API
                 await updateStaff(employeeData.id, {
@@ -275,6 +274,7 @@ const Employee: React.FC = () => {
                 onSave={handleSaveEmployee}
                 isAdd={isAddMode}
                 onDeleteClicked={() => currentEmployee && handleDeleteClick(currentEmployee.id)}
+                loading={loading}
             />
         </div>
     );

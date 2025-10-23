@@ -15,7 +15,7 @@ interface UserProfileContextType {
     loading: boolean;
     error: Error | null;
     loadProfile: () => Promise<void>;
-    updateProfile: (payload: { fullName: string; phoneNumber: string; countryCode: string }) => Promise<boolean>;
+    updateProfile: (payload: { fullName: string; email: string; phoneNumber: string; countryCode: string }) => Promise<boolean>;
     changePassword: (payload: { currentPassword: string; newPassword: string; confirmPassword: string }) => Promise<boolean>;
 }
 
@@ -38,12 +38,13 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
     };
 
-    const updateProfile = async (payload: { fullName: string; phoneNumber: string; countryCode: string }) => {
+    const updateProfile = async (payload: { fullName: string; email: string; phoneNumber: string; countryCode: string }) => {
         setLoading(true);
         try {
             const success = await apiService.updateUserProfile({
                 userProfileId: profile?.id ?? 0,
                 fullName: payload.fullName,
+                email: payload.email,
                 phoneNumber: payload.phoneNumber,
                 countryCode: payload.countryCode
             });
