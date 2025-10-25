@@ -4,6 +4,7 @@ import Button from '../../../components/Button/Button';
 import styles from './Profile.module.css';
 import { useUserProfile } from '../../../hooks/useUserProfile';
 import { useToast } from '../../../contexts/ToastContext';
+import useNavigationPrompt from '../../../hooks/useNavigationPrompt';
 
 const Profile: React.FC = () => {
     const { profile, loadProfile, updateProfile, changePassword } = useUserProfile();
@@ -64,6 +65,8 @@ const Profile: React.FC = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [hasUnsavedChanges, hasUnsavedPasswordChanges]);
 
+    // Prompt for in-app navigation when there are unsaved changes
+    useNavigationPrompt((hasUnsavedChanges || hasUnsavedPasswordChanges));
     const handleChange = (name: string, value: string) => setForm(prev => ({ ...prev, [name]: value }));
 
     const handleCancel = () => {
