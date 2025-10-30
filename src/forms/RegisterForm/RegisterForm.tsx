@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../contexts/ToastContext';
 import { fbLogin } from '../../lib/facebook';
 import { googleSignIn } from '../../lib/google';
+import { getPasswordStrength, strengthToColor } from '../../lib/passwordStrength';
 
 
 interface RegisterFormProps {
@@ -200,6 +201,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
                     feedback={formErrors.password ? 'error' : undefined}
                     feedbackMessage={formErrors.password}
                 />
+                {/* Password strength indicator */}
+                {formData.password && (
+                    (() => {
+                        const level = getPasswordStrength(formData.password).level;
+                        const cls = strengthToColor(level);
+                        return (
+                            <div className={`${styles.pwStrength} ${styles[cls]}`} aria-live="polite">
+                                Password strength: {level}
+                            </div>
+                        );
+                    })()
+                )}
 
                 <InputField
                     label="Confirm Password"

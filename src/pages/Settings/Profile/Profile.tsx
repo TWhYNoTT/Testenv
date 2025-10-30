@@ -69,6 +69,18 @@ const Profile: React.FC = () => {
     useNavigationPrompt((hasUnsavedChanges || hasUnsavedPasswordChanges));
     const handleChange = (name: string, value: string) => setForm(prev => ({ ...prev, [name]: value }));
 
+    // sanitize inputs while typing
+    const sanitizePhoneNumber = (v: string) => v.replace(/\D/g, ''); // keep only digits
+    const sanitizeCountryCode = (v: string) => {
+        // allow an optional leading + followed by digits; strip other chars and extra +
+        let cleaned = v.replace(/[^0-9+]/g, '');
+        // remove all plus signs then re-add a single leading plus if original started with +
+        const hadPlus = /^\+/.test(cleaned);
+        cleaned = cleaned.replace(/\+/g, '');
+        if (hadPlus) cleaned = '+' + cleaned;
+        return cleaned;
+    };
+
     const handleCancel = () => {
         if (hasUnsavedChanges) {
             const confirmed = window.confirm('You have unsaved changes. Do you want to discard them?');
@@ -95,7 +107,9 @@ const Profile: React.FC = () => {
 
     // Validation functions
     const validateEmail = (email: string): boolean => {
-        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+        // Use a stricter email validation that requires a proper TLD (letters only, min 2 chars)
+        // This prevents inputs like user@example.com67 from being accepted.
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
         return emailRegex.test(email);
     };
 
@@ -122,6 +136,11 @@ const Profile: React.FC = () => {
 
     const handleSave = async () => {
         // Validate before saving
+        if (!validateEmail(form.email)) {
+            showToast('Invalid email format. Please enter a valid email address.', 'error');
+            return;
+        }
+
         if (!isFormValid()) {
             showToast('Please ensure all fields are valid', 'error');
             return;
@@ -226,8 +245,19 @@ const Profile: React.FC = () => {
                         <InputField name="fullName" placeholder="John Doe" label="Full Name" value={form.fullName} onChange={(v) => handleChange('fullName', v)} disabled={saving} required />
                         <InputField name="email" placeholder="user@example.com" label="Email" value={form.email} onChange={(v) => handleChange('email', v)} disabled={saving} type="email" required />
                         <div className={styles.phoneInputs}>
-                            <InputField name="countryCode" placeholder="+1" label="Country code" value={form.countryCode} onChange={(v) => handleChange('countryCode', v)} disabled={saving} />
-                            <InputField name="phoneNumber" placeholder="501234567" label="Phone Number" value={form.phoneNumber} onChange={(v) => handleChange('phoneNumber', v)} disabled={saving} />
+                            <InputField
+                                name="countryCode"
+                                placeholder="+1"
+                                label="Country code"
+                                value={form.countryCode}
+                                onChange={(v) => handleChange('countryCode', sanitizeCountryCode(v))}
+                                disabled={saving}
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="^\+?[0-9]{1,4}$"
+                                maxLength={5}
+                            />
+                            <InputField name="phoneNumber" placeholder="501234567" label="Phone Number" value={form.phoneNumber} onChange={(v) => handleChange('phoneNumber', sanitizePhoneNumber(v))} disabled={saving} />
                         </div>
 
                     </div>
@@ -248,6 +278,21 @@ const Profile: React.FC = () => {
                         <div style={{ marginTop: 12 }}>
                             <InputField name="currentPassword" type="password" label="Current password" value={pw.currentPassword} onChange={(v) => setPw(p => ({ ...p, currentPassword: v }))} disabled={pwSaving} />
                             <InputField name="newPassword" type="password" label="New password" value={pw.newPassword} onChange={(v) => setPw(p => ({ ...p, newPassword: v }))} disabled={pwSaving} />
+                            {/* Password strength indicator for change password */}
+                            {pw.newPassword && (() => {
+                                try {
+                                    // lazy import of util to avoid circular deps
+                                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                                    const { getPasswordStrength, strengthToColor } = require('../../../lib/passwordStrength');
+                                    const level = getPasswordStrength(pw.newPassword).level;
+                                    const cls = strengthToColor(level);
+                                    return (
+                                        <div style={{ marginTop: 6 }} className={styles.pwStrength + ' ' + styles[cls]} aria-live="polite">Password strength: {level}</div>
+                                    );
+                                } catch {
+                                    return null;
+                                }
+                            })()}
                             <InputField name="confirmPassword" type="password" label="Confirm password" value={pw.confirmPassword} onChange={(v) => setPw(p => ({ ...p, confirmPassword: v }))} disabled={pwSaving} />
                         </div>
                         <div className={styles.buttonRow}>

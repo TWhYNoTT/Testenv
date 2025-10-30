@@ -90,3 +90,22 @@
     font-size: var(--font-size-sm);
     padding: var(--paddin-md) 0;
 }
+
+/* Password strength indicator */
+.pwStrength {
+    margin-top: 6px;
+    font-size: var(--font-size-xs);
+}
+
+.weak {
+    color: var(--color-danger, #d9534f);
+}
+
+.medium {
+    color: #e6a23c;
+    /* amber-ish */
+}
+
+.strong {
+    color: var(--color-success, #28a745);
+}

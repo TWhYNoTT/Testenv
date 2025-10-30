@@ -7,7 +7,7 @@ type InputFieldProps = {
     value?: string;
     onChange?: (value: string) => void;
     placeholder?: string;
-    type?: 'text' | 'password' | 'email' | 'number';
+    type?: 'text' | 'password' | 'email' | 'number' | 'tel';
     disabled?: boolean;
     required?: boolean;
     feedback?: 'success' | 'error' | 'warning';
@@ -15,6 +15,10 @@ type InputFieldProps = {
     unit?: string;
     name?: string;
     showSpinner?: boolean;
+    // forwarded HTML input attributes for better control from callers
+    inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+    pattern?: string;
+    maxLength?: number;
 
 };
 
@@ -31,6 +35,9 @@ const InputField: React.FC<InputFieldProps> = ({
     unit,
     name,
     showSpinner = false,
+    inputMode,
+    pattern,
+    maxLength,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
 
@@ -53,6 +60,9 @@ const InputField: React.FC<InputFieldProps> = ({
                     disabled={disabled}
                     required={required}
                     name={name}
+                    inputMode={inputMode}
+                    pattern={pattern}
+                    maxLength={maxLength}
                 />
                 <label className={styles.label}>
                     {label} {required && <span className={styles.required}>*</span>}

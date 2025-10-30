@@ -196,3 +196,21 @@
     padding-top: 12px;
     border-top: 1px dashed var(--color-neutral-light);
 }
+
+/* password strength */
+.pwStrength {
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.weak {
+    color: var(--color-danger, #d9534f);
+}
+
+.medium {
+    color: #e6a23c;
+}
+
+.strong {
+    color: var(--color-success, #28a745);
+}

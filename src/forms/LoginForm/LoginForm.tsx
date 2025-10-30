@@ -33,6 +33,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
             showToast('Email is required', 'error');
             return false;
         }
+        // Validate email format and prevent sending API request with invalid format
+        const validateEmail = (email: string): boolean => {
+            const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            return emailRegex.test(email);
+        };
+
+        if (!validateEmail(email)) {
+            showToast('Invalid email format. Please enter a valid email address.', 'error');
+            return false;
+        }
         if (!password) {
             showToast('Password is required', 'error');
             return false;
