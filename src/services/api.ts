@@ -188,6 +188,7 @@ export interface RegisterStaffRequest {
     fullName: string;
     email: string;
     phoneNumber: string;
+    gender?: 1 | 2;
     // Password removed - staff will set via invitation email
     position?: string;
     isActive: boolean;
@@ -219,6 +220,7 @@ export interface InvitationDetailsResponse {
     fullName: string;
     email: string;
     phoneNumber: string;
+    gender?: 1 | 2;
     position: string;
     businessName: string;
     role: 1 | 2;

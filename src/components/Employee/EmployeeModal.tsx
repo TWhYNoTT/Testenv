@@ -29,6 +29,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
         fullName: '',
         email: '',
         phoneNumber: '',
+        gender: 2,
         position: '',
         role: 2,
         isActive: true,
@@ -49,6 +50,7 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
             fullName: '',
             email: '',
             phoneNumber: '',
+            gender: 2,
             position: '',
             role: 2,
             isActive: true,
@@ -143,6 +145,19 @@ const EmployeeModal: React.FC<EmployeeModalProps> = ({
                         placeholder="Phone Number"
                         required
                         disabled={loading}
+                    />
+
+                    {/* Gender selector (required when adding staff) */}
+                    <Dropdown
+                        options={["Male", "Female"]}
+                        value={data.gender === 1 ? 'Male' : 'Female'}
+                        onChange={(v) => {
+                            const genderValue = typeof v === 'string' ? (v === 'Male' ? 1 : 2) : 2;
+                            setData({ ...data, gender: genderValue });
+                        }}
+                        defaultMessage="Select gender"
+                        disabled={loading}
+                        label="Gender"
                     />
 
                     <InputField

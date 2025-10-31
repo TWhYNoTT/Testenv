@@ -157,6 +157,7 @@ const AcceptInvitation: React.FC = () => {
                 <div className={styles.info}>
                     <p><strong>Position:</strong> {invitationDetails?.position}</p>
                     <p><strong>Email:</strong> {invitationDetails?.email}</p>
+                    <p><strong>Gender:</strong> {invitationDetails?.gender === 1 ? 'Male' : invitationDetails?.gender === 2 ? 'Female' : 'N/A'}</p>
                 </div>
 
                 <div className={styles.form}>
