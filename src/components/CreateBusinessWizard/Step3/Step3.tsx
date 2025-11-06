@@ -19,6 +19,7 @@ interface Step3Props {
     setBusinessHours: React.Dispatch<React.SetStateAction<BusinessHour[]>>;
     errors?: {
         businessHours?: string;
+        invalidDays?: (string | undefined)[];
     };
 }
 
@@ -115,6 +116,9 @@ const Step3: React.FC<Step3Props> = ({
                                         defaultMessage='Closing time'
                                     />
                                 </div>
+                                {errors?.invalidDays?.[index] && (
+                                    <div className={styles.dayError}>{errors.invalidDays[index]}</div>
+                                )}
                             </div>
                         </div>
                     ))}

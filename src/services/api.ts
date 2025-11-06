@@ -1,12 +1,13 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
-import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse } from '../types/api-responses';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse, DashboardSummaryResponse } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
 const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
+//const API_BASE_URL = 'https://127.0.0.1:7063/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -89,6 +90,7 @@ export interface ServicePricingOptionDto {
 
 export interface ServiceRequest {
     categoryId: number;
+    branchId: number;
     name: string;
     image?: File;
     minDuration: string;
@@ -97,9 +99,11 @@ export interface ServiceRequest {
     hasHomeService: boolean;
     description?: string;
     pricingOptions: ServicePricingOptionDto[];
+    staffIds?: number[];
 }
 
 export interface UpdateServiceRequest {
+    branchId: number;
     name: string;
     image?: File;
     removeExistingImage: boolean;
@@ -110,6 +114,7 @@ export interface UpdateServiceRequest {
     description?: string;
     isActive: boolean;
     pricingOptions: ServicePricingOptionDto[];
+    staffIds?: number[];
 }
 
 export interface VerifyAccountRequest {
@@ -136,6 +141,7 @@ export interface ResetPasswordRequest {
 
 export interface Service {
     id: number;
+    branchId: number;
     name: string;
     imageUrl: string;
     minDuration: string;
@@ -151,6 +157,7 @@ export interface Service {
         currency: string;
         duration: string;
     }>;
+    assignedStaffIds?: number[];
 }
 
 export interface ServiceListResponse {
@@ -253,6 +260,33 @@ export interface UpdateBranchRequest {
     primaryHeadQuarter: boolean;
     active: boolean;
     description: string;
+}
+
+// Business Update types (match backend UpdateBusinessRequest)
+export interface UpdateBusinessRequest {
+    name: string;
+    about: string;
+    businessRegistrationNumber?: string;
+    isAlwaysOpen: boolean;
+    serviceType: number; // enum on backend; send numeric
+    location: {
+        country: string;
+        city: string;
+        state: string;
+        streetAddress: string;
+        zipCode: string;
+        hasHomeService: boolean;
+        latitude?: number;
+        longitude?: number;
+    };
+    businessHours: Array<{
+        dayOfWeek: number; // 0=Sunday ... 6=Saturday
+        isOpen: boolean;
+        openTime?: string; // HH:mm or undefined when 24 hours/closed
+        closeTime?: string;
+        is24Hours: boolean;
+    }>;
+    categoryIds: number[];
 }
 
 // User Profile types
@@ -471,6 +505,11 @@ class ApiService {
         return response.data;
     }
 
+    async updateBusiness(businessId: number, data: UpdateBusinessRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/business/${businessId}`, data);
+        return response.status === 200;
+    }
+
     async getCategories() {
         const response = await this.axiosInstance.get('/category');
         return response.data;
@@ -524,6 +563,7 @@ class ApiService {
         formData.append('ServiceType', data.serviceType.toString());
         formData.append('MaxDuration', data.maxDuration);
         formData.append('CategoryId', data.categoryId.toString());
+        formData.append('BranchId', data.branchId.toString());
 
         // Add image if exists
         if (data.image) {
@@ -534,6 +574,10 @@ class ApiService {
 
         if (data.description) {
             formData.append('Description', data.description);
+        }
+
+        if (data.staffIds && data.staffIds.length > 0) {
+            formData.append('StaffIdsJson', JSON.stringify(data.staffIds));
         }
 
         const response = await this.axiosInstance.post(
@@ -564,6 +608,7 @@ class ApiService {
         const formData = new FormData();
 
         formData.append('Name', data.name);
+        formData.append('BranchId', data.branchId.toString());
         formData.append('MinDuration', data.minDuration);
         formData.append('MaxDuration', data.maxDuration);
         formData.append('ServiceType', data.serviceType.toString());
@@ -577,6 +622,10 @@ class ApiService {
         }
         if (data.description) {
             formData.append('Description', data.description);
+        }
+
+        if (data.staffIds && data.staffIds.length > 0) {
+            formData.append('StaffIdsJson', JSON.stringify(data.staffIds));
         }
 
         const response = await this.axiosInstance.put(`/service/${serviceId}`, formData, {
@@ -763,6 +812,16 @@ class ApiService {
 
     async getAppointmentById(id: number): Promise<any> {
         const response = await this.axiosInstance.get(`/salon-owner/appointments/${id}`);
+        return response.data;
+    }
+
+    // Dashboard aggregate
+    async getDashboardSummary(startDate?: string, endDate?: string): Promise<DashboardSummaryResponse> {
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        const qs = params.toString();
+        const response = await this.axiosInstance.get(`/salon-owner/dashboard${qs ? `?${qs}` : ''}`);
         return response.data;
     }
 

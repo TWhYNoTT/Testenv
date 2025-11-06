@@ -30,6 +30,7 @@ const Branches: React.FC = () => {
     const [isAdd, setIsAdd] = useState(true);
     const [data, setData] = useState<BranchTableData[]>([]);
     const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
+    const [hasUnsavedModalChanges, setHasUnsavedModalChanges] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentBranch, setCurrentBranch] = useState<BranchTableData | null>(null);
 
@@ -180,6 +181,10 @@ const Branches: React.FC = () => {
     };
 
     const handleBackToSettingsClick = () => {
+        if (isAddEditModalOpen && hasUnsavedModalChanges) {
+            const confirmLeave = window.confirm('You have unsaved changes. Do you want to discard them?');
+            if (!confirmLeave) return;
+        }
         navigate('/settings');
     };
 
@@ -248,6 +253,7 @@ const Branches: React.FC = () => {
                     initialData={getModalData()}
                     isAdd={isAdd}
                     loading={loading}
+                    onDirtyChange={setHasUnsavedModalChanges}
                     onDeleteClicked={() => {
                         setIsAddEditModalOpen(false);
                         setIsDeleteModalOpen(true);

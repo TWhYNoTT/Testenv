@@ -137,8 +137,10 @@ export const BusinessProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
             const business = await checkBusinessExists();
             if (business) {
-                navigate('/settings/accountsettings');
+                // After login, land on Dashboard as requested
+                navigate('/');
             } else {
+                // No business configured: guide through setup
                 navigate('/wizard');
             }
         } catch (error) {

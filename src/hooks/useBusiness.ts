@@ -1,6 +1,6 @@
 // src/hooks/useBusiness.ts
 import { useState, useCallback } from "react";
-import { apiService, BusinessRequest } from "../services/api";
+import { apiService, BusinessRequest, UpdateBusinessRequest } from "../services/api";
 import type { BusinessDetailsResponse } from "../types/api-responses";
 
 export const useBusiness = () => {
@@ -40,9 +40,24 @@ export const useBusiness = () => {
         }
     }, []);
 
+    const updateBusiness = useCallback(async (businessId: number, data: UpdateBusinessRequest) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const ok = await apiService.updateBusiness(businessId, data);
+            return ok;
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'An error occurred');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         createBusiness,
         checkBusinessExists,
+        updateBusiness,
         loading,
         error
     };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, useCallback } from "react";
 import { useServices } from "../../../hooks/useServices";
 import { useCategories } from "../../../hooks/useCategories";
+import { useBranches } from "../../../hooks/useBranches";
 import { Category } from "../../../types/api-responses";
 import { ServiceRequest, UpdateServiceRequest } from "../../../services/api";
 import InputField from "../../../components/InputField/InputField";
@@ -11,6 +12,9 @@ import ProgressBar from "../../../components/ProgressBar/ProgressBar";
 import Dropdown from "../../../components/Dropdown/Dropdown";
 import SearchBar from "../../../components/SearchBar/SearchBar";
 import styles from './AddEditService.module.css';
+import { useStaff } from "../../../hooks/useStaff";
+import { useUser } from "../../../contexts/UserContext";
+import type { BusinessStaffDto } from "../../../types/api-responses";
 
 interface AddEditProps {
     isOpen: boolean;
@@ -25,6 +29,13 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
     const [isLoadingService, setIsLoadingService] = useState(false);
     const { getBusinessCategories } = useCategories();
     const { createService, updateService, getService, loading } = useServices();
+    const { getBranches } = useBranches();
+    const [branches, setBranches] = useState<import("../../../types/api-responses").BranchDto[]>([]);
+    const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+    const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
+    const { user } = useUser();
+    const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
+    const [staffSearch, setStaffSearch] = useState<string>("");
 
     const isEditMode = !!editingServiceId;
 
@@ -36,6 +47,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
         minDuration: '00:30:00',
         maxDuration: '01:00:00',
         serviceType: 1,
+        branchId: 0,
         hasHomeService: false,
         description: '',
         isActive: true,
@@ -59,6 +71,19 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
         }
     }, [getBusinessCategories]);
 
+    const fetchBranches = useCallback(async () => {
+        setIsLoadingBranches(true);
+        try {
+            const response = await getBranches();
+            // Only show active branches to users
+            setBranches(response.branches.filter(b => b.active));
+        } catch (error) {
+            console.error('Error fetching branches:', error);
+        } finally {
+            setIsLoadingBranches(false);
+        }
+    }, [getBranches]);
+
     const loadServiceData = useCallback(async (serviceId: number) => {
         setIsLoadingService(true);
         try {
@@ -71,6 +96,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                 minDuration: service.minDuration,
                 maxDuration: service.maxDuration,
                 serviceType: service.serviceType,
+                branchId: service.branchId || 0,
                 hasHomeService: service.hasHomeService,
                 description: service.description || '',
                 isActive: service.isActive,
@@ -81,6 +107,10 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                     duration: option.duration
                 }))
             });
+            // Pre-select assigned staff if present
+            if (service.assignedStaffIds && Array.isArray(service.assignedStaffIds)) {
+                setSelectedStaffIds(service.assignedStaffIds);
+            }
         } catch (error) {
             console.error('Error loading service:', error);
         } finally {
@@ -91,11 +121,15 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
     useEffect(() => {
         if (isOpen) {
             fetchCategories();
+            fetchBranches();
+            if (user?.businessId) {
+                getBusinessStaff({ businessId: user.businessId });
+            }
             if (isEditMode && editingServiceId) {
                 loadServiceData(editingServiceId);
             }
         }
-    }, [isOpen, isEditMode, editingServiceId, fetchCategories, loadServiceData]);
+    }, [isOpen, isEditMode, editingServiceId, fetchCategories, fetchBranches, loadServiceData, getBusinessStaff, user?.businessId]);
 
     useEffect(() => {
         if (isOpen) {
@@ -113,6 +147,7 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
         try {
             if (isEditMode && editingServiceId) {
                 const updateData: UpdateServiceRequest = {
+                    branchId: serviceData.branchId,
                     name: serviceData.name,
                     image: serviceData.image || undefined,
                     removeExistingImage: serviceData.removeExistingImage,
@@ -122,12 +157,14 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                     hasHomeService: serviceData.hasHomeService,
                     description: serviceData.description,
                     isActive: serviceData.isActive,
-                    pricingOptions: serviceData.pricingOptions
+                    pricingOptions: serviceData.pricingOptions,
+                    staffIds: selectedStaffIds
                 };
                 await updateService(editingServiceId, updateData);
             } else {
                 const requestData: ServiceRequest = {
                     categoryId: serviceData.categoryId,
+                    branchId: serviceData.branchId,
                     name: serviceData.name,
                     image: serviceData.image || undefined,
                     minDuration: serviceData.minDuration,
@@ -135,7 +172,8 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                     serviceType: serviceData.serviceType,
                     hasHomeService: serviceData.hasHomeService,
                     description: serviceData.description,
-                    pricingOptions: serviceData.pricingOptions
+                    pricingOptions: serviceData.pricingOptions,
+                    staffIds: selectedStaffIds
                 };
                 await createService(requestData);
             }
@@ -292,7 +330,17 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                                     isLoading={isLoadingCategories}
                                 />
                             )}
-                            <Dropdown label="Branch" />
+                            <Dropdown
+                                label="Branch"
+                                options={branches.map(b => b.name)}
+                                value={branches.find(b => b.id === serviceData.branchId)?.name || ''}
+                                onChange={(value) => {
+                                    const selected = branches.find(b => b.name === value);
+                                    handleInputChange('branchId', selected ? selected.id : 0);
+                                }}
+                                isLoading={isLoadingBranches}
+                                defaultMessage={isLoadingBranches ? 'Loading branches...' : 'Select a branch'}
+                            />
                             <div className={styles.checkboxGroup}>
                                 <Checkbox
                                     label="Men only"
@@ -398,17 +446,41 @@ const AddEditService: React.FC<AddEditProps> = ({ onClose, onSuccess, isOpen, ed
                     {step === 3 && (
                         <>
                             <div className={styles.searchSection}>
-                                <SearchBar placeholder="Search employee" />
+                                <SearchBar placeholder="Search employee" onSearch={setStaffSearch} />
                             </div>
-                            <div className={styles.empsContainer}>
-                                <div className={styles.empCard}>
-                                    <Checkbox />
-                                    <img className={styles.empImg} src="./assets/icons/emp.png" alt="" />
-                                    <div className={styles.empDetails}>
-                                        <span className={styles.empName}>Ahmad Housam</span>
-                                        <span className={styles.empTitle}>Junior stylist</span>
+                            {(staffLoading) && (
+                                <div className={styles.loadingOverlay}>
+                                    <div className={styles.spinner}>
+                                        <svg viewBox="0 0 50 50">
+                                            <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                                        </svg>
+                                        <span>Loading staff...</span>
                                     </div>
                                 </div>
+                            )}
+                            <div className={styles.empsContainer}>
+                                {staff
+                                    .filter((s: BusinessStaffDto) => (s.fullName || '').toLowerCase().includes(staffSearch.toLowerCase()))
+                                    .map((s: BusinessStaffDto) => (
+                                        <div key={s.id} className={styles.empCard}>
+                                            <Checkbox
+                                                checked={selectedStaffIds.includes(s.id)}
+                                                onChange={() =>
+                                                    setSelectedStaffIds(prev => prev.includes(s.id)
+                                                        ? prev.filter(id => id !== s.id)
+                                                        : [...prev, s.id])
+                                                }
+                                            />
+                                            <img className={styles.empImg} src="./assets/icons/emp.png" alt="employee" />
+                                            <div className={styles.empDetails}>
+                                                <span className={styles.empName}>{s.fullName}</span>
+                                                <span className={styles.empTitle}>{s.position || (s.role === 1 ? 'Staff Manager' : 'Staff')}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                {(!staffLoading && staff.length === 0) && (
+                                    <div style={{ padding: 12, color: '#8191AB' }}>No staff found</div>
+                                )}
                             </div>
                         </>
                     )}

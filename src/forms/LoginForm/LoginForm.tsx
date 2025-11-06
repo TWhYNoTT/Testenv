@@ -27,19 +27,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMeChecked, setRememberMeChecked] = useState(false);
+    const [emailError, setEmailError] = useState<string | undefined>(undefined);
+
+    const isValidEmail = (value: string): boolean => {
+        // Require a proper TLD (letters only, min 2 chars) to prevent inputs like user@example.com67
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+        return emailRegex.test(value);
+    };
 
     const validateForm = () => {
         if (!email) {
             showToast('Email is required', 'error');
             return false;
         }
-        // Validate email format and prevent sending API request with invalid format
-        const validateEmail = (email: string): boolean => {
-            const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-            return emailRegex.test(email);
-        };
-
-        if (!validateEmail(email)) {
+        if (!isValidEmail(email)) {
             showToast('Invalid email format. Please enter a valid email address.', 'error');
             return false;
         }
@@ -48,6 +49,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
             return false;
         }
         return true;
+    };
+
+    const handleEmailChange = (value: string) => {
+        setEmail(value);
+        if (!value) {
+            setEmailError('Email is required');
+        } else if (!isValidEmail(value)) {
+            setEmailError('Invalid email format. Please enter a valid email address.');
+        } else {
+            setEmailError(undefined);
+        }
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -147,10 +159,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
                 <InputField
                     label="Email"
                     value={email}
-                    onChange={setEmail}
+                    onChange={handleEmailChange}
                     placeholder="Enter your email"
                     type="email"
                     required
+                    feedback={emailError ? 'error' : undefined}
+                    feedbackMessage={emailError}
                 />
 
                 <InputField
@@ -168,8 +182,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
                     type="submit"
                     label={loading ? "Signing in..." : "Sign In"}
                     variant={loading ? "disabled" : "primary"}
-
-                    disabled={loading}
+                    disabled={loading || !email || !!emailError || !password}
                 />
             </div>
 

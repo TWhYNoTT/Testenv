@@ -11,10 +11,12 @@ import { RegisterStaffRequest } from '../../services/api';
 import type { BusinessStaffDto } from '../../types/api-responses';
 import { useAuthContext } from '../../contexts/AuthContext';
 import EmployeeModal from '../../components/Employee/EmployeeModal';
+import { useUser } from '../../contexts/UserContext';
 
 const Employee: React.FC = () => {
     // Added Rating to headers
     const headers = ['Name', 'ID', 'Email', 'Phone', 'Position', 'Status', 'Rating', ''];
+    const DEFAULT_AVATAR = '/assets/images/employees/emp1.png';
     const { showToast } = useToast();
     const {
         staff,
@@ -37,12 +39,13 @@ const Employee: React.FC = () => {
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
-    // Get your current business ID (you might get this from context or localStorage)
-    const businessId = 1; // Replace with actual business ID
+    // Get current business ID from user context
+    const { user } = useUser();
+    const businessId = user?.businessId ?? 0;
 
     useEffect(() => {
         fetchStaff();
-    }, [page]); // Refetch when page changes
+    }, [page, businessId]); // Refetch when page or business changes
 
     useEffect(() => {
         if (staff && staff.length > 0) {
@@ -50,14 +53,14 @@ const Employee: React.FC = () => {
             setFilteredData(staff.map((employee, index) => ({
                 ...employee,
                 originalIndex: index,
-                imageUrl: './assets/images/employees/emp1.png', // Default image
-                ID: employee.id.toString(),
-                Name: employee.fullName,
-                Email: employee.email,
-                Phone: employee.phoneNumber,
+                imageUrl: DEFAULT_AVATAR, // Default image
+                ID: employee.id?.toString?.() ?? '',
+                Name: employee.fullName ?? '',
+                Email: employee.email ?? '',
+                Phone: employee.phoneNumber ?? '',
                 Position: employee.position || '',
-                Status: employee.isActive,
-                Rating: `${employee.rating.toFixed(1)} (${employee.totalRatings})`
+                Status: !!employee.isActive,
+                Rating: `${(employee.rating ?? 0).toFixed(1)} (${employee.totalRatings ?? 0})`
             })));
         } else {
             setFilteredData([]);
@@ -66,6 +69,10 @@ const Employee: React.FC = () => {
 
     const fetchStaff = async () => {
         try {
+            if (!businessId) {
+                // No business selected/available yet; skip fetch
+                return;
+            }
             await getBusinessStaff({
                 businessId,
                 page,
@@ -88,20 +95,20 @@ const Employee: React.FC = () => {
         const filtered = staff.map((employee, index) => ({
             ...employee,
             originalIndex: index,
-            imageUrl: './assets/images/employees/emp1.png',
-            ID: employee.id.toString(),
-            Name: employee.fullName,
-            Email: employee.email,
-            Phone: employee.phoneNumber,
+            imageUrl: DEFAULT_AVATAR,
+            ID: employee.id?.toString?.() ?? '',
+            Name: employee.fullName ?? '',
+            Email: employee.email ?? '',
+            Phone: employee.phoneNumber ?? '',
             Position: employee.position || '',
-            Status: employee.isActive,
-            Rating: `${employee.rating.toFixed(1)} (${employee.totalRatings})`
+            Status: !!employee.isActive,
+            Rating: `${(employee.rating ?? 0).toFixed(1)} (${employee.totalRatings ?? 0})`
         })).filter(employee =>
-            employee.fullName.toLowerCase().includes(lowercasedQuery) ||
-            employee.id.toString().includes(lowercasedQuery) ||
-            (employee.position?.toLowerCase() || '').includes(lowercasedQuery) ||
-            employee.phoneNumber.toLowerCase().includes(lowercasedQuery) ||
-            employee.email.toLowerCase().includes(lowercasedQuery)
+            (employee.fullName?.toLowerCase?.() || '').includes(lowercasedQuery) ||
+            (employee.id?.toString?.() || '').includes(lowercasedQuery) ||
+            (employee.position?.toLowerCase?.() || '').includes(lowercasedQuery) ||
+            (employee.phoneNumber?.toLowerCase?.() || '').includes(lowercasedQuery) ||
+            (employee.email?.toLowerCase?.() || '').includes(lowercasedQuery)
         );
 
         setFilteredData(filtered);
@@ -181,42 +188,55 @@ const Employee: React.FC = () => {
     };
 
     const customRenderers = {
-        Name: (value: string, rowIndex: number) => (
-            <div className={styles.nameCell}>
-                <img src={filteredData[rowIndex].imageUrl} alt={value} className={styles.avatar} />
-                <span>{value}</span>
-            </div>
-        ),
-        Status: (value: boolean) => (
-            <span className={value ? styles.active : styles.inactive}>
-                {value ? 'Active' : 'Inactive'}
-            </span>
-        ),
+        Name: (value: string, rowIndex: number) => {
+            const row = filteredData?.[rowIndex];
+            const imgSrc = row?.imageUrl || DEFAULT_AVATAR;
+            const displayName = value ?? row?.Name ?? '';
+            return (
+                <div className={styles.nameCell}>
+                    <img src={imgSrc} alt={displayName} className={styles.avatar} />
+                    <span>{displayName}</span>
+                </div>
+            );
+        },
+        Status: (value: boolean) => {
+            const isActive = !!value;
+            return (
+                <span className={isActive ? styles.active : styles.inactive}>
+                    {isActive ? 'Active' : 'Inactive'}
+                </span>
+            );
+        },
         Rating: (value: string) => (
             <div className={styles.ratingCell}>
-                <span className={styles.ratingValue}>{value}</span>
+                <span className={styles.ratingValue}>{value ?? '0.0 (0)'}</span>
             </div>
         ),
-        '': (_: any, rowIndex: number) => (
-            <div className={styles.tableButtonContainer}>
-                {canDeleteStaff && (
+        '': (_: any, rowIndex: number) => {
+            const row = filteredData?.[rowIndex];
+            return (
+                <div className={styles.tableButtonContainer}>
+                    {canDeleteStaff && (
+                        <Button
+                            label="Delete"
+                            onClick={() => row && handleDeleteClick(row.id)}
+                            noAppearance={true}
+                            backgroundColor="transparent"
+                            fontColor="red"
+                            disabled={!row}
+                        />
+                    )}
                     <Button
-                        label="Delete"
-                        onClick={() => handleDeleteClick(filteredData[rowIndex].id)}
+                        label="Edit"
+                        onClick={() => row && handleEditClick(rowIndex)}
                         noAppearance={true}
                         backgroundColor="transparent"
-                        fontColor="red"
+                        fontColor="var(--color-primary)"
+                        disabled={!row}
                     />
-                )}
-                <Button
-                    label="Edit"
-                    onClick={() => handleEditClick(rowIndex)}
-                    noAppearance={true}
-                    backgroundColor="transparent"
-                    fontColor="var(--color-primary)"
-                />
-            </div>
-        )
+                </div>
+            );
+        }
     };
 
     return (

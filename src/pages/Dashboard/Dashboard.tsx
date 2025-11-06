@@ -1,5 +1,6 @@
 import React from 'react';
 import { useUser } from '../../contexts/UserContext';
+import { useToast } from '../../contexts/ToastContext';
 
 import StatisticsSummary from './StatisticsSummary/StatisticsSummary';
 import BookingsRevenueChart from './BookingsRevenueChart/BookingsRevenueChart';
@@ -9,14 +10,38 @@ import styles from './Dashboard.module.css';
 import RevenueChart from './RevenueChart/RevenueChart';
 import DateRangePicker from '../../components/DateRangePicker/DateRangePicker';
 import BranchFilter from '../../components/BranchFilter/BranchFilter';
+import { useDashboard } from '../../hooks/useDashboard';
+import Button from '../../components/Button/Button';
 
 const Dashboard: React.FC = () => {
     const { user } = useUser();
-    const data = [10000, 15000, 35000, 30000, 30000, 15000, 40500, 37000];
-    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+    const { showToast } = useToast();
+    const {
+        loading,
+        range,
+        setRange,
+        selectedDate,
+        setSelectedDate,
+        summary,
+        bookingsRevenue,
+        revenueSeries,
+        appointmentStats,
+        refresh,
+    } = useDashboard({ range: 'last30days' });
 
     return (
-        <div className={styles.dashboard} >
+        <div className={styles.dashboard} aria-busy={loading}>
+
+            {loading && (
+                <div className={styles.loadingOverlay}>
+                    <div className={styles.spinner}>
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                        </svg>
+                        <span>Loading data...</span>
+                    </div>
+                </div>
+            )}
 
             <div className={styles.clientNameGreetingAndDateFilterContainer}>
                 <h1 className={styles.clientName}>
@@ -24,17 +49,42 @@ const Dashboard: React.FC = () => {
                 </h1>
                 <div className={styles.greetingAndDateFilter}>
                     <h3 className={styles.greetingText}>Here’s what’s happening this week</h3>
-                    <DateRangePicker />
+                    {/* Temporary: keep DateRangePicker UI, but we'll wire state in a later pass */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <DateRangePicker />
+                        <Button
+                            label={loading ? 'Refreshing…' : 'Refresh'}
+                            size="small"
+                            variant="secondary"
+                            disabled={loading}
+                            onClick={async () => {
+                                const ok = await refresh();
+                                if (ok) {
+                                    showToast('Dashboard updated successfully.', 'success');
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
 
             <BranchFilter />
 
-            <StatisticsSummary />
-            <BookingsRevenueChart />
+            <StatisticsSummary
+                totalAppointments={summary.totalAppointments}
+                employees={summary.employees}
+                activeBranches={summary.activeBranches}
+            />
+            <BookingsRevenueChart
+                labels={bookingsRevenue.labels}
+                bookings={bookingsRevenue.bookings}
+                amounts={bookingsRevenue.amounts}
+                totalRevenue={bookingsRevenue.totalRevenue}
+                reservationRate={bookingsRevenue.reservationRate}
+            />
             <div className={styles.charts}>
-                <RevenueChart data={data} labels={labels} year={2024} />
-                <AppointmentStatistics />
+                <RevenueChart data={revenueSeries.data} labels={revenueSeries.labels} year={revenueSeries.year} />
+                <AppointmentStatistics labels={appointmentStats.labels} values={appointmentStats.values} />
             </div>
         </div>
     );

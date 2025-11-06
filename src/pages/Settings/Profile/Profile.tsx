@@ -167,6 +167,17 @@ const Profile: React.FC = () => {
             return;
         }
 
+        // Enforce at least Medium strength on client-side to give immediate feedback
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const { getPasswordStrength } = require('../../../lib/passwordStrength');
+            const level = getPasswordStrength(pw.newPassword).level;
+            if (level === 'Weak') {
+                showToast('Password is too weak. It must be at least 12 characters and include at least two of: uppercase, lowercase, digits, symbols.', 'error');
+                return;
+            }
+        } catch { /* noop if util not available at runtime */ }
+
         setPwSaving(true);
         try {
             await changePassword({ currentPassword: pw.currentPassword, newPassword: pw.newPassword, confirmPassword: pw.confirmPassword });

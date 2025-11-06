@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useCategories } from '../../hooks/useCategories';
 import { useServices } from '../../hooks/useServices';
+import { useBranches } from '../../hooks/useBranches';
 import { useToast } from '../../contexts/ToastContext';
 import { Category } from '../../types/api-responses';
 import { Service } from '../../services/api';
@@ -30,8 +31,10 @@ const Services: React.FC = () => {
 
     const { getBusinessCategories, getMyRequestedCategories, removeCategoryFromBusiness } = useCategories();
     const { getServices, services, deleteService } = useServices();
+    const { getBranches } = useBranches();
     const { showToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
+    const [branchMap, setBranchMap] = useState<Record<number, string>>({});
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -49,16 +52,23 @@ const Services: React.FC = () => {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            await Promise.all([
+            const [, , branchesRes] = await Promise.all([
                 fetchCategories(),
-                getServices()
+                getServices(),
+                getBranches()
             ]);
+            if (branchesRes && Array.isArray(branchesRes.branches)) {
+                const map = Object.fromEntries(branchesRes.branches.map(b => [b.id, b.name]));
+                setBranchMap(map);
+            } else {
+                setBranchMap({});
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setIsLoading(false);
         }
-    }, [fetchCategories, getServices]);
+    }, [fetchCategories, getServices, getBranches]);
 
     useEffect(() => {
         fetchData();
@@ -227,7 +237,7 @@ const Services: React.FC = () => {
                                 title={service.name}
                                 category={service.categoryName || ''}
                                 duration={`${service.minDuration} - ${service.maxDuration}`}
-                                branch="Marina branch"
+                                branch={branchMap[Number(service.branchId)] || ''}
                                 image={service.imageUrl}
                                 pricingOptions={service.pricingOptions.map(option => ({
                                     option: option.name,

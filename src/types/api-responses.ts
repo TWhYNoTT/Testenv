@@ -158,3 +158,26 @@ export interface BusinessBranchListResponse {
     branches: BranchDto[];
     totalCount: number;
 }
+
+// Dashboard
+export interface DashboardSummaryResponse {
+    totalAppointments: number;
+    employees: number;
+    activeBranches: number;
+    bookingsRevenue: {
+        labels: string[];
+        bookings: number[];
+        amounts: number[];
+        totalRevenue: number;
+        reservationRate: number; // percent
+    };
+    revenueSeries: {
+        labels: string[];
+        data: number[];
+        year: number;
+    };
+    appointmentStats: {
+        labels: string[];
+        values: number[]; // percentage ints
+    };
+}

@@ -51,10 +51,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
 
         if (!formData.password) {
             errors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-            errors.password = 'Password must be at least 8 characters';
-        } else if (!/(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(formData.password)) {
-            errors.password = 'Password must contain uppercase, lowercase, number and special character';
+        } else {
+            const level = getPasswordStrength(formData.password).level;
+            if (level === 'Weak') {
+                errors.password = 'Password is too weak. It must be at least 12 characters and include at least two of: uppercase, lowercase, digits, symbols.';
+            }
         }
 
         if (formData.password !== formData.confirmPassword) {
@@ -86,8 +87,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
                 userType: 2
             });
 
-            showToast('Registration successful!', 'success');
-
+            // Inform the user to verify their email
+            showToast('Verification link sent to your email.', 'success');
+            // Redirect to login; user will verify via the link/code from email
             navigate('/form/login');
 
         } catch (err: any) {

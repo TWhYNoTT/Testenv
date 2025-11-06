@@ -59,3 +59,14 @@ div.weekDayRow div.dropdownContainer div::after {
     border-right-width: 3px;
     right: 11%;
 }
+
+.error {
+    color: var(--color-error, #d32f2f);
+    font-size: 0.95rem;
+}
+
+.dayError {
+    width: 100%;
+    color: var(--color-error, #d32f2f);
+    font-size: 0.85rem;
+}

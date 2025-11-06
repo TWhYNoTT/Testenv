@@ -60,31 +60,13 @@ const roundedBarPlugin: Plugin<'bar'> = {
     },
 };
 
-const data = {
-    labels: ['May 1', 'May 4', 'May 7', 'May 15', 'May 19', 'May 23', 'May 28', 'May 31', 'Oct 30'],
-    datasets: [
-        {
-            label: 'Bookings',
-            borderRadius: 18,
-            data: [65, 59, 80, 81, 56, 55, 40, 45, 100],
-            hoverBorderColor: '#6138E0',
-            backgroundColor: 'transparent',
-            hoverBackgroundColor: 'transparent',
-            barThickness: 15,
-            maxBarThickness: 40,
-        },
-        {
-            label: 'Amount',
-            borderRadius: 18,
-            data: [28, 48, 40, 19, 86, 27, 90, 34, 48],
-            hoverBorderColor: '#B15EAA',
-            backgroundColor: 'transparent',
-            hoverBackgroundColor: 'transparent',
-            barThickness: 15,
-            maxBarThickness: 40,
-        },
-    ],
-};
+interface Props {
+    labels: string[];
+    bookings: number[];
+    amounts: number[];
+    totalRevenue: number;
+    reservationRate: number; // percent
+}
 
 const options: ChartOptions<'bar'> = {
     responsive: true,
@@ -151,7 +133,32 @@ const options: ChartOptions<'bar'> = {
     },
 };
 
-const BookingsRevenueChart: React.FC = () => {
+const BookingsRevenueChart: React.FC<Props> = ({ labels, bookings, amounts, totalRevenue, reservationRate }) => {
+    const data = {
+        labels,
+        datasets: [
+            {
+                label: 'Bookings',
+                borderRadius: 18,
+                data: bookings,
+                hoverBorderColor: '#6138E0',
+                backgroundColor: 'transparent',
+                hoverBackgroundColor: 'transparent',
+                barThickness: 15,
+                maxBarThickness: 40,
+            },
+            {
+                label: 'Amount',
+                borderRadius: 18,
+                data: amounts,
+                hoverBorderColor: '#B15EAA',
+                backgroundColor: 'transparent',
+                hoverBackgroundColor: 'transparent',
+                barThickness: 15,
+                maxBarThickness: 40,
+            },
+        ],
+    };
     return (
         <div className={styles.chartContainer}>
             <div className={styles.header}>
@@ -165,11 +172,11 @@ const BookingsRevenueChart: React.FC = () => {
             <div className={styles.detailsContainer}>
                 <div className={styles.textContainer}>
                     <span>
-                        <h3 className='headerText' >375,911<span>AED</span></h3>
+                        <h3 className='headerText' >{totalRevenue.toLocaleString()}<span>AED</span></h3>
                         <p className={styles.subText}>Total revenue</p>
                     </span>
                     <span>
-                        <h3 className='headerText' >0.5%</h3>
+                        <h3 className='headerText' >{reservationRate}%</h3>
                         <p className={styles.subText}>Reservation rate</p>
                     </span>
                 </div>

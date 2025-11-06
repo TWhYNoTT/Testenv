@@ -1,7 +1,13 @@
 import React from 'react';
 import styles from './StatisticsSummary.module.css';
 
-const StatisticsSummary: React.FC = () => {
+interface Props {
+    totalAppointments: number;
+    employees: number;
+    activeBranches: number;
+}
+
+const StatisticsSummary: React.FC<Props> = ({ totalAppointments, employees, activeBranches }) => {
     return (
         <div className={styles.statisticsSummary}>
             <div className={styles.card}>
@@ -18,7 +24,7 @@ const StatisticsSummary: React.FC = () => {
                 </div>
                 <div className={styles.info}>
                     <p>Total Appointments</p>
-                    <h2>157</h2>
+                    <h2>{totalAppointments}</h2>
                 </div>
             </div>
 
@@ -35,7 +41,7 @@ const StatisticsSummary: React.FC = () => {
                 </div>
                 <div className={styles.info}>
                     <p>Employees</p>
-                    <h2>12</h2>
+                    <h2>{employees}</h2>
                 </div>
             </div>
 
@@ -48,8 +54,8 @@ const StatisticsSummary: React.FC = () => {
                     </svg>
                 </div>
                 <div className={styles.info}>
-                    <p>Active memberships</p>
-                    <h2>123</h2>
+                    <p>Active branches</p>
+                    <h2>{activeBranches}</h2>
                 </div>
             </div>
         </div>

@@ -72,6 +72,59 @@ const Wizard: React.FC = () => {
         return position ? <Marker position={position} /> : null;
     };
 
+    const validateStep3 = () => {
+        // Returns validity and per-day errors for Step 3
+        if (businessData.isAlwaysOpen) {
+            return {
+                isValid: true,
+                errors: { businessHours: undefined, invalidDays: [] as (string | undefined)[] }
+            };
+        }
+
+        const hours = businessData.businessHours || [];
+        const invalidDays: (string | undefined)[] = new Array(hours.length).fill(undefined);
+
+        const parseTime = (t?: string) => {
+            if (!t) return NaN;
+            const [hh, mm] = t.split(':').map(Number);
+            if (Number.isNaN(hh) || Number.isNaN(mm)) return NaN;
+            return hh * 60 + mm;
+        };
+
+        const openDays = hours.filter(h => h.isOpen);
+        if (openDays.length === 0) {
+            return {
+                isValid: false,
+                errors: { businessHours: 'Select at least one open day or mark Always open.', invalidDays }
+            };
+        }
+
+        let allValid = true;
+        hours.forEach((h, idx) => {
+            if (!h.isOpen) return;
+            // Per-day is24Hours toggle is not exposed; require both times when open
+            const o = parseTime(h.openTime);
+            const c = parseTime(h.closeTime);
+            if (Number.isNaN(o) || Number.isNaN(c)) {
+                invalidDays[idx] = 'Please set both opening and closing times.';
+                allValid = false;
+                return;
+            }
+            if (o >= c) {
+                invalidDays[idx] = 'Closing time must be after opening time.';
+                allValid = false;
+            }
+        });
+
+        return {
+            isValid: allValid,
+            errors: {
+                businessHours: allValid ? undefined : 'Fix the highlighted days before continuing.',
+                invalidDays
+            }
+        };
+    };
+
     const validateCurrentStep = () => {
         switch (step) {
             case 1:
@@ -87,11 +140,7 @@ const Wizard: React.FC = () => {
                     businessData.categoryIds.length > 0;
 
             case 3:
-                if (businessData.isAlwaysOpen) return true;
-                return businessData.businessHours.some((hour: BusinessHour) =>
-                    hour.isOpen && (hour.is24Hours ||
-                        (typeof hour.openTime === 'string' && typeof hour.closeTime === 'string'))
-                );
+                return validateStep3().isValid;
 
             case 4:
                 return businessData.location.country &&
@@ -114,10 +163,10 @@ const Wizard: React.FC = () => {
         if (step === 4) {
             try {
                 await submitBusiness();
-                
+
                 // After successful business creation, refresh the token
                 const refreshSuccess = await refreshAccessToken();
-                
+
                 showLoadingScreen(() => {
                     if (refreshSuccess) {
                         navigate('/settings/accountsettings');
@@ -126,7 +175,7 @@ const Wizard: React.FC = () => {
                         navigate('/form/login');
                     }
                 });
-                
+
             } catch (error: any) {
                 if (error.errors?.Business) {
                     setErrorMessage(error.errors.Business[0]);
@@ -220,16 +269,19 @@ const Wizard: React.FC = () => {
                             />
                         )}
 
-                        {step === 3 && (
-                            <Step3
-                                alwaysOpen={businessData.isAlwaysOpen}
-                                setAlwaysOpen={isAlwaysOpen =>
-                                    updateBusinessData({ isAlwaysOpen })}
-                                businessHours={businessData.businessHours}
-                                setBusinessHours={handleBusinessHoursChange}
-
-                            />
-                        )}
+                        {step === 3 && (() => {
+                            const v = validateStep3();
+                            return (
+                                <Step3
+                                    alwaysOpen={businessData.isAlwaysOpen}
+                                    setAlwaysOpen={isAlwaysOpen =>
+                                        updateBusinessData({ isAlwaysOpen })}
+                                    businessHours={businessData.businessHours}
+                                    setBusinessHours={handleBusinessHoursChange}
+                                    errors={{ businessHours: v.errors.businessHours, invalidDays: v.errors.invalidDays }}
+                                />
+                            );
+                        })()}
 
                         {step === 4 && (
                             <Step4
