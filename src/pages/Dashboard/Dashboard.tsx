@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from '../../contexts/UserContext';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -27,7 +27,16 @@ const Dashboard: React.FC = () => {
         revenueSeries,
         appointmentStats,
         refresh,
+        lastSuccessfulLoad,
     } = useDashboard({ range: 'last30days' });
+
+    // Show a success toast whenever the dashboard successfully finishes loading
+    // (covers both navigation initial load and manual refresh)
+    useEffect(() => {
+        if (lastSuccessfulLoad != null) {
+            showToast('Dashboard updated successfully.', 'success');
+        }
+    }, [lastSuccessfulLoad, showToast]);
 
     return (
         <div className={styles.dashboard} aria-busy={loading}>
@@ -57,12 +66,7 @@ const Dashboard: React.FC = () => {
                             size="small"
                             variant="secondary"
                             disabled={loading}
-                            onClick={async () => {
-                                const ok = await refresh();
-                                if (ok) {
-                                    showToast('Dashboard updated successfully.', 'success');
-                                }
-                            }}
+                            onClick={async () => { await refresh(); }}
                         />
                     </div>
                 </div>

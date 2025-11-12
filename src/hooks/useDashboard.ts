@@ -65,6 +65,7 @@ export const useDashboard = (opts?: UseDashboardOptions) => {
     const [bookingsRevenue, setBookingsRevenue] = useState<BookingsRevenueData>({ labels: [], bookings: [], amounts: [], totalRevenue: 0, reservationRate: 0 });
     const [revenueSeries, setRevenueSeries] = useState<RevenueSeriesData>({ labels: monthLabels, data: Array(12).fill(0), year: new Date().getFullYear() });
     const [appointmentStats, setAppointmentStats] = useState<AppointmentStatsData>({ labels: ['Pending', 'Confirm', 'Rejected', 'Completed'], values: [0, 0, 0, 0] });
+    const [lastSuccessfulLoad, setLastSuccessfulLoad] = useState<number | null>(null);
 
     const computeRange = useMemo(() => {
         const now = new Date();
@@ -128,6 +129,7 @@ export const useDashboard = (opts?: UseDashboardOptions) => {
                 labels: res.appointmentStats.labels,
                 values: res.appointmentStats.values
             });
+            setLastSuccessfulLoad(Date.now());
             return true;
         } catch (e: any) {
             setError(e?.message || 'Failed to load dashboard');
@@ -155,6 +157,7 @@ export const useDashboard = (opts?: UseDashboardOptions) => {
         bookingsRevenue,
         revenueSeries,
         appointmentStats,
+        lastSuccessfulLoad,
         // actions
         refresh: load,
     } as const;
