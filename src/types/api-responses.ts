@@ -119,6 +119,7 @@ export interface BusinessStaffDto {
     id: number;
     fullName: string;
     email: string;
+    gender?: number;
     phoneNumber: string;
     role?: number; // 1 = StaffManager, 2 = Staff
     position?: string;

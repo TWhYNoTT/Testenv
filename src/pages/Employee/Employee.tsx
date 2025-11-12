@@ -127,6 +127,7 @@ const Employee: React.FC = () => {
             fullName: employeeToEdit.fullName,
             email: employeeToEdit.email,
             phoneNumber: employeeToEdit.phoneNumber,
+            gender: employeeToEdit.gender,
             position: employeeToEdit.position,
             isActive: employeeToEdit.isActive,
             schedules: employeeToEdit.schedules,
@@ -168,6 +169,7 @@ const Employee: React.FC = () => {
                     fullName: employeeData.fullName,
                     email: employeeData.email,
                     phoneNumber: employeeData.phoneNumber,
+                    gender: employeeData.gender,
                     position: employeeData.position,
                     isActive: employeeData.isActive,
                     role: employeeData.role
