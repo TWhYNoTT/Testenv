@@ -11,6 +11,7 @@ type TextAreaProps = {
     feedback?: 'success' | 'error' | 'warning';
     feedbackMessage?: string;
     name?: string;
+    maxLength?: number;
 };
 
 const TextArea: React.FC<TextAreaProps> = ({
@@ -22,7 +23,8 @@ const TextArea: React.FC<TextAreaProps> = ({
     required = false,
     feedback,
     feedbackMessage,
-    name
+    name,
+    maxLength
 }) => {
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const resizeHandleRef = useRef<HTMLSpanElement>(null);
@@ -82,6 +84,7 @@ const TextArea: React.FC<TextAreaProps> = ({
                     disabled={disabled}
                     required={required}
                     name={name}
+                    maxLength={maxLength}
                 />
                 <label className={styles.label}>
                     {label} {required && <span className={styles.required}>*</span>}

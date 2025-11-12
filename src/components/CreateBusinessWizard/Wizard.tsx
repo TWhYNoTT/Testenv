@@ -125,15 +125,44 @@ const Wizard: React.FC = () => {
         };
     };
 
+    const validateStep1 = () => {
+        const errors: { businessName?: string; about?: string } = {};
+        const name = businessData.businessName || '';
+        const about = businessData.about || '';
+
+        const nameTooLong = name.length > 100;
+        const nameHasInvalidChars = !/^[A-Za-z0-9 ]*$/.test(name);
+        const nameHasLeadingOrTrailing = name.trim() !== name;
+        const nameHasDoubleSpaces = / {2,}/.test(name);
+        const nameTooShort = name.trim().length < 3;
+
+        if (!name.trim()) {
+            errors.businessName = 'Business Name is required.';
+        } else if (nameTooShort) {
+            errors.businessName = 'Business Name must be at least 3 characters.';
+        } else if (nameTooLong || nameHasInvalidChars || nameHasLeadingOrTrailing || nameHasDoubleSpaces) {
+            errors.businessName = 'Business Name must be alphanumeric and up to 100 characters.';
+        }
+
+        const aboutTooShort = about.trim().length < 10;
+        const aboutTooLong = about.length > 300;
+
+        if (!about.trim()) {
+            errors.about = 'About is required.';
+        } else if (aboutTooShort) {
+            errors.about = 'About must be at least 10 characters.';
+        } else if (aboutTooLong) {
+            errors.about = 'About section exceeds the character limit of 300.';
+        }
+
+        const isValid = !errors.businessName && !errors.about;
+        return { isValid, errors };
+    };
+
     const validateCurrentStep = () => {
         switch (step) {
             case 1:
-                console.log('Step 1 validation:', {
-                    nameLength: businessData.businessName.length,
-                    aboutLength: businessData.about.length
-                });
-                return businessData.businessName.length >= 3 &&
-                    businessData.about.length >= 10;
+                return validateStep1().isValid;
 
             case 2:
                 return businessData.serviceType !== undefined &&
@@ -238,17 +267,20 @@ const Wizard: React.FC = () => {
                     </div>
 
                     <div className={styles.StepContainer}>
-                        {step === 1 && (
-                            <Step1
-                                formData={{
-                                    businessName: businessData.businessName,
-                                    about: businessData.about,
-                                    businessRegistrationNumber: businessData.businessRegistrationNumber
-                                }}
-                                setFormData={updateBusinessData}
-
-                            />
-                        )}
+                        {step === 1 && (() => {
+                            const v1 = validateStep1();
+                            return (
+                                <Step1
+                                    formData={{
+                                        businessName: businessData.businessName,
+                                        about: businessData.about,
+                                        businessRegistrationNumber: businessData.businessRegistrationNumber
+                                    }}
+                                    setFormData={updateBusinessData}
+                                    errors={v1.errors}
+                                />
+                            );
+                        })()}
 
                         {step === 2 && (
                             <Step2

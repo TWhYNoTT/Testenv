@@ -19,10 +19,21 @@ interface Step1Props {
     };
 }
 
+const MAX_NAME = 100;
+const MAX_ABOUT = 300;
+
 const Step1: React.FC<Step1Props> = ({ formData, setFormData, errors }) => {
     const handleInputChange = (name: keyof FormData) => (value: string) => {
+        // Enforce max lengths at the component level
+        let next = value;
+        if (name === 'businessName') {
+            next = value.slice(0, MAX_NAME);
+        }
+        if (name === 'about') {
+            next = value.slice(0, MAX_ABOUT);
+        }
         setFormData({
-            [name]: value
+            [name]: next
         });
     };
 
@@ -37,6 +48,7 @@ const Step1: React.FC<Step1Props> = ({ formData, setFormData, errors }) => {
                 value={formData.businessName}
                 onChange={(value) => handleInputChange('businessName')(value)}
                 required
+                maxLength={MAX_NAME}
                 feedback={errors?.businessName ? 'error' : undefined}
                 feedbackMessage={errors?.businessName}
             />
@@ -57,6 +69,7 @@ const Step1: React.FC<Step1Props> = ({ formData, setFormData, errors }) => {
                 value={formData.about}
                 onChange={(value) => handleInputChange('about')(value)}
                 required
+                maxLength={MAX_ABOUT}
                 feedback={errors?.about ? 'error' : undefined}
                 feedbackMessage={errors?.about}
             />
