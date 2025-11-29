@@ -48,6 +48,15 @@ const Calendar: React.FC<CalendarProps> = ({
     );
     const calendarRef = useRef<HTMLDivElement>(null);
 
+    // Update selected date when the initialSelectedDate prop changes
+    useEffect(() => {
+        if (initialSelectedDate) {
+            setSelectedDate(initialSelectedDate);
+            setCurrentMonth(initialSelectedDate.getMonth());
+            setCurrentYear(initialSelectedDate.getFullYear());
+        }
+    }, [initialSelectedDate]);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
