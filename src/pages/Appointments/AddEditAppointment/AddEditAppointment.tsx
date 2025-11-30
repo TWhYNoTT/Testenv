@@ -54,6 +54,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const { getBusinessCategories, loading: categoriesLoading } = useCategories();
 
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(false);
     const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
     const [filteredServices, setFilteredServices] = useState<Array<any>>([]);
     const [pricingOptions, setPricingOptions] = useState<Array<{ id: number, name: string, price: number, currency: string, duration: string }>>([]);
@@ -72,6 +73,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         amount: '',
         staffId: 0,
         paymentStatus: PaymentStatus.Upcoming,
+        appointmentStatus: AppointmentStatus.Pending,
         appointmentDate: new Date().toISOString(),
         isDraft: false,
         notes: ''
@@ -87,6 +89,14 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         { label: 'Late', value: PaymentStatus.Late }
     ];
 
+    const appointmentStatusOptions = [
+        { label: 'Pending', value: AppointmentStatus.Pending },
+        { label: 'Approved', value: AppointmentStatus.Approved },
+        { label: 'Completed', value: AppointmentStatus.Completed },
+        { label: 'Cancelled', value: AppointmentStatus.Cancelled },
+        { label: 'No Show', value: AppointmentStatus.NoShow }
+    ];
+
     const resetForm = useCallback(() => {
         setAppointmentData({
             businessId: businessId,
@@ -99,6 +109,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             amount: '',
             staffId: 0,
             paymentStatus: PaymentStatus.Upcoming,
+            appointmentStatus: AppointmentStatus.Pending,
             appointmentDate: new Date().toISOString(),
             isDraft: false,
             notes: ''
@@ -127,6 +138,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 amount: appointment.amount?.toString() || appointment.servicePrice?.toString() || '',
                 staffId: appointment.staffId || 0,
                 paymentStatus: appointment.paymentStatus || PaymentStatus.Upcoming,
+                appointmentStatus: appointment.status || AppointmentStatus.Pending,
                 appointmentDate: appointment.appointmentDate || new Date().toISOString(),
                 isDraft: appointment.isDraft || false,
                 notes: appointment.notes || ''
@@ -189,37 +201,42 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             document.body.style.overflow = 'hidden';
 
             const initializeModal = async () => {
-                // First, load all the initial data (categories, services, staff)
-                await fetchInitialData();
+                setIsInitialLoading(true);
+                try {
+                    // First, load all the initial data (categories, services, staff)
+                    await fetchInitialData();
 
-                // Then check if we're editing or creating
-                if (editingAppointmentId) {
-                    await loadExistingAppointment(editingAppointmentId);
-                } else {
-                    setIsEditMode(false);
-                    resetForm();
+                    // Then check if we're editing or creating
+                    if (editingAppointmentId) {
+                        await loadExistingAppointment(editingAppointmentId);
+                    } else {
+                        setIsEditMode(false);
+                        resetForm();
 
-                    // Initialize calendar date from selectedDate prop
-                    try {
-                        if (selectedDate && selectedDate.includes('/')) {
-                            const [day, month, year] = selectedDate.split('/').map(Number);
-                            const dateObj = new Date(year, month - 1, day);
-                            setCalendarSelectedDate(dateObj);
+                        // Initialize calendar date from selectedDate prop
+                        try {
+                            if (selectedDate && selectedDate.includes('/')) {
+                                const [day, month, year] = selectedDate.split('/').map(Number);
+                                const dateObj = new Date(year, month - 1, day);
+                                setCalendarSelectedDate(dateObj);
+                            }
+                        } catch (error) {
+                            console.error('Error parsing initial date:', error);
+                            setCalendarSelectedDate(new Date());
                         }
-                    } catch (error) {
-                        console.error('Error parsing initial date:', error);
-                        setCalendarSelectedDate(new Date());
-                    }
 
-                    // Initialize time from selectedTime prop
-                    if (selectedTime && selectedTime.includes(':')) {
-                        const [hours, minutes] = selectedTime.split(':').map(Number);
-                        const amPm = hours >= 12 ? 'PM' : 'AM';
-                        const displayHour = hours % 12 || 12;
-                        const displayMinute = minutes.toString().padStart(2, '0');
-                        const timeString = `${displayHour}:${displayMinute} ${amPm}`;
-                        setSelectedTimeSlot(timeString);
+                        // Initialize time from selectedTime prop
+                        if (selectedTime && selectedTime.includes(':')) {
+                            const [hours, minutes] = selectedTime.split(':').map(Number);
+                            const amPm = hours >= 12 ? 'PM' : 'AM';
+                            const displayHour = hours % 12 || 12;
+                            const displayMinute = minutes.toString().padStart(2, '0');
+                            const timeString = `${displayHour}:${displayMinute} ${amPm}`;
+                            setSelectedTimeSlot(timeString);
+                        }
                     }
+                } finally {
+                    setIsInitialLoading(false);
                 }
             };
 
@@ -366,6 +383,11 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
         return status ? status.label : '';
     };
 
+    const getAppointmentStatusDisplayValue = (statusValue: AppointmentStatus) => {
+        const status = appointmentStatusOptions.find(s => s.value === statusValue);
+        return status ? status.label : '';
+    };
+
     // Change handlers for dropdowns
     const handleCategoryChange = (value: string | string[]) => {
         if (typeof value === 'string') {
@@ -411,6 +433,15 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
             const selectedStatus = paymentStatusOptions.find(status => status.label === value);
             if (selectedStatus) {
                 handleInputChange('paymentStatus', selectedStatus.value);
+            }
+        }
+    };
+
+    const handleAppointmentStatusChange = (value: string | string[]) => {
+        if (typeof value === 'string') {
+            const selectedStatus = appointmentStatusOptions.find(status => status.label === value);
+            if (selectedStatus) {
+                handleInputChange('appointmentStatus', selectedStatus.value);
             }
         }
     };
@@ -470,6 +501,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 amount: parseFloat(appointmentData.amount),
                 staffId: appointmentData.staffId,
                 paymentStatus: appointmentData.paymentStatus,
+                status: appointmentData.appointmentStatus,
                 appointmentDate: appointmentData.appointmentDate,
                 isDraft: appointmentData.isDraft,
                 notes: appointmentData.notes
@@ -495,14 +527,14 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>
             <div className={`${styles.modalContainer} ${isOpen ? styles.open : ''}`}>
-                {appointmentLoading && (
+                {(appointmentLoading || isInitialLoading) && (
                     <div className={styles.loadingOverlay}>
                         <div className={styles.spinner}>
                             <svg viewBox="0 0 50 50">
                                 <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
                             </svg>
                             <span>
-                                {isEditMode ? 'Updating appointment...' : 'Creating appointment...'}
+                                {isInitialLoading ? 'Loading appointment...' : (isEditMode ? 'Updating appointment...' : 'Creating appointment...')}
                             </span>
                         </div>
                     </div>
@@ -624,6 +656,13 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                         onChange={handlePaymentStatusChange}
                     />
 
+                    <Dropdown
+                        label="Appointment Status"
+                        options={appointmentStatusOptions.map(status => status.label)}
+                        value={getAppointmentStatusDisplayValue(appointmentData.appointmentStatus)}
+                        onChange={handleAppointmentStatusChange}
+                    />
+
                     <TextArea
                         label="Notes"
                         name="notes"
@@ -645,12 +684,13 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                             label="Cancel"
                             size="medium"
                             noAppearance={true}
+                            disabled={isInitialLoading || appointmentLoading}
                         />
                         <Button
                             onClick={handleSubmit}
                             label={isEditMode ? 'Update' : 'Add'}
                             size="medium"
-                            disabled={servicesLoading || staffLoading || appointmentLoading || categoriesLoading}
+                            disabled={servicesLoading || staffLoading || appointmentLoading || categoriesLoading || isInitialLoading}
                         />
                     </div>
                 </div>

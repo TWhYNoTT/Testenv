@@ -772,7 +772,10 @@ class ApiService {
 
     // Update appointment
     async updateAppointment(id: number, data: Omit<AppointmentRequest, 'businessId'>): Promise<boolean> {
-        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}`, data);
+        const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}`, {
+            id,
+            ...data
+        });
         return response.data;
     }
 
