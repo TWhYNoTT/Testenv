@@ -1,13 +1,13 @@
 // src/services/api.ts
 import axios, { AxiosInstance } from 'axios';
 import { ErrorResponse } from '../types/api-errors';
-import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse, DashboardSummaryResponse } from '../types/api-responses';
+import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse, DashboardSummaryResponse, PromotionDto, PromotionListResponse, DiscountType, CouponCodeType } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
 import { AppointmentStatus } from '../types/enums';
 
 const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
-//const API_BASE_URL = 'https://127.0.0.1:7063/api';
+// const API_BASE_URL = 'http://localhost:5279/api';
 
 let toastService: { showToast: (message: string, type: 'error' | 'success' | 'info' | 'warning') => void } | null = null;
 
@@ -261,6 +261,64 @@ export interface UpdateBranchRequest {
     primaryHeadQuarter: boolean;
     active: boolean;
     description: string;
+}
+
+// Promotion request types
+export interface CreateDiscountedDatePromoRequest {
+    branchId?: number;
+    startDate: string;
+    endDate: string;
+    discountValue: number;
+    discountType: DiscountType;
+}
+
+export interface UpdateDiscountedDatePromoRequest {
+    branchId?: number;
+    startDate: string;
+    endDate: string;
+    discountValue: number;
+    discountType: DiscountType;
+    isActive: boolean;
+}
+
+export interface CreateServiceLevelPromoRequest {
+    branchId?: number;
+    serviceId: number;
+    minimumAmount?: number;
+    discountValue: number;
+    discountType: DiscountType;
+}
+
+export interface UpdateServiceLevelPromoRequest {
+    branchId?: number;
+    serviceId: number;
+    minimumAmount?: number;
+    discountValue: number;
+    discountType: DiscountType;
+    isActive: boolean;
+}
+
+export interface CreateCouponPromoRequest {
+    couponName: string;
+    couponQuantity: number;
+    expiryDate: string;
+    discountValue: number;
+    discountType: DiscountType;
+    codeType: CouponCodeType;
+}
+
+export interface UpdateCouponPromoRequest {
+    couponName: string;
+    couponQuantity: number;
+    expiryDate: string;
+    discountValue: number;
+    discountType: DiscountType;
+    codeType: CouponCodeType;
+    isActive: boolean;
+}
+
+export interface TogglePromotionRequest {
+    isActive: boolean;
 }
 
 // Business Update types (match backend UpdateBusinessRequest)
@@ -837,6 +895,57 @@ class ApiService {
 
     async acceptInvitation(data: AcceptInvitationRequest): Promise<AcceptInvitationResponse> {
         const response = await this.axiosInstance.post('/staff-invitation/accept', data);
+        return response.data;
+    }
+
+    // Promotion APIs
+    async getPromotions(): Promise<PromotionListResponse> {
+        const response = await this.axiosInstance.get('/salon-owner/promotions');
+        return response.data;
+    }
+
+    async getPromotionById(id: number): Promise<PromotionDto> {
+        const response = await this.axiosInstance.get(`/salon-owner/promotions/${id}`);
+        return response.data;
+    }
+
+    async createDiscountedDatePromo(data: CreateDiscountedDatePromoRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-owner/promotions/discounted-dates', data);
+        return response.data;
+    }
+
+    async updateDiscountedDatePromo(id: number, data: UpdateDiscountedDatePromoRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/promotions/discounted-dates/${id}`, { ...data, id });
+        return response.data;
+    }
+
+    async createServiceLevelPromo(data: CreateServiceLevelPromoRequest): Promise<number> {
+        const response = await this.axiosInstance.post('/salon-owner/promotions/service-level', data);
+        return response.data;
+    }
+
+    async updateServiceLevelPromo(id: number, data: UpdateServiceLevelPromoRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/promotions/service-level/${id}`, { ...data, id });
+        return response.data;
+    }
+
+    async createCouponPromo(data: CreateCouponPromoRequest): Promise<{ promotionId: number; couponCode: string }> {
+        const response = await this.axiosInstance.post('/salon-owner/promotions/coupon', data);
+        return response.data;
+    }
+
+    async updateCouponPromo(id: number, data: UpdateCouponPromoRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/promotions/coupon/${id}`, { ...data, id });
+        return response.data;
+    }
+
+    async togglePromotion(id: number, data: TogglePromotionRequest): Promise<boolean> {
+        const response = await this.axiosInstance.put(`/salon-owner/promotions/${id}/toggle`, { ...data, id });
+        return response.data;
+    }
+
+    async deletePromotion(id: number): Promise<boolean> {
+        const response = await this.axiosInstance.delete(`/salon-owner/promotions/${id}`);
         return response.data;
     }
 

@@ -74,12 +74,12 @@ const Table: React.FC<TableProps> = ({
                             </th>
                         ))}
                     </tr>
+                    <tr>
+                        <td className={styles.tdHr} colSpan={headers.length}>
+                            <div className={styles.horR}></div>
+                        </td>
+                    </tr>
                 </thead>
-                <tr>
-                    <td className={styles.tdHr} colSpan={headers.length}>
-                        <div className={styles.horR}></div>
-                    </td>
-                </tr>
                 <tbody>
                     {displayedData.length === 0 ? (
                         <>

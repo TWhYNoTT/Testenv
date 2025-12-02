@@ -58,3 +58,31 @@
 .backButton {
     cursor: pointer;
 }
+
+.existingCode {
+    display: grid;
+    gap: var(--gap-xs);
+}
+
+.existingCode label {
+    font-size: var(--font-size-sm);
+    color: var(--color-disabled);
+    font-weight: 500;
+}
+
+.codeDisplay {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--br-md);
+    padding: var(--paddin-md) var(--paddin-lg);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-primary);
+    letter-spacing: 2px;
+}
+
+.error {
+    color: #E52D42;
+    font-size: var(--font-size-sm);
+    margin-top: -10px;
+}

@@ -182,3 +182,49 @@ export interface DashboardSummaryResponse {
         values: number[]; // percentage ints
     };
 }
+
+// Promotion types
+export enum DiscountType {
+    Percentage = 1,
+    FixedAmount = 2
+}
+
+export enum CouponCodeType {
+    Alphanumeric = 1,
+    Numeric = 2
+}
+
+export type PromotionType = 'DiscountedDates' | 'ServiceLevel' | 'Coupon';
+
+export interface PromotionDto {
+    id: number;
+    businessId: number;
+    branchId?: number;
+    branchName?: string;
+    discountValue: number;
+    discountType: DiscountType;
+    isActive: boolean;
+    promotionType: PromotionType;
+    // Computed for display
+    name: string;
+    information: string;
+    // DiscountedDates specific
+    startDate?: string;
+    endDate?: string;
+    // ServiceLevel specific
+    serviceId?: number;
+    serviceName?: string;
+    minimumAmount?: number;
+    // Coupon specific
+    couponName?: string;
+    couponCode?: string;
+    couponQuantity?: number;
+    couponUsedCount?: number;
+    expiryDate?: string;
+    codeType?: CouponCodeType;
+}
+
+export interface PromotionListResponse {
+    promotions: PromotionDto[];
+    totalCount: number;
+}
