@@ -146,10 +146,12 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
             // Set calendar date
             if (appointment.appointmentDate) {
+                // Date from backend is ISO 8601 with Z (UTC)
+                // new Date() parses as UTC, then getHours/getDate auto-convert to local
                 const appointmentDate = new Date(appointment.appointmentDate);
                 setCalendarSelectedDate(appointmentDate);
 
-                // Set time
+                // Set time - auto-converts from UTC to local timezone
                 const timeString = appointmentDate.toLocaleTimeString('en-US', {
                     hour: 'numeric',
                     minute: '2-digit',

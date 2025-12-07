@@ -73,11 +73,15 @@ const Appointments: React.FC = () => {
     const { showToast } = useToast();
 
     const formatAppointmentDate = useCallback((dateTimeString: string) => {
+        // Dates from backend are ISO 8601 with Z (UTC)
+        // new Date() parses as UTC, toLocaleDateString() auto-converts to local timezone
         const date = new Date(dateTimeString);
         return date.toLocaleDateString('en-GB');
     }, []);
 
     const formatAppointmentTime = useCallback((dateTimeString: string) => {
+        // Dates from backend are ISO 8601 with Z (UTC)
+        // new Date() parses as UTC, getHours()/getMinutes() auto-convert to local timezone
         const date = new Date(dateTimeString);
         const minutes = date.getMinutes();
         const roundedMinutes = Math.round(minutes / 15) * 15;

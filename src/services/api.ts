@@ -176,7 +176,7 @@ export interface AppointmentRequest {
     amount: number;
     staffId?: number | null;  // Optional to match backend
     paymentStatus: number;
-    appointmentDate: string;  // Ensure format is correct (YYYY-MM-DDTHH:MM:SS)
+    appointmentDate: string;  // ISO 8601 UTC format with Z suffix. Example: "2024-12-07T17:30:00Z"
     isDraft: boolean;
     notes?: string;
 }
@@ -844,6 +844,7 @@ class ApiService {
     }
 
     // Reschedule appointment
+    // @param newDate - ISO 8601 UTC format with Z suffix. Example: "2024-12-07T17:30:00Z"
     async rescheduleAppointment(id: number, newDate: string): Promise<boolean> {
         const response = await this.axiosInstance.put(`/salon-owner/appointments/${id}/reschedule`, {
             newAppointmentDate: newDate
@@ -861,6 +862,7 @@ class ApiService {
     }
 
     // Get available staff
+    // @param appointmentDate - ISO 8601 UTC format with Z suffix. Example: "2024-12-07T17:30:00Z"
     async getAvailableStaff(businessId: number, appointmentDate: string, serviceId: number, pricingOptionId: number) {
         const queryParams = new URLSearchParams();
         queryParams.append('businessId', businessId.toString());

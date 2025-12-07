@@ -73,6 +73,7 @@ export interface AppointmentResponse {
     email: string;
     serviceId: number;
     amount: number;
+    /** ISO 8601 datetime string with Z suffix (UTC). Example: "2024-12-07T17:30:00Z" */
     appointmentDate: string;
     appointmentTime: string;
     isDraft: boolean;
@@ -93,6 +94,9 @@ export interface AppointmentDetails {
     customerName: string;
     phoneNumber: string;
     email: string;
+    /** ISO 8601 datetime string with Z suffix (UTC). Example: "2024-12-07T17:30:00Z"
+     * Use new Date(appointmentDate) to parse, then use local timezone methods (toLocaleDateString, toLocaleTimeString, etc.)
+     */
     appointmentDate: string;
     duration: string;
     servicePrice: number;
