@@ -73,16 +73,29 @@ const Appointments: React.FC = () => {
     const { showToast } = useToast();
 
     const formatAppointmentDate = useCallback((dateTimeString: string) => {
-        // Dates from backend are ISO 8601 with Z (UTC)
-        // new Date() parses as UTC, toLocaleDateString() auto-converts to local timezone
+        // CRITICAL: Backend must return dates with Z suffix: "2025-12-11T08:00:00Z"
+        // If no Z, JavaScript treats it as local time and timezone conversion fails
+        // Example: "2025-12-11T08:00:00Z" (8 AM UTC) → 10 AM Egypt (UTC+2)
         const date = new Date(dateTimeString);
+
+        if (isNaN(date.getTime())) {
+            return 'Invalid Date';
+        }
+
         return date.toLocaleDateString('en-GB');
     }, []);
 
     const formatAppointmentTime = useCallback((dateTimeString: string) => {
-        // Dates from backend are ISO 8601 with Z (UTC)
-        // new Date() parses as UTC, getHours()/getMinutes() auto-convert to local timezone
+        // CRITICAL: Backend must return dates with Z suffix: "2025-12-11T08:00:00Z"
+        // new Date() parses Z-suffixed string as UTC
+        // getHours() automatically converts to local timezone
+        // Example: "2025-12-11T08:00:00Z" → parsed as 8 AM UTC → displayed as 10 AM Egypt
         const date = new Date(dateTimeString);
+
+        if (isNaN(date.getTime())) {
+            return 'Invalid Time';
+        }
+
         const minutes = date.getMinutes();
         const roundedMinutes = Math.round(minutes / 15) * 15;
         date.setMinutes(roundedMinutes);

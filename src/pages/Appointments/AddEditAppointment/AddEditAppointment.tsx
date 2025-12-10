@@ -255,6 +255,8 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const updateAppointmentDateTime = useCallback((date?: Date, time?: string) => {
         if (!date) return;
 
+        // Salon owner (in Egypt) selects local time
+        // Example: Selects 10 AM Egypt time (EET UTC+2)
         const appointmentDate = new Date(date);
 
         if (time && time.includes(':')) {
@@ -268,12 +270,15 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 finalHours = 0;
             }
 
+            // setHours() sets time in local timezone (Egypt time: 10 AM)
             appointmentDate.setHours(finalHours, minutes, 0, 0);
         } else {
             const now = new Date();
             appointmentDate.setHours(now.getHours(), now.getMinutes(), 0, 0);
         }
 
+        // toISOString() converts from local to UTC with Z suffix
+        // Result: 10 AM Egypt (UTC+2) → 08:00:00Z (UTC)
         setAppointmentData(prev => ({
             ...prev,
             appointmentDate: appointmentDate.toISOString()
