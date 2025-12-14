@@ -30,7 +30,7 @@ const BranchFilter: React.FC = () => {
                 .map((branch: BranchDto) => ({
                     id: branch.id,
                     name: branch.name,
-                    city: branch.address
+                    city: branch.city
                 }));
             setAllBranches(mappedBranches);
         } catch (err) {

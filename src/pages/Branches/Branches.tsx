@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Table from '../../components/Table/Table';
 import Button from '../../components/Button/Button';
 import Toggle from '../../components/Toggle/Toggle';
-import AddEditModal from '../../components/AddEditModal/AddEditModal';
+import BranchAddEditModal from '../../components/BranchAddEditModal/BranchAddEditModal';
 import DeleteModal from '../../components/DeleteModal/DeleteModal';
 import styles from './Branches.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,14 @@ interface BranchTableData {
     id: number;
     primaryHeadQuarter: boolean;
     description: string;
+    // New expanded address fields
+    streetAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    phoneNumber: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 const Branches: React.FC = () => {
@@ -40,7 +48,7 @@ const Branches: React.FC = () => {
             const response = await getBranches();
             const mappedData: BranchTableData[] = response.branches.map((branch: BranchDto, index: number) => ({
                 Branch: branch.name,
-                Location: branch.address,
+                Location: `${branch.streetAddress}, ${branch.city}, ${branch.state}`,
                 'Date joined': new Date(branch.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -50,7 +58,15 @@ const Branches: React.FC = () => {
                 originalIndex: index,
                 id: branch.id,
                 primaryHeadQuarter: branch.primaryHeadQuarter,
-                description: branch.description
+                description: branch.description,
+                // Map new fields
+                streetAddress: branch.streetAddress || '',
+                city: branch.city || '',
+                state: branch.state || '',
+                country: branch.country || '',
+                phoneNumber: branch.phoneNumber || '',
+                latitude: branch.latitude,
+                longitude: branch.longitude
             }));
             setData(mappedData);
         } catch (err) {
@@ -68,7 +84,13 @@ const Branches: React.FC = () => {
             await updateBranch(branch.id, {
                 id: branch.id,
                 name: branch.Branch,
-                address: branch.Location,
+                streetAddress: branch.streetAddress,
+                city: branch.city,
+                state: branch.state,
+                country: branch.country,
+                phoneNumber: branch.phoneNumber,
+                latitude: branch.latitude,
+                longitude: branch.longitude,
                 primaryHeadQuarter: branch.primaryHeadQuarter,
                 active: value,
                 description: branch.description
@@ -107,9 +129,15 @@ const Branches: React.FC = () => {
                 // Add new branch
                 await createBranch({
                     name: branch.Branch,
-                    address: branch.Location,
+                    streetAddress: branch.StreetAddress,
+                    city: branch.City,
+                    state: branch.State,
+                    country: branch.Country,
+                    phoneNumber: branch.PhoneNumber,
+                    latitude: branch.Latitude,
+                    longitude: branch.Longitude,
                     primaryHeadQuarter: branch.Headquarters || false,
-                    active: branch.Status || true,
+                    active: branch.Status ?? true,
                     description: branch.Description || ''
                 });
                 showToast('Branch created successfully', 'success');
@@ -119,7 +147,13 @@ const Branches: React.FC = () => {
                     await updateBranch(currentBranch.id, {
                         id: currentBranch.id,
                         name: branch.Branch,
-                        address: branch.Location,
+                        streetAddress: branch.StreetAddress,
+                        city: branch.City,
+                        state: branch.State,
+                        country: branch.Country,
+                        phoneNumber: branch.PhoneNumber,
+                        latitude: branch.Latitude,
+                        longitude: branch.Longitude,
                         primaryHeadQuarter: branch.Headquarters || false,
                         active: branch.Status,
                         description: branch.Description || ''
@@ -188,24 +222,36 @@ const Branches: React.FC = () => {
         navigate('/settings');
     };
 
-    // Prepare modal data
+    // Prepare modal data for the new BranchAddEditModal
     const getModalData = () => {
         if (!currentBranch) {
             return {
                 Branch: '',
-                Location: '',
+                StreetAddress: '',
+                City: '',
+                State: '',
+                Country: '',
+                PhoneNumber: '',
                 Status: true,
                 Headquarters: false,
-                Description: ''
+                Description: '',
+                Latitude: undefined,
+                Longitude: undefined
             };
         }
 
         return {
             Branch: currentBranch.Branch,
-            Location: currentBranch.Location,
+            StreetAddress: currentBranch.streetAddress,
+            City: currentBranch.city,
+            State: currentBranch.state,
+            Country: currentBranch.country,
+            PhoneNumber: currentBranch.phoneNumber,
             Status: currentBranch.Status,
             Headquarters: currentBranch.primaryHeadQuarter,
-            Description: currentBranch.description
+            Description: currentBranch.description,
+            Latitude: currentBranch.latitude,
+            Longitude: currentBranch.longitude
         };
     };
 
@@ -246,7 +292,7 @@ const Branches: React.FC = () => {
             />
 
             {isAddEditModalOpen && (
-                <AddEditModal
+                <BranchAddEditModal
                     isOpen={isAddEditModalOpen}
                     onClose={() => setIsAddEditModalOpen(false)}
                     onSave={handleSaveBranch}

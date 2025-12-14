@@ -152,7 +152,16 @@ export interface BusinessStaffListResponse {
 export interface BranchDto {
     id: number;
     name: string;
-    address: string;
+    // Address fields
+    streetAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    // GPS coordinates for map integration
+    latitude?: number;
+    longitude?: number;
+    // Phone number - internal use only, not displayed to customers
+    phoneNumber: string;
     primaryHeadQuarter: boolean;
     active: boolean;
     description: string;
