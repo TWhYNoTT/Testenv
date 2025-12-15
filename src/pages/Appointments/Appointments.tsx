@@ -187,6 +187,7 @@ const Appointments: React.FC = () => {
             const response = await getAppointments({
                 startDate,
                 endDate,
+                branchId: branchFilter ?? undefined,
                 paymentStatus: paymentStatusFilter ?? undefined,
                 categoryId: categoryFilter ?? undefined,
                 page: 1,
@@ -219,7 +220,7 @@ const Appointments: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [selectedDate, paymentStatusFilter, categoryFilter, getAppointments, showToast, formatAppointmentTime, formatAppointmentDate]);
+    }, [selectedDate, branchFilter, paymentStatusFilter, categoryFilter, getAppointments, showToast, formatAppointmentTime, formatAppointmentDate]);
 
     const handleDragEnd = useCallback(async (data: ScheduleAppointment[], movedAppointmentData?: { appointmentId: string, newTime: string, newDate: string }) => {
         if (movedAppointmentData) {

@@ -184,6 +184,7 @@ export interface AppointmentRequest {
 export interface AppointmentListParams {
     startDate?: string;         // Changed from fromDate
     endDate?: string;           // Changed from toDate
+    branchId?: number;          // Added for branch filtering
     paymentStatus?: number;     // Changed from status
     categoryId?: number;        // Added to match backend
     page?: number;              // Changed from pageNumber
