@@ -9,6 +9,7 @@ import AddEditAppointment from './AddEditAppointment/AddEditAppointment';
 import { useToast } from '../../contexts/ToastContext';
 import { useAppointments } from '../../hooks/useAppointments';
 import { useCategories } from '../../hooks/useCategories';
+import { useBranches } from '../../hooks/useBranches';
 
 export interface ScheduleAppointment {
     id: string;
@@ -79,24 +80,35 @@ const Appointments: React.FC = () => {
 
     const { getAppointments, rescheduleAppointment } = useAppointments();
     const { getBusinessCategories } = useCategories();
+    const { getBranches } = useBranches();
     const { showToast } = useToast();
 
     const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
+    const [branches, setBranches] = useState<Array<{ id: number, name: string }>>([]);
+    const [branchFilter, setBranchFilter] = useState<number | null>(null);
 
-    // Load categories on mount
+    // Load categories and branches on mount
     useEffect(() => {
-        const loadCategories = async () => {
+        const loadData = async () => {
             try {
-                const response = await getBusinessCategories();
-                if (response?.categories) {
-                    setCategories(response.categories.map(c => ({ id: c.id, name: c.name })));
+                const [categoriesResponse, branchesResponse] = await Promise.all([
+                    getBusinessCategories(),
+                    getBranches()
+                ]);
+
+                if (categoriesResponse?.categories) {
+                    setCategories(categoriesResponse.categories.map(c => ({ id: c.id, name: c.name })));
+                }
+
+                if (branchesResponse?.branches) {
+                    setBranches(branchesResponse.branches.map(b => ({ id: b.id, name: b.name })));
                 }
             } catch (error) {
-                console.error('Failed to load categories:', error);
+                console.error('Failed to load filter data:', error);
             }
         };
-        loadCategories();
-    }, [getBusinessCategories]);
+        loadData();
+    }, [getBusinessCategories, getBranches]);
 
     const formatAppointmentDate = useCallback((dateTimeString: string) => {
         // CRITICAL: Backend must return dates with Z suffix: "2025-12-11T08:00:00Z"
@@ -299,7 +311,9 @@ const Appointments: React.FC = () => {
                 <h1 className='xH1'>{currentMonthYear}</h1>
                 <div className={styles.controlsContainer}>
                     <AppointmentControls
+                        branches={branches}
                         categories={categories}
+                        onBranchChange={setBranchFilter}
                         onPaymentStatusChange={setPaymentStatusFilter}
                         onCategoryChange={setCategoryFilter}
                     />
