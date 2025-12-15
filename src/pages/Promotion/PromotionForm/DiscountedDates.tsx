@@ -23,6 +23,7 @@ const DiscountedDates: React.FC<DiscountedDatesProps> = ({ handleBack, editingPr
 
     const [branches, setBranches] = useState<{ id: number; name: string }[]>([]);
     const [formData, setFormData] = useState({
+        promotionName: editingPromotion?.promotionName || '',
         branchId: editingPromotion?.branchId || undefined as number | undefined,
         startDate: editingPromotion?.startDate ? new Date(editingPromotion.startDate) : undefined as Date | undefined,
         endDate: editingPromotion?.endDate ? new Date(editingPromotion.endDate) : undefined as Date | undefined,
@@ -47,6 +48,15 @@ const DiscountedDates: React.FC<DiscountedDatesProps> = ({ handleBack, editingPr
 
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
+
+        // Promotion Name validation
+        if (!formData.promotionName.trim()) {
+            newErrors.promotionName = 'Promotion name is required.';
+        } else if (formData.promotionName.length < 3 || formData.promotionName.length > 50) {
+            newErrors.promotionName = 'Promotion name must be between 3 and 50 characters.';
+        } else if (!/^[a-zA-Z0-9\s]+$/.test(formData.promotionName)) {
+            newErrors.promotionName = 'Invalid promotion name. Please use alphabetic or alphanumeric characters.';
+        }
 
         if (!formData.startDate) {
             newErrors.startDate = 'Please fill in all required fields.';
@@ -83,6 +93,7 @@ const DiscountedDates: React.FC<DiscountedDatesProps> = ({ handleBack, editingPr
             if (editingPromotion) {
                 const updateData: UpdateDiscountedDatePromoRequest = {
                     branchId: formData.branchId,
+                    promotionName: formData.promotionName,
                     startDate: formatDateForApi(formData.startDate!),
                     endDate: formatDateForApi(formData.endDate!),
                     discountValue: parseFloat(formData.discountValue),
@@ -94,6 +105,7 @@ const DiscountedDates: React.FC<DiscountedDatesProps> = ({ handleBack, editingPr
             } else {
                 const createData: CreateDiscountedDatePromoRequest = {
                     branchId: formData.branchId,
+                    promotionName: formData.promotionName,
                     startDate: formatDateForApi(formData.startDate!),
                     endDate: formatDateForApi(formData.endDate!),
                     discountValue: parseFloat(formData.discountValue),
@@ -149,6 +161,19 @@ const DiscountedDates: React.FC<DiscountedDatesProps> = ({ handleBack, editingPr
 
             <form className={styles.frm} onSubmit={handleSubmit}>
                 <div className={styles.filedContainer}>
+                    <Input
+                        type="text"
+                        label="Promotion Name"
+                        placeholder="Enter promotion name"
+                        name="promotionName"
+                        value={formData.promotionName}
+                        onChange={(val) => setFormData({ ...formData, promotionName: val })}
+                        feedback={errors.promotionName ? 'error' : undefined}
+                        feedbackMessage={errors.promotionName}
+                        required
+                        maxLength={50}
+                    />
+
                     <Dropdown
                         defaultMessage="Select branch"
                         options={branchOptions}

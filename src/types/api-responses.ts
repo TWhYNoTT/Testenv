@@ -218,7 +218,9 @@ export interface PromotionDto {
     discountType: DiscountType;
     isActive: boolean;
     promotionType: PromotionType;
-    // Computed for display
+    // Stored promotion name (for DiscountedDates and ServiceLevel)
+    promotionName?: string;
+    // Display name (uses promotionName if available)
     name: string;
     information: string;
     // DiscountedDates specific

@@ -284,6 +284,7 @@ export interface UpdateBranchRequest {
 // Promotion request types
 export interface CreateDiscountedDatePromoRequest {
     branchId?: number;
+    promotionName: string;
     startDate: string;
     endDate: string;
     discountValue: number;
@@ -292,6 +293,7 @@ export interface CreateDiscountedDatePromoRequest {
 
 export interface UpdateDiscountedDatePromoRequest {
     branchId?: number;
+    promotionName: string;
     startDate: string;
     endDate: string;
     discountValue: number;
@@ -301,6 +303,7 @@ export interface UpdateDiscountedDatePromoRequest {
 
 export interface CreateServiceLevelPromoRequest {
     branchId?: number;
+    promotionName: string;
     serviceId: number;
     minimumAmount?: number;
     discountValue: number;
@@ -309,6 +312,7 @@ export interface CreateServiceLevelPromoRequest {
 
 export interface UpdateServiceLevelPromoRequest {
     branchId?: number;
+    promotionName: string;
     serviceId: number;
     minimumAmount?: number;
     discountValue: number;

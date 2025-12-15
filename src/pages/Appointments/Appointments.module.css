@@ -30,3 +30,42 @@
     font-size: var(--font-size-lg);
     color: var(--color-primary);
 }
+
+.loadingContainer .spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md);
+}
+
+.loadingContainer .spinner svg {
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+.loadingContainer .spinner circle {
+    stroke: var(--color-primary);
+    stroke-dasharray: 126;
+    stroke-dashoffset: 25;
+    stroke-linecap: round;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    gap: var(--gap-lg);
+    color: var(--color-lightslategray-100);
+    font-size: var(--font-size-lg);
+    text-align: center;
+    padding: var(--paddin-xl);
+}

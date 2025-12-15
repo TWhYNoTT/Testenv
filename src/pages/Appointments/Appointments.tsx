@@ -8,6 +8,7 @@ import ScheduleList from './Schedul/ScheduleList';
 import AddEditAppointment from './AddEditAppointment/AddEditAppointment';
 import { useToast } from '../../contexts/ToastContext';
 import { useAppointments } from '../../hooks/useAppointments';
+import { useCategories } from '../../hooks/useCategories';
 
 export interface ScheduleAppointment {
     id: string;
@@ -69,8 +70,33 @@ const Appointments: React.FC = () => {
         return today.toLocaleDateString('en-GB');
     });
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasError, setHasError] = useState(false);
+
+    // Filter states
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState<number | null>(null);
+    const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
+
     const { getAppointments, rescheduleAppointment } = useAppointments();
+    const { getBusinessCategories } = useCategories();
     const { showToast } = useToast();
+
+    const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
+
+    // Load categories on mount
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const response = await getBusinessCategories();
+                if (response?.categories) {
+                    setCategories(response.categories.map(c => ({ id: c.id, name: c.name })));
+                }
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+            }
+        };
+        loadCategories();
+    }, [getBusinessCategories]);
 
     const formatAppointmentDate = useCallback((dateTimeString: string) => {
         // CRITICAL: Backend must return dates with Z suffix: "2025-12-11T08:00:00Z"
@@ -136,6 +162,8 @@ const Appointments: React.FC = () => {
     }, []);
 
     const refreshAppointments = useCallback(async () => {
+        setIsLoading(true);
+        setHasError(false);
         try {
             const fromDateParts = selectedDate.split('/');
             const startDate = `${fromDateParts[2]}-${fromDateParts[1]}-${fromDateParts[0]}`;
@@ -147,6 +175,8 @@ const Appointments: React.FC = () => {
             const response = await getAppointments({
                 startDate,
                 endDate,
+                paymentStatus: paymentStatusFilter ?? undefined,
+                categoryId: categoryFilter ?? undefined,
                 page: 1,
                 pageSize: 50
             });
@@ -171,10 +201,13 @@ const Appointments: React.FC = () => {
 
             setScheduleData(transformedData);
         } catch (error) {
-            showToast('Failed to fetch appointments', 'error');
+            setHasError(true);
+            showToast('Error loading appointments. Please try again.', 'error');
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
-    }, [selectedDate, getAppointments, showToast, formatAppointmentTime, formatAppointmentDate]);
+    }, [selectedDate, paymentStatusFilter, categoryFilter, getAppointments, showToast, formatAppointmentTime, formatAppointmentDate]);
 
     const handleDragEnd = useCallback(async (data: ScheduleAppointment[], movedAppointmentData?: { appointmentId: string, newTime: string, newDate: string }) => {
         if (movedAppointmentData) {
@@ -265,7 +298,11 @@ const Appointments: React.FC = () => {
             <div className={styles.controlsHeaderContainer}>
                 <h1 className='xH1'>{currentMonthYear}</h1>
                 <div className={styles.controlsContainer}>
-                    <AppointmentControls />
+                    <AppointmentControls
+                        categories={categories}
+                        onPaymentStatusChange={setPaymentStatusFilter}
+                        onCategoryChange={setCategoryFilter}
+                    />
                     <Button
                         label="New appointment +"
                         variant="primary"
@@ -280,16 +317,40 @@ const Appointments: React.FC = () => {
                 onDateClick={handleDateClick}
             />
 
-            <DndContext>
-                <ScheduleList
-                    scheduleData={filteredScheduleData}
-                    dateRange={dateRange}
-                    onDragEnd={handleDragEnd}
-                    onTimeSlotSelect={handleTimeSlotSelect}
-                    onEdit={handleEditAppointment}
-                    onDelete={handleDeleteAppointment}
-                />
-            </DndContext>
+            {isLoading ? (
+                <div className={styles.loadingContainer}>
+                    <div className={styles.spinner}>
+                        <svg viewBox="0 0 50 50">
+                            <circle cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
+                        </svg>
+                        <span>Loading appointments...</span>
+                    </div>
+                </div>
+            ) : hasError ? (
+                <div className={styles.emptyState}>
+                    <p>Error loading appointments. Please try again.</p>
+                    <Button
+                        label="Retry"
+                        onClick={refreshAppointments}
+                        size="small"
+                    />
+                </div>
+            ) : filteredScheduleData.length === 0 ? (
+                <div className={styles.emptyState}>
+                    <p>No appointments scheduled.</p>
+                </div>
+            ) : (
+                <DndContext>
+                    <ScheduleList
+                        scheduleData={filteredScheduleData}
+                        dateRange={dateRange}
+                        onDragEnd={handleDragEnd}
+                        onTimeSlotSelect={handleTimeSlotSelect}
+                        onEdit={handleEditAppointment}
+                        onDelete={handleDeleteAppointment}
+                    />
+                </DndContext>
+            )}
 
             <AddEditAppointment
                 isOpen={isAddEditOpen}

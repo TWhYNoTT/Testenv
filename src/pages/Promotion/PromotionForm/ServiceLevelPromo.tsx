@@ -27,6 +27,7 @@ const ServiceLevelPromo: React.FC<ServiceLevelPromoProps> = ({ handleBack, editi
     const [filteredServices, setFilteredServices] = useState<{ id: number; name: string }[]>([]);
 
     const [formData, setFormData] = useState({
+        promotionName: editingPromotion?.promotionName || '',
         branchId: editingPromotion?.branchId || undefined as number | undefined,
         serviceId: editingPromotion?.serviceId || undefined as number | undefined,
         minimumAmount: editingPromotion?.minimumAmount?.toString() || '',
@@ -65,6 +66,15 @@ const ServiceLevelPromo: React.FC<ServiceLevelPromoProps> = ({ handleBack, editi
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
 
+        // Promotion Name validation
+        if (!formData.promotionName.trim()) {
+            newErrors.promotionName = 'Promotion name is required.';
+        } else if (formData.promotionName.length < 3 || formData.promotionName.length > 50) {
+            newErrors.promotionName = 'Promotion name must be between 3 and 50 characters.';
+        } else if (!/^[a-zA-Z0-9\s]+$/.test(formData.promotionName)) {
+            newErrors.promotionName = 'Invalid promotion name. Please use alphabetic or alphanumeric characters.';
+        }
+
         if (!formData.serviceId) {
             newErrors.serviceId = 'Please fill in all required fields.';
         }
@@ -93,6 +103,7 @@ const ServiceLevelPromo: React.FC<ServiceLevelPromoProps> = ({ handleBack, editi
             if (editingPromotion) {
                 const updateData: UpdateServiceLevelPromoRequest = {
                     branchId: formData.branchId,
+                    promotionName: formData.promotionName,
                     serviceId: formData.serviceId!,
                     minimumAmount: formData.minimumAmount ? parseFloat(formData.minimumAmount) : undefined,
                     discountValue: parseFloat(formData.discountValue),
@@ -104,6 +115,7 @@ const ServiceLevelPromo: React.FC<ServiceLevelPromoProps> = ({ handleBack, editi
             } else {
                 const createData: CreateServiceLevelPromoRequest = {
                     branchId: formData.branchId,
+                    promotionName: formData.promotionName,
                     serviceId: formData.serviceId!,
                     minimumAmount: formData.minimumAmount ? parseFloat(formData.minimumAmount) : undefined,
                     discountValue: parseFloat(formData.discountValue),
@@ -172,6 +184,19 @@ const ServiceLevelPromo: React.FC<ServiceLevelPromoProps> = ({ handleBack, editi
 
             <form className={styles.frm} onSubmit={handleSubmit}>
                 <div className={styles.filedContainer}>
+                    <Input
+                        type="text"
+                        label="Promotion Name"
+                        placeholder="Enter promotion name"
+                        name="promotionName"
+                        value={formData.promotionName}
+                        onChange={(val) => setFormData({ ...formData, promotionName: val })}
+                        feedback={errors.promotionName ? 'error' : undefined}
+                        feedbackMessage={errors.promotionName}
+                        required
+                        maxLength={50}
+                    />
+
                     <Dropdown
                         defaultMessage="Select branch"
                         options={branchOptions}

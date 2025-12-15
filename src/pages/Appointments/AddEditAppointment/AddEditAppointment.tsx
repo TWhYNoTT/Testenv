@@ -3,6 +3,7 @@ import { useServices } from '../../../hooks/useServices';
 import { useAppointments } from '../../../hooks/useAppointments';
 import { useStaff } from '../../../hooks/useStaff';
 import { useCategories } from '../../../hooks/useCategories';
+import { useToast } from '../../../contexts/ToastContext';
 import { CategoryListResponse, Category } from '../../../types/api-responses';
 import InputField from '../../../components/InputField/InputField';
 import Toggle from '../../../components/Toggle/Toggle';
@@ -11,6 +12,7 @@ import Dropdown from '../../../components/Dropdown/Dropdown';
 import TextArea from '../../../components/TextArea/TextArea';
 import Calendar from '../../../components/Calendar/Calendar';
 import TimePicker from '../../../components/TimePicker/TimePicker';
+import ConfirmationModal from '../../../components/ConfirmationModal/ConfirmationModal';
 import styles from './AddEditAppointment.module.css';
 
 enum AppointmentStatus {
@@ -52,6 +54,10 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const { createAppointment, getAppointmentById, updateAppointment, loading: appointmentLoading } = useAppointments();
     const { staff, getBusinessStaff, loading: staffLoading } = useStaff();
     const { getBusinessCategories, loading: categoriesLoading } = useCategories();
+    const { showToast } = useToast();
+
+    const [isDirty, setIsDirty] = useState(false);
+    const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
 
     const [isEditMode, setIsEditMode] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(false);
@@ -357,6 +363,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     }, [appointmentData.serviceId, services, isEditMode]);
 
     const handleInputChange = (name: string, value: string | number | boolean) => {
+        setIsDirty(true);
         setAppointmentData(prev => ({
             ...prev,
             [name]: value
@@ -456,40 +463,71 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
 
-        if (!appointmentData.clientName || appointmentData.clientName.length < 3 || appointmentData.clientName.length > 100) {
-            newErrors.clientName = 'Name must be between 3 and 100 characters';
-        }
-        if (!/^[a-zA-Z\s]*$/.test(appointmentData.clientName)) {
-            newErrors.clientName = 'Name can only contain letters and spaces';
-        }
-
-        if (!/^\d{10,15}$/.test(appointmentData.mobileNumber)) {
-            newErrors.mobileNumber = 'Mobile number must be between 10 and 15 digits';
+        // Client Name validation
+        if (!appointmentData.clientName || appointmentData.clientName.trim() === '') {
+            newErrors.clientName = 'Client name is required.';
+        } else if (!/^[a-zA-Z\s]+$/.test(appointmentData.clientName)) {
+            newErrors.clientName = 'Invalid name. Please use alphabetic characters only.';
         }
 
+        // Mobile Number validation
+        if (!appointmentData.mobileNumber || appointmentData.mobileNumber.trim() === '') {
+            newErrors.mobileNumber = 'Mobile number is required.';
+        } else if (!/^\d{10,15}$/.test(appointmentData.mobileNumber)) {
+            newErrors.mobileNumber = 'Invalid mobile number. Please enter a valid 10–15 digit number.';
+        }
+
+        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(appointmentData.email)) {
-            newErrors.email = 'Please enter a valid email address';
+        if (!appointmentData.email || appointmentData.email.trim() === '') {
+            newErrors.email = 'Email Address is required.';
+        } else if (!emailRegex.test(appointmentData.email)) {
+            newErrors.email = 'Invalid email format. Please enter a valid email address.';
         }
 
+        // Category validation
         if (!appointmentData.categoryId || appointmentData.categoryId <= 0) {
-            newErrors.categoryId = 'Please select a category';
+            newErrors.categoryId = 'Please select a category.';
         }
 
+        // Service validation
         if (!appointmentData.serviceId || appointmentData.serviceId <= 0) {
-            newErrors.serviceId = 'Please select a service';
+            newErrors.serviceId = 'Please select a service.';
         }
 
+        // Pricing option validation
         if (!appointmentData.pricingOptionId || appointmentData.pricingOptionId <= 0) {
-            newErrors.pricingOptionId = 'Please select a pricing option';
+            newErrors.pricingOptionId = 'Please select a pricing option.';
         }
 
-        if (!appointmentData.amount || parseFloat(appointmentData.amount) <= 0) {
-            newErrors.amount = 'Amount must be greater than 0';
+        // Amount validation
+        if (!appointmentData.amount || appointmentData.amount.trim() === '') {
+            newErrors.amount = 'Amount is required.';
+        } else if (isNaN(parseFloat(appointmentData.amount)) || parseFloat(appointmentData.amount) <= 0) {
+            newErrors.amount = 'Invalid amount. Please enter a valid numeric value.';
+        }
+
+        // Payment Status validation
+        if (!appointmentData.paymentStatus) {
+            newErrors.paymentStatus = 'Please select a payment status.';
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleCancel = () => {
+        if (isDirty) {
+            setShowCancelConfirmation(true);
+        } else {
+            onClose();
+        }
+    };
+
+    const handleConfirmDiscard = () => {
+        setShowCancelConfirmation(false);
+        setIsDirty(false);
+        onClose();
     };
 
     const handleSubmit = async () => {
@@ -516,16 +554,24 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
             if (isEditMode && editingAppointmentId) {
                 await updateAppointment(parseInt(editingAppointmentId), appointmentRequest);
+                showToast('Appointment updated successfully.', 'success');
             } else {
                 await createAppointment({
                     businessId: appointmentData.businessId,
                     ...appointmentRequest
                 });
+                if (appointmentData.isDraft) {
+                    showToast('Appointment saved as draft successfully.', 'success');
+                } else {
+                    showToast('Appointment added successfully.', 'success');
+                }
             }
 
+            setIsDirty(false);
             onSuccess();
         } catch (error) {
             console.error('Error saving appointment:', error);
+            showToast('Error adding appointment. Please try again later.', 'error');
         }
     };
 
@@ -548,7 +594,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                 )}
 
                 <div className={styles.headerCloseContainer}>
-                    <button onClick={onClose} className={styles.closeButton}>&times;</button>
+                    <button onClick={handleCancel} className={styles.closeButton}>&times;</button>
                     <h2 className={styles.header}>
                         {isEditMode ? 'Edit appointment' : 'New appointment'}
                     </h2>
@@ -687,7 +733,7 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
 
                     <div className={styles.buttonContainer}>
                         <Button
-                            onClick={onClose}
+                            onClick={handleCancel}
                             label="Cancel"
                             size="medium"
                             noAppearance={true}
@@ -702,6 +748,17 @@ const AddEditAppointment: React.FC<AddEditAppointmentProps> = ({
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={showCancelConfirmation}
+                onClose={() => setShowCancelConfirmation(false)}
+                onConfirm={handleConfirmDiscard}
+                title="Discard Changes"
+                message="Are you sure you want to discard this appointment? All entered details will be lost."
+                confirmLabel="Discard"
+                cancelLabel="Go Back"
+                confirmColor="#E52D42"
+            />
         </div>
     );
 };
