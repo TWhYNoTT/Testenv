@@ -10,9 +10,7 @@
 }
 
 .scheduleCard.isShrinked {
-
     overflow: hidden;
-
     padding: var(--paddin-sm);
 }
 
@@ -48,6 +46,7 @@
     top: var(--paddin-sm);
     right: var(--paddin-sm);
     cursor: pointer;
+    overflow: visible;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
@@ -200,14 +199,14 @@
 .dropdownMenu {
     position: absolute;
     top: 25px;
-    right: 40px;
+    right: 15px;
     display: grid;
     gap: var(--gap-xs);
     background-color: var(--color-background-component);
     box-shadow: var(--box-shadow-card);
     border-radius: var(--br-md);
     overflow: hidden;
-    z-index: 1000;
+    z-index: 10000;
     padding: 10px 0px;
 }
 
