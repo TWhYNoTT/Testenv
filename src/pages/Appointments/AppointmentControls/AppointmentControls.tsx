@@ -3,13 +3,13 @@ import Dropdown from '../../../components/Dropdown/Dropdown';
 import Calendar from '../../../components/Calendar/Calendar';
 import styles from './AppointmentControls.module.css';
 
-// Payment status enum matching backend
+// Payment status enum matching backend (uses JsonStringEnumConverter)
 enum PaymentStatus {
-    Paid = 1,
-    Unpaid = 2,
-    Upcoming = 3,
-    Draft = 4,
-    Late = 5
+    Paid = 'Paid',
+    Unpaid = 'Unpaid',
+    Upcoming = 'Upcoming',
+    Draft = 'Draft',
+    Late = 'Late'
 }
 
 interface Branch {
@@ -26,12 +26,12 @@ interface AppointmentControlsProps {
     branches?: Branch[];
     categories?: Category[];
     onBranchChange?: (branchId: number | null) => void;
-    onPaymentStatusChange?: (status: number | null) => void;
+    onPaymentStatusChange?: (status: string | null) => void;  // PaymentStatus enum value as string
     onCategoryChange?: (categoryId: number | null) => void;
     onDateChange?: (date: Date | null) => void;
 }
 
-const paymentStatusOptions = [
+const paymentStatusOptions: Array<{ label: string; value: string | null }> = [
     { label: 'All', value: null },
     { label: 'Paid', value: PaymentStatus.Paid },
     { label: 'Unpaid', value: PaymentStatus.Unpaid },

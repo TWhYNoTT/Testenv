@@ -16,19 +16,19 @@ import ConfirmationModal from '../../../components/ConfirmationModal/Confirmatio
 import styles from './AddEditAppointment.module.css';
 
 enum AppointmentStatus {
-    Pending = 1,
-    Approved = 2,
-    Completed = 3,
-    Cancelled = 4,
-    NoShow = 5
+    Pending = 'Pending',
+    Approved = 'Approved',
+    Completed = 'Completed',
+    Cancelled = 'Cancelled',
+    NoShow = 'NoShow'
 }
 
 enum PaymentStatus {
-    Paid = 1,
-    Unpaid = 2,
-    Upcoming = 3,
-    Draft = 4,
-    Late = 5
+    Paid = 'Paid',
+    Unpaid = 'Unpaid',
+    Upcoming = 'Upcoming',
+    Draft = 'Draft',
+    Late = 'Late'
 }
 
 interface AddEditAppointmentProps {

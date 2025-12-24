@@ -8,6 +8,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { fbLogin } from '../../lib/facebook';
 import { googleSignIn } from '../../lib/google';
 import { getPasswordStrength, strengthToColor } from '../../lib/passwordStrength';
+import { ProfileType } from '../../types/enums';
 
 
 interface RegisterFormProps {
@@ -84,7 +85,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
                 password: formData.password,
                 fullName: formData.fullName,
                 termsAccepted: true,
-                userType: 2
+                userType: ProfileType.SalonOwner
             });
 
             // Inform the user to verify their email
@@ -109,7 +110,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
             const accessToken = response.authResponse.accessToken;
 
             // Sign up via social login endpoint (Facebook provider = 2). TermsAccepted = true for sign-up.
-            await socialLogin(2, accessToken, 2, true);
+            await socialLogin(2, accessToken, ProfileType.SalonOwner, true);
 
             showToast('Signed up successfully using Facebook.', 'success');
             // navigate to login or dashboard depending on flow — reuse existing flow by redirecting to login
@@ -141,7 +142,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggleForm }) => {
             const idToken = resp.idToken;
 
             // Sign up via social login endpoint (Google provider = 1). TermsAccepted = true for sign-up.
-            await socialLogin(1, idToken, 2, true);
+            await socialLogin(1, idToken, ProfileType.SalonOwner, true);
 
             showToast('Signed up successfully using Google.', 'success');
         } catch (err: any) {

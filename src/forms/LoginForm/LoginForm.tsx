@@ -11,6 +11,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useUser } from '../../contexts/UserContext'; // Add this import
 import { fbLogin } from '../../lib/facebook';
 import { googleSignIn } from '../../lib/google';
+import { ProfileType } from '../../types/enums';
 
 interface LoginFormProps {
     toggleForm: (form: 'login' | 'register' | 'forgetPassword' | 'partner') => void;
@@ -70,7 +71,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
             await login({
                 identifier: email,
                 password: password,
-                userType: 2
+                userType: ProfileType.SalonOwner
             });
 
 
@@ -92,7 +93,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
             const accessToken = response.authResponse.accessToken;
             // Backend expects provider enum: Facebook = 2, and IdToken field contains the token
             // For sign-in flows, TermsAccepted = false
-            await socialLogin(2, accessToken, 2, false);
+            await socialLogin(2, accessToken, ProfileType.SalonOwner, false);
 
             // refresh user data and navigate
             await refreshUser();
@@ -123,7 +124,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggleForm }) => {
             const idToken = resp.idToken;
 
             // For sign-in flows, TermsAccepted = false
-            await socialLogin(1, idToken, 2, false);
+            await socialLogin(1, idToken, ProfileType.SalonOwner, false);
 
             // refresh user data and navigate
             await refreshUser();

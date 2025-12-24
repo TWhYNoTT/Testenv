@@ -95,6 +95,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, [showToast]);
 
+    // Request browser notification permission
+    useEffect(() => {
+        if (isAuthenticated && 'Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+    }, [isAuthenticated]);
+
     // Initial load
     useEffect(() => {
         if (isAuthenticated) {
@@ -118,11 +127,16 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             setUnreadCount(prev => prev + 1);
 
             // Show browser notification if permission granted
-            if (Notification.permission === 'granted') {
-                new Notification(notification.title, {
-                    body: notification.message || '',
-                    icon: '/assets/icons/layout/logo.png'
-                });
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(notification.title, {
+                        body: notification.message || '',
+                        icon: '/assets/icons/layout/logo.png',
+                        tag: `notification-${notification.id}` // Prevents duplicate notifications
+                    });
+                } catch (e) {
+                    console.error('Failed to show browser notification:', e);
+                }
             }
         });
 
@@ -153,18 +167,30 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             setUnreadCount(0);
         });
 
+        let isCancelled = false;
+
         connection.start()
             .then(() => {
-                connection.invoke('JoinBusinessGroup', businessId);
+                if (!isCancelled) {
+                    console.log('SignalR connected successfully');
+                    connection.invoke('JoinBusinessGroup', businessId)
+                        .catch((err: Error) => console.error('Failed to join business group:', err));
+                }
             })
-            .catch((err: Error) => console.error('SignalR Connection Error:', err));
+            .catch((err: Error) => {
+                if (!isCancelled) {
+                    console.error('SignalR Connection Error:', err);
+                }
+            });
 
         connectionRef.current = connection;
 
         return () => {
+            isCancelled = true;
             if (connectionRef.current) {
                 connectionRef.current.invoke('LeaveBusinessGroup', businessId).catch(() => { });
                 connectionRef.current.stop();
+                connectionRef.current = null;
             }
         };
     }, [isAuthenticated, accessToken, businessId]);

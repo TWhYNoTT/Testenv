@@ -95,8 +95,20 @@ const AccountSettings: React.FC = () => {
 
                 const formattedHours: { [key: string]: { from: string, to: string } } = {};
                 business.businessHours.forEach(hour => {
-                    const dayIndex = typeof hour.dayOfWeek === 'string' ? parseInt(hour.dayOfWeek, 10) : hour.dayOfWeek;
-                    const day = getDayName(dayIndex);
+                    // Handle dayOfWeek as either number or string day name
+                    let day: string;
+                    if (typeof hour.dayOfWeek === 'string') {
+                        // Could be a day name like "Sunday" or a stringified number like "0"
+                        const parsed = parseInt(hour.dayOfWeek, 10);
+                        if (!isNaN(parsed)) {
+                            day = getDayName(parsed);
+                        } else {
+                            // It's a day name string already
+                            day = hour.dayOfWeek;
+                        }
+                    } else {
+                        day = getDayName(hour.dayOfWeek);
+                    }
                     formattedHours[day] = {
                         from: hour.is24Hours ? '24 hours' : hour.openTime || 'Closed',
                         to: hour.is24Hours ? '24 hours' : hour.closeTime || 'Closed'
@@ -107,8 +119,15 @@ const AccountSettings: React.FC = () => {
                 setWeekDays(business.businessHours
                     .filter(hour => hour.isOpen)
                     .map(hour => {
-                        const dayIndex = typeof hour.dayOfWeek === 'string' ? parseInt(hour.dayOfWeek, 10) : hour.dayOfWeek;
-                        return getDayName(dayIndex);
+                        // Handle dayOfWeek as either number or string day name
+                        if (typeof hour.dayOfWeek === 'string') {
+                            const parsed = parseInt(hour.dayOfWeek, 10);
+                            if (!isNaN(parsed)) {
+                                return getDayName(parsed);
+                            }
+                            return hour.dayOfWeek;
+                        }
+                        return getDayName(hour.dayOfWeek);
                     })
                 );
             }

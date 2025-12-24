@@ -4,7 +4,7 @@ import { ErrorResponse } from '../types/api-errors';
 import { CategoryListResponse, CreateServiceResponse, RequestCategoryResponse, LogoutResponse, AppointmentResponse, AppointmentListResponse, BusinessStaffListResponse, BranchDto, BusinessBranchListResponse, DashboardSummaryResponse, PromotionDto, PromotionListResponse, DiscountType, CouponCodeType } from '../types/api-responses';
 import { User } from '../types/user.interface';
 import { LogoutRequest } from './auth.service';
-import { AppointmentStatus } from '../types/enums';
+import { AppointmentStatus, ProfileType, Gender, ServiceType } from '../types/enums';
 
 const API_BASE_URL = 'https://devanza-dev-backend.azurewebsites.net/api';
 // const API_BASE_URL = 'http://localhost:5279/api';
@@ -38,7 +38,7 @@ const formatErrorMessage = (baseMessage: string, errors?: Record<string, string[
 export interface LoginRequest {
     identifier: string;
     password: string;
-    userType: 1 | 2;
+    userType: ProfileType;
 }
 
 export interface RegisterRequest {
@@ -47,9 +47,9 @@ export interface RegisterRequest {
     fullName: string;
     phoneNumber?: string;
     countryCode?: string;
-    gender?: 1 | 2;
+    gender?: Gender;
     termsAccepted: boolean;
-    userType: 1 | 2;
+    userType: ProfileType;
 }
 
 export interface BusinessRequest {
@@ -57,7 +57,7 @@ export interface BusinessRequest {
     about: string;
     businessRegistrationNumber?: string;
     isAlwaysOpen: boolean;
-    serviceType: 1 | 2 | 3;
+    serviceType: ServiceType;
     city: string;
     state: string;
     streetAddress: string;
@@ -126,7 +126,7 @@ export interface VerifyAccountRequest {
 // Password reset types
 export interface InitiatePasswordResetRequest {
     identifier: string; // email or phone
-    userType: 1 | 2;
+    userType: ProfileType;
 }
 
 export interface InitiatePasswordResetResponse {
@@ -175,7 +175,8 @@ export interface AppointmentRequest {
     pricingOptionId: number;
     amount: number;
     staffId?: number | null;  // Optional to match backend
-    paymentStatus: number;
+    paymentStatus: string;  // PaymentStatus enum value as string (e.g., 'Paid', 'Unpaid')
+    status?: string;        // AppointmentStatus enum value as string (e.g., 'Pending', 'Approved')
     appointmentDate: string;  // ISO 8601 UTC format with Z suffix. Example: "2024-12-07T17:30:00Z"
     isDraft: boolean;
     notes?: string;
@@ -185,7 +186,7 @@ export interface AppointmentListParams {
     startDate?: string;         // Changed from fromDate
     endDate?: string;           // Changed from toDate
     branchId?: number;          // Added for branch filtering
-    paymentStatus?: number;     // Changed from status
+    paymentStatus?: string;     // PaymentStatus enum value as string (e.g., 'Paid', 'Unpaid')
     categoryId?: number;        // Added to match backend
     page?: number;              // Changed from pageNumber
     pageSize?: number;
@@ -196,7 +197,7 @@ export interface RegisterStaffRequest {
     fullName: string;
     email: string;
     phoneNumber: string;
-    gender?: 1 | 2;
+    gender?: Gender;
     // Password removed - staff will set via invitation email
     position?: string;
     isActive: boolean;
@@ -210,7 +211,7 @@ export interface UpdateStaffRequest {
     position?: string;
     isActive?: boolean;
     role?: 1 | 2;
-    gender?: 1 | 2; // 1 = Male, 2 = Female
+    gender?: Gender;
 }
 
 export interface StaffListParams {
@@ -229,7 +230,7 @@ export interface InvitationDetailsResponse {
     fullName: string;
     email: string;
     phoneNumber: string;
-    gender?: 1 | 2;
+    gender?: Gender;
     position: string;
     businessName: string;
     role: 1 | 2;
@@ -535,7 +536,7 @@ class ApiService {
         return response.data;
     }
 
-    async socialAuth(data: { provider: number; idToken: string; userType: 1 | 2; termsAccepted: boolean }) {
+    async socialAuth(data: { provider: number; idToken: string; userType: ProfileType; termsAccepted: boolean }) {
         // Debug: log payload being sent to server to help diagnose validation issues
         try {
             // eslint-disable-next-line no-console

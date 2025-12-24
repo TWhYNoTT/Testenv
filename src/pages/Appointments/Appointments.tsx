@@ -75,7 +75,7 @@ const Appointments: React.FC = () => {
     const [hasError, setHasError] = useState(false);
 
     // Filter states
-    const [paymentStatusFilter, setPaymentStatusFilter] = useState<number | null>(null);
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState<string | null>(null);
     const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
 
     const { getAppointments, rescheduleAppointment } = useAppointments();

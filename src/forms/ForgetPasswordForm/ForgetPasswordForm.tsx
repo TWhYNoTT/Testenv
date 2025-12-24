@@ -43,8 +43,8 @@ const ForgetPasswordForm: React.FC<ForgetFormProps> = ({ toggleForm }) => {
 
         setLoading(true);
         try {
-            // Only salon owner (ProfileType.SalonOwner === 2)
-            const response = await apiService.requestPasswordReset({ identifier: email, userType: ProfileType.SalonOwner as 2 });
+            // Only salon owner (ProfileType.SalonOwner)
+            const response = await apiService.requestPasswordReset({ identifier: email, userType: ProfileType.SalonOwner });
             if (response?.userId) setUserId(response.userId);
             showToast('Reset password link sent to your email.', 'success');
             setStep('step2');
