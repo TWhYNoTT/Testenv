@@ -974,6 +974,34 @@ class ApiService {
         return response.data;
     }
 
+    // Notification APIs
+    async getNotifications(limit?: number): Promise<{ notifications: any[]; unreadCount: number }> {
+        const params = limit ? `?limit=${limit}` : '';
+        const response = await this.axiosInstance.get(`/notifications${params}`);
+        return response.data;
+    }
+
+    async getUnreadCount(): Promise<{ count: number }> {
+        const response = await this.axiosInstance.get('/notifications/unread-count');
+        return response.data;
+    }
+
+    async markNotificationAsRead(id: number): Promise<void> {
+        await this.axiosInstance.patch(`/notifications/${id}/read`);
+    }
+
+    async markAllNotificationsAsRead(): Promise<void> {
+        await this.axiosInstance.patch('/notifications/mark-all-read');
+    }
+
+    async deleteNotification(id: number): Promise<void> {
+        await this.axiosInstance.delete(`/notifications/${id}`);
+    }
+
+    async clearAllNotifications(): Promise<void> {
+        await this.axiosInstance.delete('/notifications/clear-all');
+    }
+
 }
 
 export const apiService = new ApiService();
